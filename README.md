@@ -103,7 +103,11 @@ jack({
   // An option alias can take a value and use it in the expansion.
   // use `${value}` in the alias to sub in what the user provides
   covlevel: opt({
-    alias: ['--statements=${value}', '--lines=${value}', '--branches=${value}]
+    alias: [
+      '--statements=${value}',
+      '--lines=${value}',
+      '--branches=${value}'
+    ]
   }),
 
   // aliases can recurse, as well
