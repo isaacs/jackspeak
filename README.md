@@ -2,8 +2,6 @@
 
 A very strict and proper argument parser.
 
-(The name is a play on the pirate theme of "yargs".)
-
 ## USAGE
 
 ```js
@@ -125,3 +123,10 @@ jack({
   }),
 })
 ```
+
+## Name
+
+The inspiration for this module is [yargs](http://npm.im/yargs), which
+is pirate talk themed.  Yargs has all the features, and is infinitely
+flexible.  "Jackspeak" is the slang of the royal navy.  This module
+does not have all the features, and is rigid by design.
