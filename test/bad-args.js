@@ -1,0 +1,20 @@
+const t = require('tap')
+const { jack, opt, flag } = require('../')
+const assert = require('assert')
+const test = (arg, msg) => t.throws(_ => jack(arg), { message: msg }, msg)
+
+test({ main: 'foo' }, 'main should be a function, if specified')
+test({ _: 'foo' }, '_ is reserved for positional arguments')
+test({ usage: {} }, 'usage should be a string, not an argument type')
+test({ help: {} }, 'help should be a string, not an argument type')
+test({ foo: {} }, 'foo neither flag nor opt')
+test({ 'no-x': flag(), x: flag() }, `'x' specified, but 'no-x' already defined`)
+test({ x: flag({ short: 'xyz' }) }, `x short alias must be 1 char, found 'xyz'`)
+test({xy: flag({ short:'x'}), xx: flag({short: 'x'}) },
+     `short x used for xx and xy`)
+test({ argv: ['--foo'] }, 'invalid argument: --foo')
+test({ xyz: flag({short:'x'}), argv: ['-xy']}, 'invalid argument: -y')
+test({ xyz: flag(), argv: ['--xyz=foo']}, 'value provided for boolean flag: xyz')
+test({ xyz: opt(), argv: ['--xyz']}, 'no value provided for option: xyz')
+test({ al: opt({alias:'--foo=${value}'}), foo: opt(), argv:['--al']},
+     'no value provided for option: al')
