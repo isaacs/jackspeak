@@ -1,6 +1,6 @@
 {
   "name": "jackspeak",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A very strict and proper argument parser.",
   "main": "index.js",
   "scripts": {
