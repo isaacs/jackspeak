@@ -8,6 +8,12 @@
 // results, so they feel like maybe a different kind of thing?
 
 const assert = require('assert')
+const cliui = require('cliui')
+const path = require('path')
+
+// only way to trigger is run as non-module, which can't be instrumented
+/* istanbul ignore next */
+const $0 = require.main ? path.basename(require.main.filename) : '$0'
 
 const _flag = Symbol('flag')
 const _list = Symbol('list')
@@ -33,6 +39,64 @@ const list = options => ({
 })
 
 const count = options => list(flag(options))
+
+const trim = string => string
+  // remove single line breaks
+  .replace(/([^\n])\n[ \t]*([^\n])/g, '$1 $2')
+  // normalize mid-line whitespace
+  .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
+  // two line breaks are enough
+  .replace(/\n{3,}/g, '\n\n')
+  .trim()
+
+const ranUsage = Symbol('ranUsage')
+const usage = options => {
+  options[ranUsage] = true
+
+  let maxWidth = 0
+  const table = Object.keys(options).filter(
+    k => k !== 'argv' &&
+         k !== 'help' &&
+         k !== 'usage'
+  ).map(k => {
+    const arg = options[k]
+    const val = arg[_opt] ? `[${arg.hint || k}]` : ''
+    const short = arg.short ? ` -${arg.short}${val}` : ''
+    const desc = trim(arg.description || '[no description provided]')
+    const mult = arg[_list] ? `${
+      desc.indexOf('\n') === -1 ? '\n' : '\n\n'
+    }Can be set multiple times` : ''
+    // XXX negated counters and shorthands
+    const row = [
+      `--${k}${val ? `=${val}`: ''}${short}`,
+      `${desc}${mult}`
+    ]
+    maxWidth = Math.min(30, Math.max(row[0].length + 4, maxWidth))
+    return row
+  })
+  const ui = cliui()
+  ui.div('Usage:')
+  ui.div({
+    text: (options.usage || `${$0} <options>`),
+    padding: [0, 0, 1, 2]
+  })
+
+  if (options.help)
+    ui.div({text: options.help, paddign: [1, 0, 0, 0]})
+
+  if (table.length)
+    ui.div({text: 'Options:', padding: [1, 0, 1, 0]})
+
+  table.forEach(row => {
+    ui.div({
+      text: row[0],
+      width: maxWidth,
+      padding: [0, 2, 0, 2]
+    }, { text: row[1] })
+    ui.div()
+  })
+  return ui.toString()
+}
 
 const jack = options_ => {
   // don't monkey with the originals
@@ -89,6 +153,11 @@ const jack = options_ => {
           `${name} short alias must be 1 char, found '${arg.short}'`)
           assert(!short[arg.short],
           `short ${arg.short} used for ${name} and ${short[arg.short]}`)
+          assert(arg.short !== 'h',
+          `${name} using 'h' short arg, reserved for --help`)
+          assert(arg.short !== '?',
+          `${name} using '?' short arg, reserved for --help`)
+
           short[arg.short] = name
           if (arg[_flag])
             shortFlags[arg.short] = name
@@ -148,7 +217,9 @@ const jack = options_ => {
           expand.push('--' + sf)
         else if (so) {
           const soslice = arg.slice(f + 1)
-          const soval = soslice.charAt(0) === '=' ? soslice : '=' + soslice
+          const soval = !soslice || soslice.charAt(0) === '='
+            ? soslice : '=' + soslice
+
           expand.push('--' + so + soval)
           f = arg.length
         } else if (arg !== '-' + fc)
@@ -162,12 +233,18 @@ const jack = options_ => {
       }
     }
 
-    // XXX special handling for -h, --help
-
     const argsplit = arg.split('=')
     const literalKey = argsplit.shift()
     const key = literalKey.replace(/^--?/, '')
     let val = argsplit.length ? argsplit.join('=') : null
+
+    if (literalKey === '-h' ||
+        literalKey === '--help' ||
+        literalKey === '-?') {
+      if (!options[ranUsage])
+        console.log(usage(options))
+      continue
+    }
 
     const spec = options[key]
 

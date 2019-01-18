@@ -18,3 +18,5 @@ test({ xyz: flag(), argv: ['--xyz=foo']}, 'value provided for boolean flag: xyz'
 test({ xyz: opt(), argv: ['--xyz']}, 'no value provided for option: xyz')
 test({ al: opt({alias:'--foo=${value}'}), foo: opt(), argv:['--al']},
      'no value provided for option: al')
+test({ ho: flag({short: 'h'}) }, `ho using 'h' short arg, reserved for --help`)
+test({ ho: flag({short: '?'}) }, `ho using '?' short arg, reserved for --help`)
