@@ -17,5 +17,7 @@
   "files": [
     "index.js"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "cliui": "^4.1.0"
+  }
 }
