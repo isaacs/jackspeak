@@ -179,6 +179,8 @@ const execute = j => {
 }
 
 const buildParser = (j, sections) => {
+  let inHeader = true
+
   sections.forEach(section => {
     if (Array.isArray(section))
       section = { argv: section }
@@ -207,6 +209,7 @@ const buildParser = (j, sections) => {
     if (section.description && !isArg(section.description)) {
       typeof section.description === 'string' || assert(false,
              'description must be string')
+      inHeader = false
       j.help.push({
         text: trim(`${section.description}:`),
         padding: [0, 0, 1, 0]
@@ -215,7 +218,10 @@ const buildParser = (j, sections) => {
 
     if (section.help && !isArg(section.help)) {
       typeof section.help === 'string' || assert(false, 'help must be a string')
-      j.help.push({ text: trim(section.help) + '\n' })
+      j.help.push({
+        text: trim(section.help) + '\n',
+        padding: inHeader ? null : [ 0, 0, 0, 2 ]
+      })
     }
 
     if (section.main && !isArg(section.main))
@@ -225,6 +231,7 @@ const buildParser = (j, sections) => {
 
     const names = Object.keys(section)
     for (let n = 0; n < names.length; n++) {
+      inHeader = false
       const name = names[n]
       const val = section[name]
 

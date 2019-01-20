@@ -71,9 +71,9 @@ Basic Options:
 
 Running Parallel Tests:
 
-Tap can run multiple test files in parallel. This generally results in a
-speedier test run, but can also cause problems if your test files are not
-designed to be independent from one another.
+  Tap can run multiple test files in parallel. This generally results in a
+  speedier test run, but can also cause problems if your test files are not
+  designed to be independent from one another.
 
   -j<n> --jobs=<n>       Run up to <n> test files in parallel Note that this
                          causes tests to be run in "buffered" mode, so
@@ -87,9 +87,9 @@ designed to be independent from one another.
 
 Code Coverage Options:
 
-Tap uses the nyc module internally to provide code coverage, so there is no need
-to invoke nyc yourself or depend on it directly unless you want to use it in
-other scenarios.
+  Tap uses the nyc module internally to provide code coverage, so there is no
+  need to invoke nyc yourself or depend on it directly unless you want to use it
+  in other scenarios.
 
   --100                  Enforce full coverage, 100%. Sets branches, statements,
                          functions, and lines to 100.
@@ -125,14 +125,14 @@ other scenarios.
 
 Coverage Enfocement Options:
 
-These options enable you to specify that the test will fail if a given coverage
-level is not met. Setting any of the options below will trigger the --coverage
-and --check-coverage flags.
+  These options enable you to specify that the test will fail if a given
+  coverage level is not met. Setting any of the options below will trigger the
+  --coverage and --check-coverage flags.
 
-The most stringent is --100. You can find a list of projects running their tests
-like this at: https://www.node-tap.org/100
+  The most stringent is --100. You can find a list of projects running their
+  tests like this at: https://www.node-tap.org/100
 
-If you run tests in this way, please add your project to the list.
+  If you run tests in this way, please add your project to the list.
 
   --check-coverage       Check whether coverage is within thresholds provided.
                          Setting this explicitly will default --coverage to
@@ -246,12 +246,12 @@ Environment Variables:
 
 Config Files:
 
-You can create a yaml file with any of the options above. By default, the file
-at ~/.taprc will be loaded, but the TAP_RCFILE environment variable can modify
-this.
+  You can create a yaml file with any of the options above. By default, the file
+  at ~/.taprc will be loaded, but the TAP_RCFILE environment variable can modify
+  this.
 
-Run 'tap --dump-config' for a listing of what can be set in that file. Each of
-the keys corresponds to one of the options above.
+  Run 'tap --dump-config' for a listing of what can be set in that file. Each of
+  the keys corresponds to one of the options above.
 
 [ '--help' ]
 { _: [],

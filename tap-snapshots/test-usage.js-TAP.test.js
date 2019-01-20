@@ -47,9 +47,9 @@ Usage:
 
 describeamabob:
 
-This text is very helpful.
+  This text is very helpful.
 
-It has multiple paragraphs!
+  It has multiple paragraphs!
 
   --foo=<foo>  This is a helpful descripton of the foo option
 
@@ -108,7 +108,7 @@ Usage:
   --foo      [no description provided]
   --no-foo   switch off the --foo flag
 
-this text is so helpful
+  this text is so helpful
 
   -h --help  Show this helpful output
   --no-help  switch off the --help flag
