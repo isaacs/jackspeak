@@ -1,5 +1,5 @@
 const t = require('tap')
-const { parse, env, jack, opt, flag, list, count } = require('../')
+const { parse, env, jack, opt, flag, list, count, num } = require('../')
 
 const options = {
   verbose: count({
@@ -102,19 +102,23 @@ t.test('env things', t => {
       flagmaybe: '',
       num1: '1',
       num2: '',
+      nums: '1,2,,3,4,',
+      counter: '1,0,1,0,0,0,1'
     },
+    counter: env(count({ delimiter: ',' })),
     foo: env({
       default: 'baz',
     }),
     lines: env(list({
       delimiter: ',',
     })),
+    nums: env(list(num({ max: 5, delimiter: ',' }))),
     dreams: env(list({ delimiter: ',' })),
     flagon: env(flag()),
     flagoff: env(flag()),
     flagmaybe: env(flag()),
-    num1: env({type: 'number'}),
-    num2: env({type: 'number' }),
+    num1: env(num()),
+    num2: num(env()),
     main: result => t.matchSnapshot(result),
   })
   t.end()

@@ -129,9 +129,17 @@ as argument names as well; just put them in different sections.
             For example, in [tap](https://www.node-tap.org), `-bRspec`
             is equivalent to `--bail --reporter=spec`.
 
-        - Set `type: 'number'` to parse the environ as a numeric
-          value, and raise an error if it is non-numeric.  (Note: this
-          is an inelegant API, and may change in future versions.)
+    - `num(options)` - An `opt` that is a number.  This will be
+      provided in the result as an actual number (rather than a
+      string) and will raise an error if given a non-numeric value.
+
+        This is numericized by using the `+` operator, so any
+        JavaScript number represenation will do.
+
+        All of the `opt()` options are supported, plus these:
+
+        - `min` - A number that this value cannot be smaller than.
+        - `max` - A number that this value cannot be larger than.
 
     - `list(options)` - An option which can take multiple values by
       being specified multiple times, and is represented in the result
@@ -139,11 +147,15 @@ as argument names as well; just put them in different sections.
       arguments, then it will be an empty array.
 
     - `count(options)` - A flag which can be set multiple times to
-      increase a number.  Unsetting decrements the value, setting
+      increase a value.  Unsetting decrements the value, setting
       increments it.  This can be useful for things like `-v` to set a
       verbosity level, or `-d` to set a debug level.
 
         Counts always default to 0.
+
+        Note that a `count` is actually a flag that can be set
+        multiple times.  Thus, it is a composition of the `list` and
+        `flag` types.
 
     - `env(options)` - An environment variable that the program is
       interested in.
@@ -178,14 +190,44 @@ as argument names as well; just put them in different sections.
             })
             ```
 
-        - Set `type: 'number'` to parse the environ as a numeric
-          value, and raise an error if it is non-numeric.  (Note: this
-          is an inelegant API, and may change in future versions.)
+            This can be further composed with `num` to pass in a list
+            of numbers separated by a delimiter.
 
+            When composed with `count` (which is the composition of
+            `list` and `flag`), you would pass in a delimited list of
+            `1` and `0` characters, and it'd count up the `1` values.
+            I don't know why you'd ever do this, but it works.
 
+        - Compose with `num()` to parse the environ as a numeric
+          value, and raise an error if it is non-numeric.
+
+### Type Composition
+
+Compose types by applying more than one function to the arg
+definition options.  For example, for a numeric environment
+variable, you can do:
 
 ```js
-const { jack, flag, opt, list, count } = require('jackspeak')
+jack({
+  HOW_MANY_FOOS: env(num({
+    description: 'set to define the number of foos'
+    max: 10,
+    min: 2,
+    default: 5,
+  }))
+})
+```
+
+The order of composition does not matter in normal cases, but note
+that some compositions will contradict one another.  For example,
+composing `flag` (an argument that does not take a value) with `opt`
+(an argument that _does_ take a value) will result in the outermost
+function taking precedence.
+
+## Some Example Code
+
+```js
+const { jack, flag, opt, list, count, num } = require('jackspeak')
 
 jack({
   // Optional
@@ -238,9 +280,15 @@ jack({
   }),
 
   // Options that take a value are specified with `opt()`
-  jobs: opt({
+  reporter: opt({
+    short: 'R',
+    description: 'the style of report to display',
+  })
+
+  // if you want a number, say so, and jackspeak will enforce it
+  jobs: num({
     short: 'j',
-    description: 'number of jobs to run in parallel',
+    description: 'how many jobs to run in parallel',
     default: 1
   }),
 
@@ -252,7 +300,7 @@ jack({
   }),
 
   // you can also set defaults with an environ of course
-  timeout: opt({
+  timeout: num({
     short: 't',
     default: +process.env.TAP_TIMEOUT || 30,
   }),

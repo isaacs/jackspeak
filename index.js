@@ -5,8 +5,6 @@
 // XXX Also aliases don't have defaults and shouldn't show up in the
 // results, so they feel like maybe a different kind of thing?
 
-// XXX type:'number' offends me.  It should be a top-level composable type.
-
 const assert = require('assert')
 const cliui = require('cliui')
 const path = require('path')
@@ -17,43 +15,59 @@ const $0 = require.main ? path.basename(require.main.filename) : '$0'
 
 const _flag = Symbol('flag')
 const flag = options => ({
+  [_env]: false,
+  [_list]: false,
   ...(options || {}),
+  [_num]: false,
   [_opt]: false,
   [_flag]: true
 })
+const isFlag = arg => arg[_flag]
 
 const _opt = Symbol('opt')
 const opt = options => ({
+  [_num]: false,
+  [_list]: false,
+  [_env]: false,
   ...(options || {}),
   [_flag]: false,
   [_opt]: true
 })
+const isOpt = arg => arg[_opt]
+
+const _num = Symbol('num')
+const num = options => (opt({
+  ...(options || {}),
+  [_num]: true,
+}))
+const isNum = arg => arg[_num]
+
+const isArg = arg => isOpt(arg) || isFlag(arg)
 
 const _env = Symbol('env')
 const env = options => ({
   [_flag]: false,
   [_list]: false,
-  [_opt]: false,
+  [_opt]: true,
+  [_num]: false,
   ...(options || {}),
   [_env]: true,
 })
+const isEnv = arg => arg[_env]
 
 const _list = Symbol('list')
 const list = options => ({
   [_flag]: false,
   [_opt]: true,
+  [_num]: false,
+  [_env]: false,
   ...(options || {}),
   [_list]: true
 })
+const isList = arg => arg[_list]
 
 const count = options => list(flag(options))
-
-const isEnv = arg => arg[_env]
-const isOpt = arg => arg[_opt]
-const isFlag = arg => arg[_flag]
-const isList = arg => arg[_list]
 const isCount = arg => isList(arg) && isFlag(arg)
-const isArg = arg => isOpt(arg) || isFlag(arg)
 
 const trim = string => string
   // remove single line breaks
@@ -218,6 +232,21 @@ const buildParser = (j, sections) => {
   return j
 }
 
+const envToNum = (name, spec) => e => {
+  if (e === '')
+    return undefined
+
+  return toNum(e, `environment variable ${name}`, spec)
+}
+
+const envToBool = name => e => {
+  assert(e === '' || e === '1' || e === '0' || typeof e === 'number',
+    `Environment variable ${name} must be set to 0 or 1 only`)
+  return e === '' ? false : !!+e
+}
+
+const countBools = l => l.reduce((v, a) => v ? a + 1 : a - 1, 0)
+
 const addEnv = (j, name, val) => {
   assertNotDefined(j, name)
   if (!j.env)
@@ -231,20 +260,20 @@ const addEnv = (j, name, val) => {
 
   if (isList(val)) {
     assert(val.delimiter, `env list ${name} lacks delimiter`)
-    j.result[name] = has ? e.split(val.delimiter) : []
-  } else if (isFlag(val)) {
-    assert(e === '' || e === '1' || e === '0' || typeof e === 'number',
-      `Environment variable ${name} must be set to 0 or 1 only`)
-    j.result[name] = e === '' ? false : !!+e
-  } else if (val.type === 'number') {
-    assert(e === '' || !isNaN(e),
-      `Non-numeric value ${e} provided for environment variable ${name}`)
-    if (e !== '')
-      j.result[name] = +e
-  } else {
-    // plain old string!
+    if (!has)
+      j.result[name] = []
+    else {
+      const split = e.split(val.delimiter)
+      j.result[name] = isFlag(val) ? countBools(split.map(envToBool(name)))
+        : isNum(val) ? split.map(envToNum(name, val)).filter(e => e !== undefined)
+        : split
+    }
+  } else if (isFlag(val))
+    j.result[name] = envToBool(name)(e)
+  else if (isNum(val))
+    j.result[name] = envToNum(name, val)(e)
+  else
     j.result[name] = e
-  }
 
   addHelpText(j, name, val)
 }
@@ -369,6 +398,16 @@ const getArgv = j => {
   return argv
 }
 
+const toNum = (val, key, spec) => {
+  assert(!isNaN(val), `non-number '${val}' given for numeric ${key}`)
+  val = +val
+  assert(isNaN(spec.max) || val <= spec.max,
+         `value ${val} for ${key} exceeds max (${spec.max})`)
+  assert(isNaN(spec.min) || val >= spec.min,
+         `value ${val} for ${key} below min (${spec.min})`)
+  return val
+}
+
 const parse_ = j => {
   const argv = getArgv(j)
 
@@ -446,14 +485,8 @@ const parse_ = j => {
 
     const negate = isFlag(spec) && key.substr(0, 3) === 'no-'
     const name = negate ? key.substr(3) : key
-    if (spec.type === 'number') {
-      val = +val
-      assert(!isNaN(val), `non-number given for numeric arg ${literalKey}`)
-      assert(isNaN(spec.max) || val <= spec.max,
-             `value ${val} for ${literalKey} exceeds max (${spec.max})`)
-      assert(isNaN(spec.min) || val >= spec.min,
-             `value ${val} for ${literalKey} below min (${spec.min})`)
-    }
+    if (isNum(spec))
+      val = toNum(val, `arg ${literalKey}`, spec)
 
     if (isList(spec)) {
       if (isOpt(spec)) {
@@ -492,4 +525,4 @@ const parse = (...sections) => parse_(buildParser({
   [usageMemo]: false,
 }, sections)).result
 
-module.exports = { jack, flag, opt, list, count, env, parse }
+module.exports = { jack, flag, opt, list, count, env, parse, num }

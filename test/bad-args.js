@@ -1,5 +1,5 @@
 const t = require('tap')
-const { list, jack, env, opt, flag } = require('../')
+const { list, jack, env, opt, flag, num, count } = require('../')
 const assert = require('assert')
 const test = (arg, msg) => t.throws(_ => jack(...arg), { message: msg }, msg)
 
@@ -25,13 +25,15 @@ test([{e:flag()},{e:env()}], 'e defined multiple times')
 test([{e:env(list({}))}], 'env list e lacks delimiter')
 test([{env: { e: 'asdf' }, e:env(flag({}))}],
      'Environment variable e must be set to 0 or 1 only')
-test([{env: { e: 'asdf' }, e:env({type: 'number'})}],
-     'Non-numeric value asdf provided for environment variable e')
+test([{env: { e: 'asdf' }, e:num(env())}],
+     `non-number 'asdf' given for numeric environment variable e`)
 test([{main:console.log},{main:console.log}],
      'main function specified multiple times')
-test([{argv:['--x=y'],x:opt({type:'number'})}],
-     'non-number given for numeric arg --x')
-test([{argv:['--x=5'],x:opt({type:'number',max:2})}],
-     'value 5 for --x exceeds max (2)')
-test([{argv:['--x=2'],x:opt({type:'number',min:5})}],
-     'value 2 for --x below min (5)')
+test([{argv:['--x=y'],x:num()}],
+     `non-number 'y' given for numeric arg --x`)
+test([{argv:['--x=5'],x:num({max:2})}],
+     'value 5 for arg --x exceeds max (2)')
+test([{argv:['--x=2'],x:num({min:5})}],
+     'value 2 for arg --x below min (5)')
+test([{env:{x:'2'}},{x:env(num({min:5}))}],
+     'value 2 for environment variable x below min (5)')
