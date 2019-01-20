@@ -128,17 +128,19 @@ const usage = j => {
 //   argv: argument list being parsed,
 //   result: parsed object passed to main function and returned
 // }
-const jack = (...sections) => execute(parse_(buildParser({
-    help: [],
-    shortOpts: {},
-    shortFlags: {},
-    options: {},
-    result: { _: [] },
-    main: null,
-    argv: null,
-    env: null,
-    [usageMemo]: false,
-  }, sections)))
+const jack = (...sections) => execute(parse_(buildParser(newObj(), sections)))
+
+const newObj = () => ({
+  help: [],
+  shortOpts: {},
+  shortFlags: {},
+  options: {},
+  result: { _: [] },
+  main: null,
+  argv: null,
+  env: null,
+  [usageMemo]: false,
+})
 
 const execute = j => {
   if (j.result.help)
@@ -510,16 +512,6 @@ const parse_ = j => {
 }
 
 // just parse the arguments and return the result
-const parse = (...sections) => parse_(buildParser({
-  help: [],
-  shortOpts: {},
-  shortFlags: {},
-  options: {},
-  result: { _: [] },
-  main: null,
-  argv: null,
-  env: null,
-  [usageMemo]: false,
-}, sections)).result
+const parse = (...sections) => parse_(buildParser(newObj(), sections)).result
 
 module.exports = { jack, flag, opt, list, count, env, parse, num }
