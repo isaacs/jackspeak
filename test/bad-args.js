@@ -38,3 +38,7 @@ test([{argv:['--x=2'],x:num({min:5})}],
      'value 2 for arg --x below min (5)')
 test([{env:{x:'2'}},{x:env(num({min:5}))}],
      'value 2 for environment variable x below min (5)')
+test([{argv:['--x=y'],x:opt({valid:['a','b','c']})}],
+`Invalid value y provided for x.
+    Must be one of:
+        a b c`)

@@ -23,7 +23,9 @@ Basic Options:
                          Use the specified reporter. Defaults to 'classic' when
                          colors are in use, or 'tap' when colors are disabled.
 
-                         Available reporters: a b c d e f g
+                         Available reporters: classic doc dot dump json
+                         jsonstream landing list markdown min nyan progress
+                         silent spec tap xunit
 
   -b --bail              Bail out on first failure
   -B --no-bail           Do not bail out on first failure (default)

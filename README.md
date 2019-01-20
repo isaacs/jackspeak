@@ -105,6 +105,9 @@ as argument names as well; just put them in different sections.
         - `default` - A default value.  If unspecified, opts default
           to `undefined`.
 
+        - `valid` - An array of valid values.  If the user provides a
+          value outside this set, it will throw an error.
+
         - `alias` - A string or array of options that this option
           expands to when used.  This works the same as flag aliases,
           with the exception that you may include the string

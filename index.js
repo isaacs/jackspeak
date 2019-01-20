@@ -443,6 +443,19 @@ const toNum = (val, key, spec) => {
   return val
 }
 
+const wrap = (text, padding) => {
+  const ui = cliui()
+  ui.div({ text, padding })
+  return ui.toString()
+}
+
+const assertValid = (val, key, spec) =>
+  !isOpt(spec) || !spec.valid ||
+    spec.valid.indexOf(val) !== -1 || assert(false,
+      `Invalid value ${val} provided for ${key}.
+    Must be one of:
+${wrap(spec.valid.join(' '), [ 0, 2, 0, 8 ])}`)
+
 const parse_ = j => {
   const argv = getArgv(j)
 
@@ -522,6 +535,8 @@ const parse_ = j => {
     const name = negate ? key.substr(3) : key
     if (isNum(spec))
       val = toNum(val, `arg ${literalKey}`, spec)
+
+    assertValid(val, key, spec)
 
     if (isList(spec)) {
       if (isOpt(spec)) {

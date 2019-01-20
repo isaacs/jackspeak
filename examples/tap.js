@@ -1,5 +1,22 @@
 const { jack, num, opt, list, flag, env } = require('../')
-const getReporters = () => 'a b c d e f g'
+const getReporters = () => [
+  'classic',
+  'doc',
+  'dot',
+  'dump',
+  'json',
+  'jsonstream',
+  'landing',
+  'list',
+  'markdown',
+  'min',
+  'nyan',
+  'progress',
+  'silent',
+  'spec',
+  'tap',
+  'xunit'
+]
 
 const res = jack({
   usage: 'tap [options] <files>',
@@ -27,12 +44,13 @@ Much more documentation available at: https://www.node-tap.org/
   reporter: opt({
     hint: 'type',
     short: 'R',
+    valid: getReporters(),
     description: `Use the specified reporter.  Defaults to
                   'classic' when colors are in use, or 'tap'
                   when colors are disabled.
 
                   Available reporters:
-                  ${getReporters()}`,
+                  ${getReporters().join(' ')}`,
   }),
 
   bail: flag({
