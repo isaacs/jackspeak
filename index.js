@@ -1,10 +1,5 @@
 'use strict'
 
-// XXX required options?  or just attach a usage() method on result?
-
-// XXX Also aliases don't have defaults and shouldn't show up in the
-// results, so they feel like maybe a different kind of thing?
-
 const assert = require('assert')
 const cliui = require('cliui')
 const path = require('path')
