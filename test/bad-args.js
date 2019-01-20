@@ -15,6 +15,7 @@ test([{ argv: ['--foo'] }], 'invalid argument: --foo')
 test([{ xyz: flag({short:'x'}), argv: ['-xy']}], 'invalid argument: -y')
 test([{ xyz: flag(), argv: ['--xyz=foo']}], 'value provided for boolean flag: xyz')
 test([{ xyz: opt(), argv: ['--xyz']}], 'no value provided for option: xyz')
+test([['a','b','c'], ['x','y','z']], 'argv specified multiple times')
 test([{ al: opt({alias:'--foo=${value}'}), foo: opt(), argv:['--al']}],
      'no value provided for option: al')
 test([{ ho: flag({short: 'h'}) }], `ho using 'h' short val, reserved for --help`)

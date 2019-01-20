@@ -153,19 +153,19 @@ const buildParser = (j, sections) => {
     if (Array.isArray(section))
       section = { argv: section }
     if (section.argv && !isArg(section.argv)) {
-      assert(!j.argv, 'argv specified multiple times')
+      !j.argv || assert(false, 'argv specified multiple times')
       j.argv = section.argv
     }
 
     if (section.env && !isArg(section.env)) {
-      assert(!j.env, 'env specified multiple times\n' +
+      !j.env || assert(false, 'env specified multiple times\n' +
              '(did you set it after defining some environment args?)')
       j.env = section.env
     }
 
     if (section.usage && !isArg(section.usage)) {
       const val = section.usage
-      assert(typeof val === 'string' || Array.isArray(val),
+      typeof val === 'string' || Array.isArray(val) || assert(false,
              'usage must be a string or array')
       j.help.push({ text: 'Usage:' })
       j.help.push.apply(j.help, [].concat(val).map(text => ({
@@ -175,7 +175,7 @@ const buildParser = (j, sections) => {
     }
 
     if (section.description && !isArg(section.description)) {
-      assert(typeof section.description === 'string',
+      typeof section.description === 'string' || assert(false,
              'description must be string')
       j.help.push({
         text: trim(`${section.description}:`),
@@ -184,14 +184,14 @@ const buildParser = (j, sections) => {
     }
 
     if (section.help && !isArg(section.help)) {
-      assert(typeof section.help === 'string', 'help must be a string')
+      typeof section.help === 'string' || assert(false, 'help must be a string')
       j.help.push({ text: trim(section.help) + '\n' })
     }
 
     if (section.main && !isArg(section.main))
       addMain(j, section.main)
 
-    assert(!section._, '_ is reserved for positional arguments')
+    !section._ || assert(false, '_ is reserved for positional arguments')
 
     const names = Object.keys(section)
     for (let n = 0; n < names.length; n++) {
@@ -240,7 +240,7 @@ const envToNum = (name, spec) => e => {
 }
 
 const envToBool = name => e => {
-  assert(e === '' || e === '1' || e === '0' || typeof e === 'number',
+  e === '' || e === '1' || e === '0' || typeof e === 'number' || assert(false,
     `Environment variable ${name} must be set to 0 or 1 only`)
   return e === '' ? false : !!+e
 }
@@ -259,7 +259,7 @@ const addEnv = (j, name, val) => {
     : ''
 
   if (isList(val)) {
-    assert(val.delimiter, `env list ${name} lacks delimiter`)
+    val.delimiter || assert(false, `env list ${name} lacks delimiter`)
     if (!has)
       j.result[name] = []
     else {
@@ -279,9 +279,8 @@ const addEnv = (j, name, val) => {
 }
 
 const assertNotDefined = (j, name) =>
-  assert(!j.options[name] &&
-         !j.shortOpts[name] &&
-         !j.shortFlags[name], `${name} defined multiple times`)
+  !j.options[name] && !j.shortOpts[name] && !j.shortFlags[name] ||
+    assert(false, `${name} defined multiple times`)
 
 const addArg = (j, name, val) => {
   assertNotDefined(j, name)
@@ -312,8 +311,8 @@ const addFlag = (j, name, val) => {
   const negate = name.substr(0, 3) === 'no-'
   // aliases can't be negated
   if (!negate && !val.alias)
-    assert(!j.options[`no-${name}`],
-    `flag '${name}' specified, but 'no-${name}' already defined`)
+    !j.options[`no-${name}`] || assert(false,
+      `flag '${name}' specified, but 'no-${name}' already defined`)
 
   addShort(j, name, val)
 
@@ -367,10 +366,8 @@ const addShort = (j, name, val) => {
     return
 
   assertNotDefined(j, val.short)
-  assert(val.short !== 'h' || name === 'help',
+  val.short !== 'h' || name === 'help' || assert(false,
     `${name} using 'h' short val, reserved for --help`)
-  assert(!j.options[val.short],
-    `short ${val.short} already defined`)
 
   if (isFlag(val))
     j.shortFlags[val.short] = name
@@ -379,8 +376,8 @@ const addShort = (j, name, val) => {
 }
 
 const addMain = (j, main) => {
-  assert(typeof main === 'function', 'main must be function')
-  assert(!j.main, 'main function specified multiple times')
+  typeof main === 'function' || assert(false, 'main must be function')
+  !j.main || assert(false, 'main function specified multiple times')
   j.main = result => {
     main(result)
     return result
@@ -399,11 +396,11 @@ const getArgv = j => {
 }
 
 const toNum = (val, key, spec) => {
-  assert(!isNaN(val), `non-number '${val}' given for numeric ${key}`)
+  !isNaN(val) || assert(false, `non-number '${val}' given for numeric ${key}`)
   val = +val
-  assert(isNaN(spec.max) || val <= spec.max,
+  isNaN(spec.max) || val <= spec.max || assert(false,
          `value ${val} for ${key} exceeds max (${spec.max})`)
-  assert(isNaN(spec.min) || val >= spec.min,
+  isNaN(spec.min) || val >= spec.min || assert(false,
          `value ${val} for ${key} below min (${spec.min})`)
   return val
 }
@@ -465,13 +462,13 @@ const parse_ = j => {
 
     const spec = j.options[key]
 
-    assert(spec, `invalid argument: ${literalKey}`)
-    assert(!isFlag(spec) || val === null,
+    spec || assert(false, `invalid argument: ${literalKey}`)
+    !isFlag(spec) || val === null || assert(false,
       `value provided for boolean flag: ${key}`)
 
     if (isOpt(spec) && val === null) {
       val = argv[++i]
-      assert(val !== undefined,
+      val !== undefined || assert(false,
         `no value provided for option: ${key}`)
     }
 
