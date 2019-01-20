@@ -4,7 +4,8 @@
   "description": "A very strict and proper argument parser.",
   "main": "index.js",
   "scripts": {
-    "snap": "TAP_SNAPSHOT=1 tap test/*.js",
+    "build-examples": "for i in examples/*.js ; do node $i -h > ${i/.js/.txt}; done",
+    "snap": "TAP_SNAPSHOT=1 tap test/*.js && npm run build-examples",
     "test": "tap test/*.js --100",
     "preversion": "npm test",
     "postversion": "npm publish",

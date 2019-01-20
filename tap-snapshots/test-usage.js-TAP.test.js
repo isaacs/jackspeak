@@ -10,7 +10,6 @@ Usage:
   usage.js <options>
 
   -h --help  Show this helpful output
-
   --no-help  switch off the --help flag
 
   --         Stop parsing flags and options, treat any additional command line
@@ -27,7 +26,6 @@ This text is very helpful.
 It has multiple paragraphs!
 
   -h --help  Show this helpful output
-
   --no-help  switch off the --help flag
 
   --         Stop parsing flags and options, treat any additional command line
@@ -40,9 +38,7 @@ Usage:
   foo <bar> [baz options]
 
   -? --help  show this thing you are reading now
-
   --         double every dash
-
 `
 
 exports[`test/usage.js TAP > all kinds of helpful text 1`] = `
@@ -64,18 +60,14 @@ It has multiple paragraphs!
 
   --no-bar     decrement the --bar flag
                Can be set multiple times
-
   -l --line    this has
 
                many lines
 
                Can be set multiple times
-
   --no-line    decrement the --line flag
                Can be set multiple times
-
   -h --help    Show this helpful output
-
   --no-help    switch off the --help flag
 
   --           Stop parsing flags and options, treat any additional command line
@@ -89,26 +81,23 @@ Usage:
 
   -the-short-form-is-shorter-but-not-short=<values-are-valuable>
   --this-is-a-very-long-option-name-dont-you-think?=<values-are-valuable>
-                    This option is hecka long.
+             This option is hecka long.
 
-                    To make matters more complicated as well, it has a fairly
-                    long description as well. That means that the description
-                    will get bumped down a line, instead of the left hand side
-                    forcibly wrapping in ways that are sometimes awkward or
-                    weird.
+             To make matters more complicated as well, it has a fairly long
+             description as well. That means that the description will get
+             bumped down a line, instead of the left hand side forcibly wrapping
+             in ways that are sometimes awkward or weird.
 
-                    Most system CLI commands format their help text this way,
-                    and it's a tradition that has been with us for a very long
-                    time.
+             Most system CLI commands format their help text this way, and it's
+             a tradition that has been with us for a very long time.
 
-                    Anyway, here's wonderwall...
+             Anyway, here's wonderwall...
 
-  -h --help         Show this helpful output
+  -h --help  Show this helpful output
+  --no-help  switch off the --help flag
 
-  --no-help         switch off the --help flag
-
-  --                Stop parsing flags and options, treat any additional command
-                    line arguments as positional arguments.
+  --         Stop parsing flags and options, treat any additional command line
+             arguments as positional arguments.
 
 `
 
@@ -117,13 +106,11 @@ Usage:
   usage.js <options>
 
   --foo      [no description provided]
-
   --no-foo   switch off the --foo flag
 
 this text is so helpful
 
   -h --help  Show this helpful output
-
   --no-help  switch off the --help flag
 
   --         Stop parsing flags and options, treat any additional command line
@@ -135,15 +122,12 @@ exports[`test/usage.js TAP run without a main script > expected output 1`] = `
 Usage:
   $0 <options>
 
-  -f<foo> --foo=<foo>
-                    some desc
+  -f<foo> --foo=<foo>  some desc
+  -h --help            Show this helpful output
+  --no-help            switch off the --help flag
 
-  -h --help         Show this helpful output
-
-  --no-help         switch off the --help flag
-
-  --                Stop parsing flags and options, treat any additional command
-                    line arguments as positional arguments.
+  --                   Stop parsing flags and options, treat any additional
+                       command line arguments as positional arguments.
 
 
 `
