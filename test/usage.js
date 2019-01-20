@@ -42,6 +42,25 @@ test({
   argv: [ '--help', '-h' ]
 }, 'all kinds of helpful text')
 
+test({
+  'this-is-a-very-long-option-name-dont-you-think?': opt({
+    short: 'the-short-form-is-shorter-but-not-short',
+    hint: 'values-are-valuable',
+    description: `
+      This option is hecka long.
+
+      To make matters more complicated as well, it has
+      a fairly long description as well.  That means that the description
+      will get bumped down a line, instead of the left hand side
+      forcibly wrapping in ways that are sometimes awkward or weird.
+
+      Most system CLI commands format their help text this way, and it's
+      a tradition that has been with us for a very long time.
+
+      Anyway, here's wonderwall...`
+  })
+}, 'a very long thing that does not wrap')
+
 t.test('usage multiple times does not recalculate', t => {
   const consolelog = console.log
   const logs = []

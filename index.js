@@ -96,16 +96,29 @@ const usage = j => {
   let maxWidth = 0
   j.help.forEach(row => {
     if (row.left)
-      maxWidth = Math.min(30, Math.max(row.left.length + 4, maxWidth))
+      maxWidth = Math.min(20, Math.max(row.left.length + 4, maxWidth))
   })
 
   j.help.forEach(row => {
     if (row.left) {
-      ui.div({
-        text: row.left,
-        padding: [0, 2, 0, 2],
-        width: maxWidth,
-      }, { text: row.text })
+      // If the row is too long, don't wrap it
+      // Bump the right-hand side down a line to make room
+      if (row.left.length >= maxWidth - 2) {
+        ui.div({
+          text: row.left,
+          padding: [ 0, 0, 0, 2 ]
+        })
+        ui.div({
+          text: row.text,
+          padding: [ 0, 0, 0, maxWidth ]
+        })
+      } else {
+        ui.div({
+          text: row.left,
+          padding: [0, 1, 0, 2],
+          width: maxWidth,
+        }, { text: row.text })
+      }
       ui.div()
     } else
       ui.div(row)
@@ -351,14 +364,15 @@ const addHelpText = (j, name, val) => {
   const text = `${desc}${mult}`
 
   const hint = val.hint || name
+  const shortEq = val.short && val.short.length > 1 ? '=' : ''
   const short = val.short ? (
-    isFlag(val) ? `, -${val.short}`
-    : `, -${val.short}<${hint}>`
+    isFlag(val) ? `-${val.short} `
+    : `-${val.short}${shortEq}<${hint}> `
   ) : ''
 
   const left = isEnv(val) ? name
-    : isFlag(val) ? `--${name}${short}`
-    : `--${name}=<${hint}>${short}`
+    : isFlag(val) ? `${short}--${name}`
+    : `${short}--${name}=<${hint}>`
 
   j.help.push({ text, left })
 }
