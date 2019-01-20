@@ -226,6 +226,9 @@ function taking precedence.
 
 ## Some Example Code
 
+Also see [the examples
+folder](https://github.com/isaacs/jackspeak/tree/master/examples)
+
 ```js
 const { jack, flag, opt, list, count, num } = require('jackspeak')
 
