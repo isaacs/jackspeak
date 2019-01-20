@@ -530,6 +530,12 @@ const parse_ = j => {
       // either flag or opt
       j.result[name] = isFlag(spec) ? !negate : val
     }
+
+    if (spec.implies) {
+      for (let i in spec.implies) {
+        j.result[i] = spec.implies[i]
+      }
+    }
   }
 
   Object.defineProperty(j.result._, 'usage', {

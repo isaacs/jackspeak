@@ -165,7 +165,7 @@ Much more documentation available at: https://www.node-tap.org/
       '--functions=100',
       '--statements=100'
     ],
-    description: `Full coverage, 100%.
+    description: `Enforce full coverage, 100%.
                   Sets branches, statements, functions,
                   and lines to 100.`,
   }),
@@ -211,6 +211,17 @@ Much more documentation available at: https://www.node-tap.org/
     description: `Do not open a web browser after generating
                   an html coverage report`,
   }),
+}, {
+  description: 'Coverage Enfocement Options',
+  help: `
+    These options enable you to specify that the test will fail
+    if a given coverage level is not met.  Setting any of the options
+    below will trigger the --coverage and --check-coverage flags.
+
+    The most stringent is --100.  You can find a list of projects
+    running their tests like this at: https://www.node-tap.org/100
+
+    If you run tests in this way, please add your project to the list.`,
 
   'check-coverage': flag({
     description: `Check whether coverage is within
@@ -220,6 +231,9 @@ Much more documentation available at: https://www.node-tap.org/
 
                   This can be run on its own any time
                   after a test run that included coverage.`,
+    implies: {
+      coverage: true
+    },
   }),
 
   branches: num({
@@ -227,10 +241,11 @@ Much more documentation available at: https://www.node-tap.org/
     max:100,
     default: 0,
     hint: 'n',
-    description: `what % of branches must be covered?
-                  Setting this will default both
-                  --check-coverage and --coverage to true.
-                  [default: 0]`,
+    implies: {
+      'check-coverage': true,
+      coverage: true
+    },
+    description: `what % of branches must be covered?`,
   }),
 
   functions: num({
@@ -238,21 +253,23 @@ Much more documentation available at: https://www.node-tap.org/
     max:100,
     default: 0,
     hint: 'n',
-    description: `what % of functions must be covered?
-                  Setting this will default both
-                  --check-coverage and --coverage to true.
-                  [default: 0]`,
+    implies: {
+      'check-coverage': true,
+      coverage: true
+    },
+    description: `what % of functions must be covered?`,
   }),
 
   lines: num({
     min: 0,
     max:100,
-    default: 0,
+    default: 90,
     hint: 'n',
-    description: `what % of lines must be covered?
-                  Setting this will default both
-                  --check-coverage and --coverage to true.
-                  [default: 90]`,
+    implies: {
+      'check-coverage': true,
+      coverage: true
+    },
+    description: `what % of lines must be covered?`,
   }),
 
   statements: num({
@@ -260,10 +277,11 @@ Much more documentation available at: https://www.node-tap.org/
     max:100,
     default: 0,
     hint: 'n',
-    description: `what % of statements must be covered?
-                  Setting this will default both
-                  --check-coverage and --coverage to true.
-                  [default: 0]`,
+    implies: {
+      'check-coverage': true,
+      coverage: true
+    },
+    description: `what % of statements must be covered?`,
   }),
 
 }, {
@@ -347,7 +365,6 @@ Much more documentation available at: https://www.node-tap.org/
                   contain the raw TAP for later replay or
                   analysis.`,
   }),
-
 
   '--': flag({
     description: `Stop parsing flags, and treat any additional
@@ -461,4 +478,5 @@ Much more documentation available at: https://www.node-tap.org/
          file.  Each of the keys corresponds to one of the options above.`,
 })
 
+console.log(res._.parsed)
 console.log(res)

@@ -21,6 +21,13 @@ const options = {
   files: list({
     short: 'f'
   }),
+  implication: flag({
+    implies: {
+      xyz: true,
+      verbose: 9,
+      files: [ 'deadbeat', 'folly', 'frump', 'lagamuffin' ]
+    }
+  }),
   'long-list': list(),
   'long-opt': opt(),
   'default-true': flag({ default: true }),
@@ -74,6 +81,7 @@ test([
 test([ '-xa' ], 'short flag alias')
 test([ '--alias=foo' ], 'long opt alias')
 test(['-vvVvV'], 'negate some verbosity')
+test(['--implication'], 'imply some things')
 
 t.test('main fn', t => {
   let called = false

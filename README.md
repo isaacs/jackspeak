@@ -63,6 +63,11 @@ as argument names as well; just put them in different sections.
 
     - `hidden` - Do not show this value in the help output.
 
+    - `implies` - JavaScript object of values to set in the result
+      objet when this flag or option is encountered in the arguments.
+      This can be used to have one flag enable another by default, for
+      example.
+
     The types are:
 
     - `flag(options)` - A boolean value which can be set or unset, but
