@@ -1,11 +1,11 @@
 'use strict'
 
-// XXX help and usage output
-
 // XXX required options?  or just attach a usage() method on result?
 
 // XXX Also aliases don't have defaults and shouldn't show up in the
 // results, so they feel like maybe a different kind of thing?
+
+// XXX type:'number' offends me.  It should be a top-level composable type.
 
 const assert = require('assert')
 const cliui = require('cliui')
@@ -16,21 +16,29 @@ const path = require('path')
 const $0 = require.main ? path.basename(require.main.filename) : '$0'
 
 const _flag = Symbol('flag')
-const _list = Symbol('list')
-const _opt = Symbol('opt')
-
 const flag = options => ({
   ...(options || {}),
   [_opt]: false,
   [_flag]: true
 })
 
+const _opt = Symbol('opt')
 const opt = options => ({
   ...(options || {}),
   [_flag]: false,
   [_opt]: true
 })
 
+const _env = Symbol('env')
+const env = options => ({
+  [_flag]: false,
+  [_list]: false,
+  [_opt]: false,
+  ...(options || {}),
+  [_env]: true,
+})
+
+const _list = Symbol('list')
 const list = options => ({
   [_flag]: false,
   [_opt]: true,
@@ -39,6 +47,13 @@ const list = options => ({
 })
 
 const count = options => list(flag(options))
+
+const isEnv = arg => arg[_env]
+const isOpt = arg => arg[_opt]
+const isFlag = arg => arg[_flag]
+const isList = arg => arg[_list]
+const isCount = arg => isList(arg) && isFlag(arg)
+const isArg = arg => isOpt(arg) || isFlag(arg)
 
 const trim = string => string
   // remove single line breaks
@@ -49,160 +64,325 @@ const trim = string => string
   .replace(/\n{3,}/g, '\n\n')
   .trim()
 
-const ranUsage = Symbol('ranUsage')
-const usage = options => {
-  options[ranUsage] = true
+const usageMemo = Symbol('usageMemo')
+const usage = j => {
+  if (j[usageMemo])
+    return j[usageMemo]
+
+  const ui = cliui()
+
+  if (!/^Usage:/.test(j.help[0].text)) {
+    ui.div('Usage:')
+    ui.div({
+      text: `${$0} <options>`,
+      padding: [0, 0, 1, 2]
+    })
+  }
 
   let maxWidth = 0
-  const table = Object.keys(options).filter(
-    k => k !== 'argv' &&
-         k !== 'help' &&
-         k !== 'usage'
-  ).map(k => {
-    const arg = options[k]
-    const val = arg[_opt] ? `[${arg.hint || k}]` : ''
-    const short = arg.short ? ` -${arg.short}${val}` : ''
-    const desc = trim(arg.description || '[no description provided]')
-    const mult = arg[_list] ? `${
-      desc.indexOf('\n') === -1 ? '\n' : '\n\n'
-    }Can be set multiple times` : ''
-    // XXX negated counters and shorthands
-    const row = [
-      `--${k}${val ? `=${val}`: ''}${short}`,
-      `${desc}${mult}`
-    ]
-    maxWidth = Math.min(30, Math.max(row[0].length + 4, maxWidth))
-    return row
-  })
-  const ui = cliui()
-  ui.div('Usage:')
-  ui.div({
-    text: (options.usage || `${$0} <options>`),
-    padding: [0, 0, 1, 2]
+  j.help.forEach(row => {
+    if (row.left)
+      maxWidth = Math.min(30, Math.max(row.left.length + 4, maxWidth))
   })
 
-  if (options.help)
-    ui.div({text: options.help, paddign: [1, 0, 0, 0]})
-
-  if (table.length)
-    ui.div({text: 'Options:', padding: [1, 0, 1, 0]})
-
-  table.forEach(row => {
-    ui.div({
-      text: row[0],
-      width: maxWidth,
-      padding: [0, 2, 0, 2]
-    }, { text: row[1] })
-    ui.div()
+  j.help.forEach(row => {
+    if (row.left) {
+      ui.div({
+        text: row.left,
+        padding: [0, 2, 0, 2],
+        width: maxWidth,
+      }, { text: row.text })
+      ui.div()
+    } else
+      ui.div(row)
   })
-  return ui.toString()
+
+  return j[usageMemo] = ui.toString()
 }
 
-const jack = options_ => {
-  // don't monkey with the originals
-  const options = { ...options_ }
+// parse each section
+// Resulting internal object looks like:
+// {
+//   help: [
+//     { text, padding, left }, ...
+//   ],
+//   // single-char shorthands
+//   shortOpts: { char: name, ... }
+//   shortFlags: { char: name, ... }
+//   options: { all opts and flags }
+//   main: mainFn or null,
+//   argv: argument list being parsed,
+//   result: parsed object passed to main function and returned
+// }
+const jack = (...sections) => execute(parse_(buildParser({
+    help: [],
+    shortOpts: {},
+    shortFlags: {},
+    options: {},
+    result: { _: [] },
+    main: null,
+    argv: null,
+    env: null,
+    [usageMemo]: false,
+  }, sections)))
 
-  // validate the options
-  const opts = {}
-  const flags = {}
-  const short = {}
-  const shortFlags = {}
-  const shortOpts = {}
-  const result = { _ : [] }
+const execute = j => {
+  if (j.result.help)
+    console.log(usage(j))
+  else if (j.main)
+    j.main(j.result)
+  return j.result
+}
 
-  const names = Object.keys(options)
-  for (let n = 0; n < names.length; n++) {
-    const name = names[n]
-    switch (name) {
-      case 'main':
-        assert(typeof options[name] === 'function',
-               `${name} should be a function, if specified`)
-        continue
-
-      case '_':
-        assert(false, '_ is reserved for positional arguments')
-
-      case 'argv':
-        assert(Array.isArray(options[name]),
-               `${name} should be the array of arguments, if specified`)
-        continue
-
-      case 'usage':
-      case 'help':
-        assert(typeof options[name] === 'string',
-               `${name} should be a string, not an argument type`)
-        continue
-
-      default: // ok it's an argument type!
-        const arg = options[name]
-        assert(arg[_flag] || arg[_opt], `${name} neither flag nor opt`)
-        if (arg[_flag]) {
-          if (name.substr(0, 3) !== 'no-') {
-            assert(!options[`no-${name}`],
-            `flag '${name}' specified, but 'no-${name}' already defined`)
-            // just to pick up the description and short arg
-            options[`no-${name}`] = flag({
-              ...(arg.negate || {}),
-              [_list]: arg[_list]
-            })
-            names.push(`no-${name}`)
-          }
-        }
-        if (arg.short) {
-          assert(arg.short.length === 1,
-          `${name} short alias must be 1 char, found '${arg.short}'`)
-          assert(!short[arg.short],
-          `short ${arg.short} used for ${name} and ${short[arg.short]}`)
-          assert(arg.short !== 'h',
-          `${name} using 'h' short arg, reserved for --help`)
-          assert(arg.short !== '?',
-          `${name} using '?' short arg, reserved for --help`)
-
-          short[arg.short] = name
-          if (arg[_flag])
-            shortFlags[arg.short] = name
-          else
-            shortOpts[arg.short] = name
-        }
-        if (arg[_flag]) {
-          flags[name] = arg
-        } else {
-          opts[name] = arg
-        }
-
-        if (!arg.alias && (!arg[_flag] || name.slice(0, 3) !== 'no-')) {
-          result[name] = arg[_list] ? (
-            arg[_flag] ? 0 : []
-          ) : arg[_flag] ? arg.default || false
-            : arg.default
-        }
-        continue
+const buildParser = (j, sections) => {
+  sections.forEach(section => {
+    if (Array.isArray(section))
+      section = { argv: section }
+    if (section.argv && !isArg(section.argv)) {
+      assert(!j.argv, 'argv specified multiple times')
+      j.argv = section.argv
     }
+
+    if (section.env && !isArg(section.env)) {
+      assert(!j.env, 'env specified multiple times\n' +
+             '(did you set it after defining some environment args?)')
+      j.env = section.env
+    }
+
+    if (section.usage && !isArg(section.usage)) {
+      const val = section.usage
+      assert(typeof val === 'string' || Array.isArray(val),
+             'usage must be a string or array')
+      j.help.push({ text: 'Usage:' })
+      j.help.push.apply(j.help, [].concat(val).map(text => ({
+        text, padding: [0, 0, 0, 2]
+      })))
+      j.help.push({ text: '' })
+    }
+
+    if (section.description && !isArg(section.description)) {
+      assert(typeof section.description === 'string',
+             'description must be string')
+      j.help.push({
+        text: trim(`${section.description}:`),
+        padding: [0, 0, 1, 0]
+      })
+    }
+
+    if (section.help && !isArg(section.help)) {
+      assert(typeof section.help === 'string', 'help must be a string')
+      j.help.push({ text: trim(section.help) + '\n' })
+    }
+
+    if (section.main && !isArg(section.main))
+      addMain(j, section.main)
+
+    assert(!section._, '_ is reserved for positional arguments')
+
+    const names = Object.keys(section)
+    for (let n = 0; n < names.length; n++) {
+      const name = names[n]
+      const val = section[name]
+
+      if (isEnv(val))
+        addEnv(j, name, val)
+      else if (isArg(val))
+        addArg(j, name, val)
+      else {
+        switch (name) {
+          case 'argv':
+          case 'description':
+          case 'usage':
+          case 'help':
+          case 'main':
+          case 'env':
+            continue
+          default:
+            assert(false, `${name} not flag, opt, or env`)
+        }
+      }
+    }
+  })
+
+  // if not already mentioned, add the note about -h and `--` ending parsing
+  if (!j.options.help)
+    addArg(j, 'help', flag({ description: 'Show this helpful output' }))
+
+  if (!j.options['--']) {
+    addHelpText(j, '', flag({
+      description: `Stop parsing flags and options, treat any additional
+                    command line arguments as positional arguments.`
+    }))
   }
 
-  // start the parsing
-  const args = [...(options.argv || process.argv)]
+  return j
+}
 
-  if (args[0] === process.execPath) {
-    args.shift()
-    if (args[0] === require.main.filename)
-      args.shift()
+const addEnv = (j, name, val) => {
+  assertNotDefined(j, name)
+  if (!j.env)
+    j.env = process.env
+
+  const def = val.default
+  const has = Object.prototype.hasOwnProperty.call(j.env, name)
+  const e = has && j.env[name] !== '' ? j.env[name]
+    : def !== undefined ? def
+    : ''
+
+  if (isList(val)) {
+    assert(val.delimiter, `env list ${name} lacks delimiter`)
+    j.result[name] = has ? e.split(val.delimiter) : []
+  } else if (isFlag(val)) {
+    assert(e === '' || e === '1' || e === '0' || typeof e === 'number',
+      `Environment variable ${name} must be set to 0 or 1 only`)
+    j.result[name] = e === '' ? false : !!+e
+  } else if (val.type === 'number') {
+    assert(e === '' || !isNaN(e),
+      `Non-numeric value ${e} provided for environment variable ${name}`)
+    if (e !== '')
+      j.result[name] = +e
+  } else {
+    // plain old string!
+    j.result[name] = e
   }
 
-  // the positional args passed on at the end
-  const argv = result._ = []
+  addHelpText(j, name, val)
+}
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i]
+const assertNotDefined = (j, name) =>
+  assert(!j.options[name] &&
+         !j.shortOpts[name] &&
+         !j.shortFlags[name], `${name} defined multiple times`)
+
+const addArg = (j, name, val) => {
+  assertNotDefined(j, name)
+  if (isFlag(val))
+    addFlag(j, name, val)
+  else
+    addOpt(j, name, val)
+}
+
+const addOpt = (j, name, val) => {
+  addShort(j, name, val)
+  j.options[name] = val
+  addHelpText(j, name, val)
+  if (!val.alias)
+    j.result[name] = isList(val) ? [] : val.default
+}
+
+const addFlag = (j, name, val) => {
+  if (name === '--') {
+    addHelpText(j, '', flag(val))
+    j.options['--'] = true
+    return
+  }
+
+  if (name === 'help' && !val.short)
+    val.short = 'h'
+
+  const negate = name.substr(0, 3) === 'no-'
+  // aliases can't be negated
+  if (!negate && !val.alias)
+    assert(!j.options[`no-${name}`],
+    `flag '${name}' specified, but 'no-${name}' already defined`)
+
+  addShort(j, name, val)
+
+  j.options[name] = val
+  if (!negate && !val.alias)
+    j.result[name] = isList(val) ? 0 : (val.default || false)
+
+  addHelpText(j, name, val)
+
+  // pick up the description and short arg
+  if (!negate && !val.alias)
+    addFlag(j, `no-${name}`, flag({
+      description: `${
+        isCount(val) ? 'decrement' : 'switch off'
+      } the --${name} flag`,
+      hidden: val.hidden,
+      ...(val.negate || {}),
+      [_list]: isList(val)
+    }))
+}
+
+const addHelpText = (j, name, val) => {
+  // help text
+  if (val.hidden)
+    return
+
+  const desc = trim(val.description || (
+    val.alias ? `Alias for ${[].concat(val.alias).join(' ')}`
+    : '[no description provided]'
+  ))
+  const mult = isList(val) ? `${
+    desc.indexOf('\n') === -1 ? '\n' : '\n\n'
+  }Can be set multiple times` : ''
+  const text = `${desc}${mult}`
+
+  const hint = val.hint || name
+  const short = val.short ? (
+    isFlag(val) ? `, -${val.short}`
+    : `, -${val.short}<${hint}>`
+  ) : ''
+
+  const left = isEnv(val) ? name
+    : isFlag(val) ? `--${name}${short}`
+    : `--${name}=<${hint}>${short}`
+
+  j.help.push({ text, left })
+}
+
+const addShort = (j, name, val) => {
+  if (!val.short)
+    return
+
+  assertNotDefined(j, val.short)
+  assert(val.short !== 'h' || name === 'help',
+    `${name} using 'h' short val, reserved for --help`)
+  assert(!j.options[val.short],
+    `short ${val.short} already defined`)
+
+  if (isFlag(val))
+    j.shortFlags[val.short] = name
+  else
+    j.shortOpts[val.short] = name
+}
+
+const addMain = (j, main) => {
+  assert(typeof main === 'function', 'main must be function')
+  assert(!j.main, 'main function specified multiple times')
+  j.main = result => {
+    main(result)
+    return result
+  }
+}
+
+const getArgv = j => {
+  const argv = [...(j.argv || process.argv)]
+
+  if (argv[0] === process.execPath) {
+    argv.shift()
+    if (argv[0] === require.main.filename)
+      argv.shift()
+  }
+  return argv
+}
+
+const parse_ = j => {
+  const argv = getArgv(j)
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
 
     if (arg.charAt(0) !== '-' || arg === '-') {
-      result._.push(arg)
+      j.result._.push(arg)
       continue
     }
 
     if (arg === '--') {
-      result._ = result._.concat(args.slice(i + 1))
-      i = args.length
+      j.result._ = j.result._.concat(argv.slice(i + 1))
+      i = argv.length
       continue
     }
 
@@ -211,23 +391,23 @@ const jack = options_ => {
       const expand = []
       for (let f = 1; f < arg.length; f++) {
         const fc = arg.charAt(f)
-        const sf = shortFlags[fc]
-        const so = shortOpts[fc]
+        const sf = j.shortFlags[fc]
+        const so = j.shortOpts[fc]
         if (sf)
-          expand.push('--' + sf)
+          expand.push(`--${sf}`)
         else if (so) {
           const soslice = arg.slice(f + 1)
           const soval = !soslice || soslice.charAt(0) === '='
             ? soslice : '=' + soslice
 
-          expand.push('--' + so + soval)
+          expand.push(`--${so}${soval}`)
           f = arg.length
-        } else if (arg !== '-' + fc)
+        } else if (arg !== `-${fc}`)
           // this will trigger a failure with the appropriate message
-          expand.push('-' + fc)
+          expand.push(`-${fc}`)
       }
       if (expand.length) {
-        args.splice.apply(args, [i, 1].concat(expand))
+        argv.splice.apply(argv, [i, 1].concat(expand))
         i--
         continue
       }
@@ -235,62 +415,81 @@ const jack = options_ => {
 
     const argsplit = arg.split('=')
     const literalKey = argsplit.shift()
-    const key = literalKey.replace(/^--?/, '')
+
+    // check if there's a >1 char shortopt/flag for this key,
+    // and de-reference it as an alias
+
+    const k = literalKey.replace(/^--?/, '')
+    // pick up shorts that aren't single-char
+    const key = j.shortOpts[k] || j.shortFlags[k] || k
     let val = argsplit.length ? argsplit.join('=') : null
 
-    if (literalKey === '-h' ||
-        literalKey === '--help' ||
-        literalKey === '-?') {
-      if (!options[ranUsage])
-        console.log(usage(options))
-      continue
-    }
+    const spec = j.options[key]
 
-    const spec = options[key]
+    assert(spec, `invalid argument: ${literalKey}`)
+    assert(!isFlag(spec) || val === null,
+      `value provided for boolean flag: ${key}`)
 
-    if (!spec)
-      throw new Error(`invalid argument: ${literalKey}`)
-
-    if (spec[_flag] && val !== null)
-      throw new Error(`value provided for boolean flag: ${key}`)
-
-    if (spec[_opt] && val === null) {
-      val = args[++i]
-      if (val === undefined)
-        throw new Error(`no value provided for option: ${key}`)
+    if (isOpt(spec) && val === null) {
+      val = argv[++i]
+      assert(val !== undefined,
+        `no value provided for option: ${key}`)
     }
 
     if (spec.alias) {
-      const alias = spec[_flag] ? spec.alias
+      const alias = isFlag(spec) ? spec.alias
       : [].concat(spec.alias).map(a => a.replace(/\$\{value\}/g, val))
-      args.splice.apply(args, [i, 1].concat(alias))
+      argv.splice.apply(argv, [i, 1].concat(alias))
       i--
       continue
     }
 
-    const negate = spec[_flag] && key.substr(0, 3) === 'no-'
+    const negate = isFlag(spec) && key.substr(0, 3) === 'no-'
     const name = negate ? key.substr(3) : key
+    if (spec.type === 'number') {
+      val = +val
+      assert(!isNaN(val), `non-number given for numeric arg ${literalKey}`)
+      assert(isNaN(spec.max) || val <= spec.max,
+             `value ${val} for ${literalKey} exceeds max (${spec.max})`)
+      assert(isNaN(spec.min) || val >= spec.min,
+             `value ${val} for ${literalKey} below min (${spec.min})`)
+    }
 
-    if (spec[_list]) {
-      if (spec[_opt]) {
-        result[name].push(val)
+    if (isList(spec)) {
+      if (isOpt(spec)) {
+        j.result[name].push(val)
       } else {
-        result[name] = result[name] || 0
+        j.result[name] = j.result[name] || 0
         if (negate)
-          result[name]--
+          j.result[name]--
         else
-          result[name]++
+          j.result[name]++
       }
     } else {
       // either flag or opt
-      result[name] = spec[_flag] ? !negate : val
+      j.result[name] = isFlag(spec) ? !negate : val
     }
   }
 
-  if (options.main)
-    options.main(result)
+  Object.defineProperty(j.result._, 'usage', {
+    value: () => console.log(usage(j))
+  })
+  Object.defineProperty(j.result._, 'parsed', { value: argv })
 
-  return result
+  return j
 }
 
-module.exports = { jack, flag, opt, list, count }
+// just parse the arguments and return the result
+const parse = (...sections) => parse_(buildParser({
+  help: [],
+  shortOpts: {},
+  shortFlags: {},
+  options: {},
+  result: { _: [] },
+  main: null,
+  argv: null,
+  env: null,
+  [usageMemo]: false,
+}, sections)).result
+
+module.exports = { jack, flag, opt, list, count, env, parse }

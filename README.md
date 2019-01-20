@@ -4,6 +4,186 @@ A very strict and proper argument parser.
 
 ## USAGE
 
+Pass one or more objects into the exported `jack(...)` function.  Each
+object can have the following fields, and would typically represent a
+"section" in a usage/help output.
+
+Using multiple sections allows for using some of the "special" fields
+as argument names as well; just put them in different sections.
+
+- `main` Function
+
+    May only appear once.  If provided, will be called with the resulting
+    parsed object.
+
+- `usage` String or Array
+
+    The `Usage: ...` bits that go at the top of the help output
+
+- `description` String
+
+    A heading for the section.  Something like `File Options` to
+    preface all of the options for working with files.
+
+- `help` String
+
+    A longer-form (multi-paragraph) section of text that explains the
+    stuff in more details.
+
+- `argv` Array
+
+    A list of arguments to parse.  If not provided, jackspeak will
+    pull form `process.argv`.  It knows how to skip over the node binary
+    and main script filename.
+
+    If a section is just an array, then it'll be treated as the argv.
+
+- `env` Object
+
+    A set of key-value pairs to pull environment variables from.  If
+    not specified, jackspeak will pull from `process.env`.
+
+    Note that environs are parsed and loaded right away when they are
+    defined, so you must put `env` on a jackspeak object before
+    definint any environent 
+
+- One or more argument definition objects.  These can be formed using
+  the functions exported by `require('jackspeak')`.  The key is the
+  full canonical name of the argument as it appears in the parsed
+  result set.
+
+    Note that the `--help` flag with the `-h` shorthand will be added
+    by default, and that `--` will always stop parsing and treat the
+    rest of the argv as positional arguments.  However, `help` and
+    `--` _may_ be added to a jack section to customize the usage text.
+
+    All types can have the following options:
+
+    - `description` - Help text for this option.
+
+    - `hidden` - Do not show this value in the help output.
+
+    The types are:
+
+    - `flag(options)` - A boolean value which can be set or unset, but
+      not given a value.
+
+        Flags can have the following options:
+
+        - `default` - Either `true` or `false`.  If unspecified, flags
+          default to `false`.
+
+        - `short` - A "short" form of the value which is indicated
+          with a single dash.  If `short` is a single character, then
+          it can be combined gnu-style with other short flags.
+
+        - `negate` - An object defining how the `--no-<whatever>` form
+          of the flag works.  It can have any options that would be
+          passed to a flag, other than `negate`.
+
+            For example, it can specify the help text for the negated
+            form, or provide a different shorthand character.  So, for
+            example, `--color` could have `-c` as a shorthand, and
+            `--no-color` could be shorthanded to `-C`.
+
+        - `alias` - Either a string or array of what this flag expands
+          to.  This means that the flag key won't have a value, but
+          will instead be expanded to its alias.  To expand an alias
+          to multiple arguments, use an array.  For example, in the
+          `rsync` program, `-m` expands to `-r -N -l inf
+          --no-remove-listing`
+
+    - `opt(options)` - An argument which takes a value.
+
+        Opts can have the following options:
+
+        - `default` - A default value.  If unspecified, opts default
+          to `undefined`.
+
+        - `alias` - A string or array of options that this option
+          expands to when used.  This works the same as flag aliases,
+          with the exception that you may include the string
+          `${value}` in the alias string(s) to substitute in the value
+          provided to this opt.
+
+            For example, `--big=<n>` could be an alias for
+            `--font-size=<n> --bold` by doing:
+
+            ```js
+            jack({
+              big: opt({
+                alias: ['--font-size=${value}', '--bold']
+              })
+            })
+            ```
+        - `hint` - A string to use in the help output as the value
+          provided to the opt.  For example, if you wanted to print
+          `--output=<file>`, then you'd set `hint: 'file'` here.
+          Defaults to the opt name.
+
+        - `short` - A "short" form of the opt which is indicated
+          with a single dash.  If `short` is a single character, then
+          it can be combined gnu-style with short flags, and take a
+          value without an `=` character.
+
+            For example, in [tap](https://www.node-tap.org), `-bRspec`
+            is equivalent to `--bail --reporter=spec`.
+
+        - Set `type: 'number'` to parse the environ as a numeric
+          value, and raise an error if it is non-numeric.  (Note: this
+          is an inelegant API, and may change in future versions.)
+
+    - `list(options)` - An option which can take multiple values by
+      being specified multiple times, and is represented in the result
+      object as an array of values.  If the list is not present in the
+      arguments, then it will be an empty array.
+
+    - `count(options)` - A flag which can be set multiple times to
+      increase a number.  Unsetting decrements the value, setting
+      increments it.  This can be useful for things like `-v` to set a
+      verbosity level, or `-d` to set a debug level.
+
+        Counts always default to 0.
+
+    - `env(options)` - An environment variable that the program is
+      interested in.
+
+        All environment variables will be present in the result
+        object.  `env()` can be composed with other types to change
+        how the environment variable is handled.
+
+        - Compose with `flag()` to define an environment variable that
+          is set to `'1'` to mean `true`, or `'0'` or `''` to mean
+          `false`.  Presented in the result object as a boolean value.
+          For example:
+
+            ```js
+            jack({
+              FOO: env(flag({
+                description: 'Set to "1" to enable the foo flag'
+              }))
+            })
+            ```
+
+        - Compose with `list()` to define an environment variable that
+          is set to multiple values separated by a delimiter.  For
+          example:
+
+            ```js
+            jack({
+              NODE_DEBUG: env(list({
+                delimiter: ',',
+                description: 'Define which bits to debug'
+              }))
+            })
+            ```
+
+        - Set `type: 'number'` to parse the environ as a numeric
+          value, and raise an error if it is non-numeric.  (Note: this
+          is an inelegant API, and may change in future versions.)
+
+
+
 ```js
 const { jack, flag, opt, list, count } = require('jackspeak')
 
@@ -133,4 +313,4 @@ jack({
 The inspiration for this module is [yargs](http://npm.im/yargs), which
 is pirate talk themed.  Yargs has all the features, and is infinitely
 flexible.  "Jackspeak" is the slang of the royal navy.  This module
-does not have all the features, and is rigid by design.
+does not have all the features.  It is declarative and rigid by design.

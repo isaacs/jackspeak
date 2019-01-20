@@ -14,9 +14,16 @@ test({
 }, 'help text')
 test({
   usage: 'foo <bar> [baz options]',
-  argv: ['-?']
+  help: flag({
+    short: '?',
+    description: 'show this thing you are reading now',
+    negate: { hidden: true },
+  }),
+  argv: ['-?'],
+  '--': flag({ description: 'double every dash' }),
 }, 'usage text')
 test({
+  description: 'describeamabob',
   help: 'This text is very helpful.\n\nIt has multiple paragraphs!',
   usage: 'foo <bar> [baz options]',
   foo: opt({
@@ -32,8 +39,22 @@ test({
     short:'l',
     description: 'this has\n\nmany lines'
   }),
-  argv: [ '--help', '-?' ]
+  argv: [ '--help', '-h' ]
 }, 'all kinds of helpful text')
+
+t.test('usage multiple times does not recalculate', t => {
+  const consolelog = console.log
+  const logs = []
+  console.log = msg => logs.push(msg)
+  t.teardown(() => console.log = consolelog)
+  const r = jack({ foo: flag() }, { help: 'this text is so helpful' })
+  r._.usage()
+  t.matchSnapshot(logs[0])
+  r._.usage()
+  t.equal(logs.length, 2)
+  t.equal(logs[0], logs[1])
+  t.end()
+})
 
 t.test('run without a main script', t => {
   const out = []

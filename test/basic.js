@@ -1,5 +1,5 @@
 const t = require('tap')
-const { jack, opt, flag, list, count } = require('../')
+const { parse, env, jack, opt, flag, list, count } = require('../')
 
 const options = {
   verbose: count({
@@ -56,7 +56,7 @@ test([
   '-v',
 ], 'execPath and main file')
 
-t.matchSnapshot(jack(options), 'using process.argv')
+t.matchSnapshot(parse(options), 'parse only, using process.argv')
 
 test([
   '-vvfone',
@@ -82,15 +82,40 @@ t.test('main fn', t => {
     t.notOk(called, 'should be called only once')
     called = true
   }
-  jack({ ...options, main, argv: ['-v']})
+  jack({ ...options, main }, ['-v'])
   t.ok(called, 'called main fn')
   t.end()
 })
 
 t.test('usage and help strings', t => {
-  t.matchSnapshot(jack({ ...options, usage: 'you can use this thing' , argv: []}))
-  t.matchSnapshot(jack({ ...options, help: 'you can help this thing' , argv: []}))
+  t.matchSnapshot(jack({ ...options, usage: 'you can use this thing' }, []))
+  t.matchSnapshot(jack({ ...options, help: 'you can help this thing' }, []))
   t.end()
 })
 
-
+t.test('env things', t => {
+  jack({
+    env: {
+      lines: `a,b,c,d`,
+      flagon: '1',
+      flagoff: '0',
+      flagmaybe: '',
+      num1: '1',
+      num2: '',
+    },
+    foo: env({
+      default: 'baz',
+    }),
+    lines: env(list({
+      delimiter: ',',
+    })),
+    dreams: env(list({ delimiter: ',' })),
+    flagon: env(flag()),
+    flagoff: env(flag()),
+    flagmaybe: env(flag()),
+    num1: env({type: 'number'}),
+    num2: env({type: 'number' }),
+    main: result => t.matchSnapshot(result),
+  })
+  t.end()
+})

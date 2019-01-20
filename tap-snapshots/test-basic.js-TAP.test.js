@@ -13,7 +13,8 @@ exports[`test/basic.js TAP > empty 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > undefined 1`] = `
@@ -24,7 +25,8 @@ exports[`test/basic.js TAP > undefined 1`] = `
   'long-list': [ '1', '2' ],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > positionals and some expansions 1`] = `
@@ -35,7 +37,8 @@ exports[`test/basic.js TAP > positionals and some expansions 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > execPath 1`] = `
@@ -46,7 +49,8 @@ exports[`test/basic.js TAP > execPath 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > execPath and main file 1`] = `
@@ -57,10 +61,11 @@ exports[`test/basic.js TAP > execPath and main file 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
-exports[`test/basic.js TAP > using process.argv 1`] = `
+exports[`test/basic.js TAP > parse only, using process.argv 1`] = `
 { _: [],
   verbose: 0,
   xyz: false,
@@ -68,7 +73,8 @@ exports[`test/basic.js TAP > using process.argv 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > list using short arg, with and without = 1`] = `
@@ -79,7 +85,8 @@ exports[`test/basic.js TAP > list using short arg, with and without = 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > using -- 1`] = `
@@ -90,7 +97,8 @@ exports[`test/basic.js TAP > using -- 1`] = `
   'long-list': [],
   'long-opt': 'value',
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > short flag alias 1`] = `
@@ -101,7 +109,8 @@ exports[`test/basic.js TAP > short flag alias 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > long opt alias 1`] = `
@@ -112,7 +121,8 @@ exports[`test/basic.js TAP > long opt alias 1`] = `
   'long-list': [ 'foo' ],
   'long-opt': 'foo',
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP > negate some verbosity 1`] = `
@@ -123,7 +133,8 @@ exports[`test/basic.js TAP > negate some verbosity 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP main fn > options in main fn 1`] = `
@@ -134,7 +145,8 @@ exports[`test/basic.js TAP main fn > options in main fn 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP usage and help strings > undefined 1`] = `
@@ -145,7 +157,8 @@ exports[`test/basic.js TAP usage and help strings > undefined 1`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
 `
 
 exports[`test/basic.js TAP usage and help strings > undefined 2`] = `
@@ -156,5 +169,18 @@ exports[`test/basic.js TAP usage and help strings > undefined 2`] = `
   'long-list': [],
   'long-opt': undefined,
   'default-true': true,
-  'noarg-flag': false }
+  'noarg-flag': false,
+  help: false }
+`
+
+exports[`test/basic.js TAP env things > undefined 1`] = `
+{ _: [],
+  foo: 'baz',
+  lines: [ 'a', 'b', 'c', 'd' ],
+  dreams: [],
+  flagon: true,
+  flagoff: false,
+  flagmaybe: false,
+  num1: 1,
+  help: false }
 `
