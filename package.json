@@ -19,5 +19,22 @@
   ],
   "dependencies": {
     "cliui": "^4.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaacs/jackspeak.git"
+  },
+  "keywords": [
+    "argument",
+    "parser",
+    "args",
+    "option",
+    "flag",
+    "cli",
+    "command",
+    "line",
+    "parse",
+    "parsing"
+  ],
+  "author": "Isaac Z. Schlueter <i@izs.me>"
 }
