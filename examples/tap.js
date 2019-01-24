@@ -62,6 +62,10 @@ Much more documentation available at: https://www.node-tap.org/
     }
   }),
 
+  comments: flag({
+    description: 'Print all tap comments to process.stderr'
+  }),
+
   color: flag({
     short: 'c',
     default: process.stdout.isTTY,
@@ -392,6 +396,14 @@ Much more documentation available at: https://www.node-tap.org/
 }, {
 
   description: 'Environment Variables',
+
+  TAP_CHILD_ID: env(flag({
+    description: `Test files have this value set to a
+                  numeric value when run through the test
+                  runner.  It also appears on the root tap
+                  object as \`tap.childId\`.`,
+  })),
+
   TAP_SNAPSHOT: env(flag({
     description: `Set to '1' to generate snapshot files
                   for 't.matchSnapshot()' assertions.`,

@@ -29,6 +29,8 @@ Basic Options:
 
   -b --bail              Bail out on first failure
   -B --no-bail           Do not bail out on first failure (default)
+  --comments             Print all tap comments to process.stderr
+  --no-comments          switch off the --comments flag
   -c --color             Use colors (Default for TTY)
   -C --no-color          Do not use colors (Default for non-TTY)
 
@@ -197,6 +199,10 @@ Other Options:
 
 Environment Variables:
 
+  TAP_CHILD_ID           Test files have this value set to a numeric value when
+                         run through the test runner. It also appears on the
+                         root tap object as `tap.childId`.
+
   TAP_SNAPSHOT           Set to '1' to generate snapshot files for
                          't.matchSnapshot()' assertions.
 
@@ -259,6 +265,7 @@ Config Files:
 { _: [],
   reporter: undefined,
   bail: false,
+  comments: false,
   color: false,
   save: undefined,
   only: false,
@@ -282,6 +289,7 @@ Config Files:
   'nyc-version': false,
   'dump-config': false,
   'output-file': undefined,
+  TAP_CHILD_ID: false,
   TAP_SNAPSHOT: false,
   TAP_RCFILE: '',
   TAP_TIMEOUT: undefined,
