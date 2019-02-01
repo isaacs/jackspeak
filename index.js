@@ -278,8 +278,13 @@ const envToNum = (name, spec) => e => {
 }
 
 const envToBool = name => e => {
-  e === '' || e === '1' || e === '0' || typeof e === 'number' || assert(false,
-    `Environment variable ${name} must be set to 0 or 1 only`)
+  typeof e === 'boolean' ||
+    e === '' ||
+    e === '1' ||
+    e === '0' ||
+    typeof e === 'number' ||
+    assert(false,
+      `Environment variable ${name} must be set to 0 or 1 only`)
   return !!+e
 }
 
