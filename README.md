@@ -16,6 +16,15 @@ as argument names as well; just put them in different sections.
     May only appear once.  If provided, will be called with the resulting
     parsed object.
 
+    Each of the defined flags and options will be set on the result
+    object, as well as a special `_` array containing all the positional
+    arguments.  `_` also has the following properties:
+
+    - `usage` A function that dumps the help output to stdout.
+    - `explicit` A `Set` containing the names of all arguments that were
+      explicitly set.
+    - `parsed` The `argv` array once all aliases have been expanded.
+
 - `usage` String or Array
 
     The `Usage: ...` bits that go at the top of the help output

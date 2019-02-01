@@ -164,6 +164,7 @@ const newObj = () => ({
   shortFlags: {},
   options: {},
   result: { _: [] },
+  explicit: new Set(),
   main: null,
   argv: null,
   env: null,
@@ -314,7 +315,7 @@ const envVal = (j, name, val) => {
 
 const addEnv = (j, name, val) => {
   assertNotDefined(j, name)
-  j.result[name] = envVal(j, name, val)
+  set(j, name, envVal(j, name, val))
   addHelpText(j, name, val)
 }
 
@@ -338,7 +339,7 @@ const addOpt = (j, name, val) => {
   j.options[name] = val
   addHelpText(j, name, val)
   if (!val.alias)
-    j.result[name] = isList(val) ? [] : val.default
+    set(j, name, isList(val) ? [] : val.default)
 }
 
 const addFlag = (j, name, val) => {
@@ -361,7 +362,7 @@ const addFlag = (j, name, val) => {
 
   j.options[name] = val
   if (!negate && !val.alias)
-    j.result[name] = isList(val) ? 0 : (val.default || false)
+    set(j, name, isList(val) ? 0 : (val.default || false))
 
   addHelpText(j, name, val)
 
@@ -546,22 +547,19 @@ const parse_ = j => {
 
     if (isList(spec)) {
       if (isOpt(spec)) {
-        j.result[name].push(val)
+        set(j, name, j.result[name].concat(val))
       } else {
-        j.result[name] = j.result[name] || 0
-        if (negate)
-          j.result[name]--
-        else
-          j.result[name]++
+        const v = j.result[name] || 0
+        set(j, name, negate ? v - 1 : v + 1)
       }
     } else {
       // either flag or opt
-      j.result[name] = isFlag(spec) ? !negate : val
+      set(j, name, isFlag(spec) ? !negate : val)
     }
 
     if (spec.implies) {
       for (let i in spec.implies) {
-        j.result[i] = spec.implies[i]
+        set(j, i, spec.implies[i])
       }
     }
   }
@@ -569,9 +567,15 @@ const parse_ = j => {
   Object.defineProperty(j.result._, 'usage', {
     value: () => console.log(usage(j))
   })
+  Object.defineProperty(j.result._, 'explicit', { value: j.explicit })
   Object.defineProperty(j.result._, 'parsed', { value: argv })
 
   return j
+}
+
+const set = (j, key, val) => {
+  j.result[key] = val
+  j.explicit.add(key)
 }
 
 // just parse the arguments and return the result
