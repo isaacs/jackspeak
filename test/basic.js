@@ -113,6 +113,9 @@ t.test('env things', t => {
       nums: '1,2,,3,4,',
       counter: '1,0,1,0,0,0,1'
     },
+    unset: num({ envDefault: 'unset', default: 7, min: 2 }),
+    one: num({ envDefault: 'num1' }),
+    numbers: list(num({ envDefault: 'nums', delimiter: ',' })),
     counter: env(count({ delimiter: ',' })),
     foo: env({
       default: 'baz',

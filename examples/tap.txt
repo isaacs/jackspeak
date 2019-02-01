@@ -64,6 +64,8 @@ Basic Options:
                          like a JavaScript RegExp literal. For example: '/xyz/i'
                          for case-insensitive matching.
 
+                         Can be set multiple times
+
   -i --invert            Invert the matches to --grep patterns. (Like grep -v)
   -I --no-invert         switch off the --invert flag
 
@@ -269,7 +271,7 @@ Config Files:
   color: false,
   save: undefined,
   only: false,
-  grep: undefined,
+  grep: [],
   invert: false,
   timeout: 30,
   jobs: 1,
@@ -304,4 +306,4 @@ Config Files:
   NODE_DEBUG: '',
   TAP_GREP: [],
   TAP_GREP_INVERT: false,
-  _TAP_COVERAGE_: '' }
+  _TAP_COVERAGE_: false }

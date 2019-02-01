@@ -78,6 +78,11 @@ as argument names as well; just put them in different sections.
         - `default` - Either `true` or `false`.  If unspecified, flags
           default to `false`.
 
+        - `envDefault` - The name of an environment variable which provides
+          the default value for this flag.  The environment variable will
+          be parsed as an `env(flag(...))` value, with `'1'` for true and
+          `'0'` for false.
+
         - `short` - A "short" form of the value which is indicated
           with a single dash.  If `short` is a single character, then
           it can be combined gnu-style with other short flags.
@@ -104,6 +109,9 @@ as argument names as well; just put them in different sections.
 
         - `default` - A default value.  If unspecified, opts default
           to `undefined`.
+
+        - `envDefault` - The name of an environment variable which provides
+          the default value for this opt.
 
         - `valid` - An array of valid values.  If the user provides a
           value outside this set, it will throw an error.

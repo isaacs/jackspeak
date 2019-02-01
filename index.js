@@ -279,13 +279,12 @@ const envToNum = (name, spec) => e => {
 const envToBool = name => e => {
   e === '' || e === '1' || e === '0' || typeof e === 'number' || assert(false,
     `Environment variable ${name} must be set to 0 or 1 only`)
-  return e === '' ? false : !!+e
+  return !!+e
 }
 
 const countBools = l => l.reduce((v, a) => v ? a + 1 : a - 1, 0)
 
-const addEnv = (j, name, val) => {
-  assertNotDefined(j, name)
+const envVal = (j, name, val) => {
   if (!j.env)
     j.env = process.env
 
@@ -298,20 +297,24 @@ const addEnv = (j, name, val) => {
   if (isList(val)) {
     val.delimiter || assert(false, `env list ${name} lacks delimiter`)
     if (!has)
-      j.result[name] = []
+      return []
     else {
       const split = e.split(val.delimiter)
-      j.result[name] = isFlag(val) ? countBools(split.map(envToBool(name)))
+      return isFlag(val) ? countBools(split.map(envToBool(name)))
         : isNum(val) ? split.map(envToNum(name, val)).filter(e => e !== undefined)
         : split
     }
   } else if (isFlag(val))
-    j.result[name] = envToBool(name)(e)
+    return envToBool(name)(e)
   else if (isNum(val))
-    j.result[name] = envToNum(name, val)(e)
+    return envToNum(name, val)(e)
   else
-    j.result[name] = e
+    return e
+}
 
+const addEnv = (j, name, val) => {
+  assertNotDefined(j, name)
+  j.result[name] = envVal(j, name, val)
   addHelpText(j, name, val)
 }
 
@@ -321,6 +324,9 @@ const assertNotDefined = (j, name) =>
 
 const addArg = (j, name, val) => {
   assertNotDefined(j, name)
+  if (val.envDefault)
+    val.default = envVal(j, val.envDefault, val)
+
   if (isFlag(val))
     addFlag(j, name, val)
   else

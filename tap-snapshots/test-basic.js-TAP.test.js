@@ -202,6 +202,9 @@ exports[`test/basic.js TAP usage and help strings > undefined 2`] = `
 
 exports[`test/basic.js TAP env things > undefined 1`] = `
 { _: [],
+  unset: 7,
+  one: 1,
+  numbers: [],
   counter: 2,
   foo: 'baz',
   lines: [ 'a', 'b', 'c', 'd' ],

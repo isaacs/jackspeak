@@ -103,9 +103,11 @@ Much more documentation available at: https://www.node-tap.org/
                   or created with t.only(...) function.`,
   }),
 
-  grep: opt({
+  grep: list({
     hint: 'pattern',
     short: 'g',
+    envDefault: 'TAP_GREP',
+    delimiter: '\n',
     description: `Only run subtests tests matching the specified
                   pattern.
 
@@ -125,10 +127,12 @@ Much more documentation available at: https://www.node-tap.org/
     negate: { short: 'I' }
   }),
 
-  timeout: opt({
+  timeout: num({
+    envDefault: 'TAP_TIMEOUT',
+    default: 30,
+    min: 0,
     short: 't',
     hint: 'n',
-    default: +process.env.TAP_TIMEOUT || 30,
     description: `Time out test files after <n> seconds.
                   Defaults to 30, or the value of the
                   TAP_TIMEOUT environment variable.
@@ -491,9 +495,9 @@ Much more documentation available at: https://www.node-tap.org/
                   works.)`
   })),
 
-  _TAP_COVERAGE_: env({
+  _TAP_COVERAGE_: env(flag({
     description: `Reserved for internal use.`
-  }),
+  })),
 
 }, {
 

@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build-examples": "for i in examples/*.js ; do node $i -h > ${i/.js/.txt}; done",
-    "snap": "TAP_SNAPSHOT=1 tap test/*.js && npm run build-examples",
-    "test": "tap test/*.js --100",
+    "snap": "TAP_SNAPSHOT=1 tap test/*.js -J && npm run build-examples",
+    "test": "tap test/*.js --100 -J",
     "preversion": "npm test",
     "postversion": "npm publish",
     "postpublish": "git push origin --all; git push origin --tags"
