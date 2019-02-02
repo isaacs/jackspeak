@@ -54,11 +54,6 @@ test([
 
 test([
   process.execPath,
-  '-v',
-], 'execPath')
-
-test([
-  process.execPath,
   require.main.filename,
   '-v',
 ], 'execPath and main file')

@@ -446,8 +446,7 @@ const getArgv = j => {
 
   if (argv[0] === process.execPath) {
     argv.shift()
-    if (argv[0] === require.main.filename)
-      argv.shift()
+    argv.shift()
   }
   return argv
 }

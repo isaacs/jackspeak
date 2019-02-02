@@ -44,19 +44,6 @@ exports[`test/basic.js TAP > positionals and some expansions 1`] = `
   help: false }
 `
 
-exports[`test/basic.js TAP > execPath 1`] = `
-{ _: [],
-  verbose: 1,
-  xyz: false,
-  files: [],
-  implication: false,
-  'long-list': [],
-  'long-opt': undefined,
-  'default-true': true,
-  'noarg-flag': false,
-  help: false }
-`
-
 exports[`test/basic.js TAP > execPath and main file 1`] = `
 { _: [],
   verbose: 1,
