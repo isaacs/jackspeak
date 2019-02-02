@@ -202,6 +202,7 @@ exports[`test/basic.js TAP usage and help strings > undefined 2`] = `
 
 exports[`test/basic.js TAP env things > undefined 1`] = `
 { _: [],
+  implied: true,
   unset: 7,
   one: 1,
   numbers: [],
@@ -215,5 +216,6 @@ exports[`test/basic.js TAP env things > undefined 1`] = `
   flagmaybe: false,
   num1: 1,
   num2: undefined,
+  implier: false,
   help: false }
 `

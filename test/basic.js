@@ -103,6 +103,7 @@ t.test('usage and help strings', t => {
 
 t.test('env things', t => {
   jack({
+    argv: ['--implier', '--no-implier'],
     env: {
       lines: `a,b,c,d`,
       flagon: '1',
@@ -113,6 +114,7 @@ t.test('env things', t => {
       nums: '1,2,,3,4,',
       counter: '1,0,1,0,0,0,1'
     },
+    implied: flag(),
     unset: num({ envDefault: 'unset', default: 7, min: 2 }),
     one: num({ envDefault: 'num1' }),
     numbers: list(num({ envDefault: 'nums', delimiter: ',' })),
@@ -125,11 +127,20 @@ t.test('env things', t => {
     })),
     nums: env(list(num({ max: 5, delimiter: ',' }))),
     dreams: env(list({ delimiter: ',' })),
-    flagon: env(flag()),
+    flagon: env(flag({
+      implies: {
+        implied: true,
+      },
+    })),
     flagoff: env(flag()),
     flagmaybe: env(flag()),
     num1: env(num()),
     num2: num(env()),
+    implier: flag({
+      implies: {
+        implied: false
+      }
+    }),
     main: result => t.matchSnapshot(result),
   })
   t.end()

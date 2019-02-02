@@ -155,6 +155,7 @@ const usage = j => {
 //   main: mainFn or null,
 //   argv: argument list being parsed,
 //   result: parsed object passed to main function and returned
+//   implies: all the implied variable values (set last)
 // }
 const jack = (...sections) => execute(parse_(buildParser(newObj(), sections)))
 
@@ -168,6 +169,7 @@ const newObj = () => ({
   main: null,
   argv: null,
   env: null,
+  implies: {},
   [usageMemo]: false,
 })
 
@@ -320,7 +322,11 @@ const envVal = (j, name, val) => {
 
 const addEnv = (j, name, val) => {
   assertNotDefined(j, name)
-  set(j, name, envVal(j, name, val))
+  const e = envVal(j, name, val)
+  if (Object.prototype.hasOwnProperty.call(j.env, name))
+    set(j, name, val, e)
+  else
+    j.result[name] = e
   addHelpText(j, name, val)
 }
 
@@ -344,7 +350,7 @@ const addOpt = (j, name, val) => {
   j.options[name] = val
   addHelpText(j, name, val)
   if (!val.alias)
-    set(j, name, isList(val) ? [] : val.default)
+    j.result[name] = isList(val) ? [] : val.default
 }
 
 const addFlag = (j, name, val) => {
@@ -367,7 +373,7 @@ const addFlag = (j, name, val) => {
 
   j.options[name] = val
   if (!negate && !val.alias)
-    set(j, name, isList(val) ? 0 : (val.default || false))
+    j.result[name] = isList(val) ? 0 : (val.default || false)
 
   addHelpText(j, name, val)
 
@@ -378,6 +384,7 @@ const addFlag = (j, name, val) => {
         isCount(val) ? 'decrement' : 'switch off'
       } the --${name} flag`,
       hidden: val.hidden,
+      implies: val.implies,
       ...(val.negate || {}),
       [_list]: isList(val)
     }))
@@ -552,22 +559,21 @@ const parse_ = j => {
 
     if (isList(spec)) {
       if (isOpt(spec)) {
-        set(j, name, j.result[name].concat(val))
+        set(j, name, spec, j.result[name].concat(val))
       } else {
         const v = j.result[name] || 0
-        set(j, name, negate ? v - 1 : v + 1)
+        set(j, name, spec, negate ? v - 1 : v + 1)
       }
     } else {
       // either flag or opt
-      set(j, name, isFlag(spec) ? !negate : val)
-    }
-
-    if (spec.implies) {
-      for (let i in spec.implies) {
-        set(j, i, spec.implies[i])
-      }
+      set(j, name, spec, isFlag(spec) ? !negate : val)
     }
   }
+
+  for (let i in j.implies)
+    for (let k in j.implies[i])
+      j.result[k] = j.implies[i][k]
+
 
   Object.defineProperty(j.result._, 'usage', {
     value: () => console.log(usage(j))
@@ -578,9 +584,15 @@ const parse_ = j => {
   return j
 }
 
-const set = (j, key, val) => {
+const set = (j, key, spec, val) => {
   j.result[key] = val
   j.explicit.add(key)
+  if (spec && spec.implies) {
+    if (!val)
+      delete j.implies[key]
+    else
+      j.implies[key] = spec.implies
+  }
 }
 
 // just parse the arguments and return the result
