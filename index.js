@@ -573,7 +573,6 @@ const parse_ = j => {
     for (let k in j.implies[i])
       j.result[k] = j.implies[i][k]
 
-
   Object.defineProperty(j.result._, 'usage', {
     value: () => console.log(usage(j))
   })
@@ -587,11 +586,14 @@ const set = (j, key, spec, val) => {
   j.result[key] = val
   j.explicit.add(key)
   if (spec && spec.implies) {
-    if (!val)
+    if (val === false)
       delete j.implies[key]
     else
-      j.implies[key] = spec.implies
+      j.implies[key] = {...spec.implies}
   }
+  // delete implications about this, since we have an explicit value
+  for (const i in j.implies)
+    delete j.implies[i][key]
 }
 
 // just parse the arguments and return the result

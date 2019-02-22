@@ -77,6 +77,8 @@ test([ '-xa' ], 'short flag alias')
 test([ '--alias=foo' ], 'long opt alias')
 test(['-vvVvV'], 'negate some verbosity')
 test(['--implication'], 'imply some things')
+test(['--implication', '--no-xyz'], 'un-imply some things')
+test(['--no-xyz', '--implication'], 're-imply some things')
 
 t.test('main fn', t => {
   let called = false

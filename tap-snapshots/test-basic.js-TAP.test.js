@@ -148,6 +148,32 @@ exports[`test/basic.js TAP > imply some things 1`] = `
   help: false }
 `
 
+exports[`test/basic.js TAP > un-imply some things 1`] = `
+{ _: [],
+  verbose: 9,
+  xyz: false,
+  files: [ 'deadbeat', 'folly', 'frump', 'lagamuffin' ],
+  implication: true,
+  'long-list': [],
+  'long-opt': undefined,
+  'default-true': true,
+  'noarg-flag': false,
+  help: false }
+`
+
+exports[`test/basic.js TAP > re-imply some things 1`] = `
+{ _: [],
+  verbose: 9,
+  xyz: true,
+  files: [ 'deadbeat', 'folly', 'frump', 'lagamuffin' ],
+  implication: true,
+  'long-list': [],
+  'long-opt': undefined,
+  'default-true': true,
+  'noarg-flag': false,
+  help: false }
+`
+
 exports[`test/basic.js TAP main fn > options in main fn 1`] = `
 { _: [],
   verbose: 1,
