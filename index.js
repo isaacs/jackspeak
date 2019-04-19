@@ -78,9 +78,12 @@ const usage = j => {
   if (j[usageMemo])
     return j[usageMemo]
 
-  const winWidth = process && process.stdout && process.stdout.columns || 80
+  const width = Math.min(
+    process && process.stdout && process.stdout.columns || 80,
+    80
+  )
 
-  const ui = cliui()
+  const ui = cliui({ width })
 
   if (!/^Usage:/.test(j.help[0].text)) {
     ui.div('Usage:')
@@ -97,7 +100,7 @@ const usage = j => {
     // find the max width of left-hand sides, and decide whether or not
     // to skip a line based on the length of the next option
     if (row.left) {
-      if (row.text.length > winWidth - maxMax) {
+      if (row.text.length > width - maxMax) {
         if (prev)
           prev.skipLine = true
         row.skipLine = true
