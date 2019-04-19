@@ -246,7 +246,6 @@ Environment Variables:
   TAP_GREP               A '\n'-delimited list of grep patterns to apply to root
                          level test objects. (This is an implementation detail
                          for how the '--grep' option works.)
-                         Can be set multiple times
 
   TAP_GREP_INVERT        Set to '1' to invert the meaning of the patterns in
                          TAP_GREP. (Implementation detail for how the '--invert'

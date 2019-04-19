@@ -402,7 +402,7 @@ const addHelpText = (j, name, val) => {
     val.alias ? `Alias for ${[].concat(val.alias).join(' ')}`
     : '[no description provided]'
   ))
-  const mult = isList(val) ? `${
+  const mult = isList(val) && !isEnv(val) ? `${
     desc.indexOf('\n') === -1 ? '\n' : '\n\n'
   }Can be set multiple times` : ''
   const text = `${desc}${mult}`
