@@ -23,6 +23,7 @@ as argument names as well; just put them in different sections.
     - `usage` A function that dumps the help output to stdout.
     - `explicit` A `Set` containing the names of all arguments that were
       explicitly set.
+    - `original` The `argv` array before any expansions.
     - `parsed` The `argv` array once all aliases have been expanded.
 
 - `usage` String or Array

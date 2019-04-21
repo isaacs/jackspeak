@@ -98,6 +98,14 @@ t.test('usage and help strings', t => {
   t.end()
 })
 
+t.test('original, parsed, explicit', t => {
+  const res = jack(options, ['-vaxv'])
+  t.matchSnapshot(res._.explicit, 'explicit')
+  t.matchSnapshot(res._.original, 'original')
+  t.matchSnapshot(res._.parsed, 'parsed')
+  t.end()
+})
+
 t.test('env things', t => {
   jack({
     argv: ['--implier', '--no-implier'],

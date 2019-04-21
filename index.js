@@ -479,6 +479,7 @@ ${wrap(spec.valid.join(' '), [ 0, 2, 0, 8 ])}`)
 
 const parse_ = j => {
   const argv = getArgv(j)
+  const original = [...argv]
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -581,6 +582,7 @@ const parse_ = j => {
   })
   Object.defineProperty(j.result._, 'explicit', { value: j.explicit })
   Object.defineProperty(j.result._, 'parsed', { value: argv })
+  Object.defineProperty(j.result._, 'original', { value: original })
 
   return j
 }

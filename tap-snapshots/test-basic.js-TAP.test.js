@@ -213,6 +213,24 @@ exports[`test/basic.js TAP usage and help strings > undefined 2`] = `
   help: false }
 `
 
+exports[`test/basic.js TAP original, parsed, explicit > explicit 1`] = `
+Set { 'verbose', 'xyz' }
+`
+
+exports[`test/basic.js TAP original, parsed, explicit > original 1`] = `
+[ '-vaxv' ]
+`
+
+exports[`test/basic.js TAP original, parsed, explicit > parsed 1`] = `
+[ '--verbose',
+  '--no-xyz',
+  '--verbose',
+  '--verbose',
+  '--verbose',
+  '--xyz',
+  '--verbose' ]
+`
+
 exports[`test/basic.js TAP env things > undefined 1`] = `
 { _: [],
   implied: true,
