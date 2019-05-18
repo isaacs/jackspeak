@@ -263,7 +263,8 @@ Config Files:
   the keys corresponds to one of the options above.
 
 [ '--help' ]
-{ _: [],
+{
+  _: [],
   reporter: undefined,
   bail: false,
   comments: false,
@@ -305,4 +306,5 @@ Config Files:
   NODE_DEBUG: '',
   TAP_GREP: [],
   TAP_GREP_INVERT: false,
-  _TAP_COVERAGE_: false }
+  _TAP_COVERAGE_: false
+}

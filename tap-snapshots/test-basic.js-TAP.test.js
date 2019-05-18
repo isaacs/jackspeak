@@ -267,6 +267,17 @@ Object {
 }
 `
 
+exports[`test/basic.js TAP list that can also be false > must match snapshot 1`] = `
+Object {
+  "_": Array [],
+  "foo": Array [
+    "baz",
+    "blorg",
+  ],
+  "help": false,
+}
+`
+
 exports[`test/basic.js TAP main fn > options in main fn 1`] = `
 Object {
   "_": Array [],

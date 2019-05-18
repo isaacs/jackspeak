@@ -150,3 +150,13 @@ t.test('env things', t => {
   })
   t.end()
 })
+
+t.test('list that can also be false', t => {
+  jack({
+    foo: list({}),
+    'no-foo': flag(),
+    argv: ['--no-foo', '--foo=bar', '--no-foo', '--foo=baz', '--foo=blorg'],
+    main: result => t.matchSnapshot(result),
+  })
+  t.end()
+})

@@ -562,6 +562,8 @@ const parse_ = j => {
 
     if (isList(spec)) {
       if (isOpt(spec)) {
+        if (!Array.isArray(j.result[name]))
+          j.result[name] = []
         set(j, name, spec, j.result[name].concat(val))
       } else {
         const v = j.result[name] || 0
