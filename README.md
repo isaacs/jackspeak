@@ -25,6 +25,10 @@ as argument names as well; just put them in different sections.
       explicitly set.
     - `original` The `argv` array before any expansions.
     - `parsed` The `argv` array once all aliases have been expanded.
+    - `reparse` A function that takes a string or array of strings, and
+      parses it according to the options initially provided.  Note that
+      this does _not_ update the results object, it's just for expanding
+      aliases and short options.
 
 - `usage` String or Array
 

@@ -162,6 +162,17 @@ const usage = j => {
 // }
 const jack = (...sections) => execute(parse_(buildParser(newObj(), sections)))
 
+const reparse = j => args => {
+  const argv = Array.isArray(args) ? args : [args]
+  return parse_({
+    ...j,
+    result: { _: [] },
+    help: [],
+    main: null,
+    argv,
+  }).result
+}
+
 const newObj = () => ({
   help: [],
   shortOpts: {},
@@ -582,6 +593,7 @@ const parse_ = j => {
   Object.defineProperty(j.result._, 'usage', {
     value: () => console.log(usage(j))
   })
+  Object.defineProperty(j.result._, 'reparse', { value: reparse(j) })
   Object.defineProperty(j.result._, 'explicit', { value: j.explicit })
   Object.defineProperty(j.result._, 'parsed', { value: argv })
   Object.defineProperty(j.result._, 'original', { value: original })

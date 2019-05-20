@@ -318,6 +318,36 @@ Array [
 ]
 `
 
+exports[`test/basic.js TAP reparse > -V -X 1`] = `
+Object {
+  "_": Array [],
+  "verbose": -1,
+  "xyz": false,
+}
+`
+
+exports[`test/basic.js TAP reparse > -v 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 1,
+}
+`
+
+exports[`test/basic.js TAP reparse > must match snapshot 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 2,
+  "xyz": false,
+  "files": Array [],
+  "implication": false,
+  "long-list": Array [],
+  "long-opt": undefined,
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
 exports[`test/basic.js TAP usage and help strings > must match snapshot 1`] = `
 Object {
   "_": Array [],

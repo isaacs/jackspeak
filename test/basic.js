@@ -160,3 +160,11 @@ t.test('list that can also be false', t => {
   })
   t.end()
 })
+
+t.test('reparse', t => {
+  const result = jack(options, ['--asdf', '-V'])
+  t.matchSnapshot(result)
+  t.matchSnapshot(result._.reparse('-v'), '-v')
+  t.matchSnapshot(result._.reparse(['-V', '-X']), '-V -X')
+  t.end()
+})
