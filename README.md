@@ -29,6 +29,10 @@ as argument names as well; just put them in different sections.
       parses it according to the options initially provided.  Note that
       this does _not_ update the results object, it's just for expanding
       aliases and short options.
+    - `update` A function that takes either a single `--key=val`, an array
+      of `--key=val` values, or an object (as read from an rc file, for
+      example), and updates the result data accordingly.  This will _not_
+      update any options set explicitly in the original argv.
 
 - `usage` String or Array
 

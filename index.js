@@ -162,10 +162,40 @@ const usage = j => {
 // }
 const jack = (...sections) => execute(parse_(buildParser(newObj(), sections)))
 
+const kvToArg = j => (k, v) =>
+  j.options[k] && isFlag(j.options[k]) ? (v ? `--${k}` : `--no-${k}`)
+  : `--${k}=${v}`
+
+const objToArgv = j => obj => Object.keys(obj).reduce((set, k) => {
+  const toArg = kvToArg(j)
+  const val = obj[k]
+  if (Array.isArray(val))
+    set.push(...val.map(v => toArg(k, v)))
+  else
+    set.push(toArg(k, val))
+  return set
+}, [])
+
+const update = j => args => {
+  const argv = []
+  const toArgv = objToArgv(j)
+  if (typeof args === 'string')
+    argv.push(args)
+  else if (Array.isArray(args))
+    argv.push(...args)
+  else if (args)
+    argv.push(...toArgv(args))
+  const result = reparse(j)(argv)
+  Object.keys(result)
+    .filter(k => k !== '_' && !j.explicit.has(k))
+    .forEach(k => j.result[k] = result[k])
+}
+
 const reparse = j => args => {
   const argv = Array.isArray(args) ? args : [args]
   return parse_({
     ...j,
+    explicit: new Set(),
     result: { _: [] },
     help: [],
     main: null,
@@ -593,6 +623,7 @@ const parse_ = j => {
   Object.defineProperty(j.result._, 'usage', {
     value: () => console.log(usage(j))
   })
+  Object.defineProperty(j.result._, 'update', { value: update(j) })
   Object.defineProperty(j.result._, 'reparse', { value: reparse(j) })
   Object.defineProperty(j.result._, 'explicit', { value: j.explicit })
   Object.defineProperty(j.result._, 'parsed', { value: argv })

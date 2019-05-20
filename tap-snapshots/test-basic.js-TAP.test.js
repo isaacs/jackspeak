@@ -348,6 +348,129 @@ Object {
 }
 `
 
+exports[`test/basic.js TAP update > --alias=bluerp 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 0,
+  "xyz": false,
+  "files": Array [],
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "bluerp",
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
+exports[`test/basic.js TAP update > -V --no-xyz 1`] = `
+Object {
+  "_": Array [],
+  "verbose": -1,
+  "xyz": false,
+  "files": Array [],
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "bluerp",
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
+exports[`test/basic.js TAP update > -fone -ftwo 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 1,
+  "xyz": false,
+  "files": Array [
+    "one",
+    "two",
+  ],
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "bluerp",
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
+exports[`test/basic.js TAP update > must match snapshot 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 0,
+  "xyz": false,
+  "files": Array [],
+  "implication": false,
+  "long-list": Array [],
+  "long-opt": undefined,
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
+exports[`test/basic.js TAP update > null update has no effect 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 1,
+  "xyz": false,
+  "files": Array [
+    "one",
+    "two",
+  ],
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "bluerp",
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
+exports[`test/basic.js TAP update > verbose: true 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 1,
+  "xyz": false,
+  "files": Array [],
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "bluerp",
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
+exports[`test/basic.js TAP update > xyz: false 1`] = `
+Object {
+  "_": Array [],
+  "verbose": 1,
+  "xyz": false,
+  "files": Array [],
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "bluerp",
+  "default-true": true,
+  "noarg-flag": false,
+  "help": false,
+}
+`
+
 exports[`test/basic.js TAP usage and help strings > must match snapshot 1`] = `
 Object {
   "_": Array [],
