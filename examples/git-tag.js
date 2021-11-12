@@ -1,6 +1,6 @@
 // usage for git-tag
 const { jack, flag, opt } = require('../')
-jack({
+const parsed = jack({
   usage: [
     'git tag [-a | -s | -u <key-id>] [-f] [-m <msg> | -F <file>] <tagname> [<head>]',
     'git tag -d <tagname>...',
@@ -80,3 +80,6 @@ jack({
     description: 'print only tags of the object'
   })
 })
+
+if (module === require.main)
+  console.log(parsed)

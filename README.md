@@ -2,6 +2,18 @@
 
 A very strict and proper argument parser.
 
+By default, _only_ defined config options and flags are allowed.  If
+anything else appears in the arguments list, the parse will fail.
+
+When allowing unknown config values, the following considerations apply:
+
+1. Long options _must_ be given a value with an equal sign.  `--opt=value`
+   is acceptable.  `--opt value` will set `opt` to boolean `true`, and
+   leave `value` as a positional argument.
+2. Single-character shorthands can set their value immediately after the
+   character, or using an equal sign.  `-o2` is fine, as is `-o=2`, but `-o
+   2` is not.
+
 ## USAGE
 
 Pass one or more objects into the exported `jack(...)` function.  Each
