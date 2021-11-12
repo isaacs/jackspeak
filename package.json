@@ -13,13 +13,13 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "tap": "^14.0.0"
+    "tap": "^15.0.10"
   },
   "files": [
     "index.js"
   ],
   "dependencies": {
-    "cliui": "^4.1.0"
+    "cliui": "^7.0.4"
   },
   "repository": {
     "type": "git",
