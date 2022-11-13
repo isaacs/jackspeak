@@ -180,6 +180,8 @@ t.test('update', t => {
   t.matchSnapshot(result, 'verbose: true')
   result._.update({ xyz: false })
   t.matchSnapshot(result, 'xyz: false')
+  result._.update({ 'long-opt': null })
+  t.matchSnapshot(result, 'long-opt: null')
   result._.update({ f: ['one', 'two'] })
   t.matchSnapshot(result, '-fone -ftwo')
   result._.update(null)

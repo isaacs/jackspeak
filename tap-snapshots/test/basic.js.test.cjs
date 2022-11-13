@@ -395,7 +395,24 @@ Object {
   "long-list": Array [
     "bluerp",
   ],
-  "long-opt": "bluerp",
+  "long-opt": "",
+  "noarg-flag": false,
+  "verbose": 1,
+  "xyz": false,
+}
+`
+
+exports[`test/basic.js TAP update > long-opt: null 1`] = `
+Object {
+  "_": Array [],
+  "default-true": true,
+  "files": Array [],
+  "help": false,
+  "implication": false,
+  "long-list": Array [
+    "bluerp",
+  ],
+  "long-opt": "",
   "noarg-flag": false,
   "verbose": 1,
   "xyz": false,
@@ -430,7 +447,7 @@ Object {
   "long-list": Array [
     "bluerp",
   ],
-  "long-opt": "bluerp",
+  "long-opt": "",
   "noarg-flag": false,
   "verbose": 1,
   "xyz": false,

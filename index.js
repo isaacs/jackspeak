@@ -164,6 +164,7 @@ const jack = (...sections) => execute(parse_(buildParser(newObj(), sections)))
 
 const kvToArg = j => (k, v) =>
   j.options[k] && isFlag(j.options[k]) ? (v ? `--${k}` : `--no-${k}`)
+  : v === null || v === undefined ? `--${k}=`
   : `--${k}=${v}`
 
 const objToArgv = j => obj => Object.keys(obj).reduce((set, k) => {
