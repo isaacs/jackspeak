@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig-base.json",
+  "include": ["./src/index.ts", "./src/parse-args-cjs.ts"],
+  "exclude": ["./src/parse-args-esm.ts"],
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "Node16",
+    "outDir": "dist-tmp/cjs"
+  }
+}

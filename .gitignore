@@ -1,8 +1,9 @@
 /*
 /.*
 
+!tsconfig*.json
 !.github
-!index.js
+!src/
 !bin/
 !lib/
 !package.json
