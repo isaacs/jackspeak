@@ -69,7 +69,13 @@ console.log(process.env.FOO_IP_ADDRS) // '192.168.0.1,1.1.1.1'
 console.log(positionals) // ['some', 'positional', 'args']
 ```
 
-## `jack(options: JackOptions = {})`
+## `jack(options: JackOptions = {}) => Jack`
+
+Returns a `Jack` object that can be used to chain and add
+field definitions.  The other methods (apart from `validate()`,
+`parse()`, and `usage()` obviously) return the same Jack object,
+updated with the new types, so they can be chained together as
+shown in the code examples.
 
 Options:
 
@@ -196,7 +202,7 @@ arguments.
 Throws an error if the object provided is not a valid result set,
 for the configurations defined thusfar.
 
-### `Jack.usage()`
+### `Jack.usage(): string`
 
 Returns the compiled `usage` string, with all option descriptions
 and heading/description text, wrapped to the appropriate width
