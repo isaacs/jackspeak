@@ -75,10 +75,14 @@ const fromEnvVal = <T extends ConfigType, M extends boolean>(
     ? env === '1'
     : +env.trim()) as ValidValue<T, M>
 
-type ValidValue<T extends ConfigType, M extends boolean> = [T, M] extends [
-  'number',
-  true
-]
+/**
+ * Defines the type of value that is valid, given a config definition's
+ * {@link ConfigType} and boolean multiple setting
+ */
+export type ValidValue<T extends ConfigType, M extends boolean> = [
+  T,
+  M
+] extends ['number', true]
   ? number[]
   : [T, M] extends ['string', true]
   ? string[]
@@ -102,6 +106,10 @@ type ValidValue<T extends ConfigType, M extends boolean> = [T, M] extends [
   ? string[] | number[] | boolean[]
   : string | number | boolean | string[] | number[] | boolean[]
 
+/**
+ * The meta information for a config option definition, when the
+ * type and multiple values can be inferred by the method being used
+ */
 export type ConfigOptionMeta<T extends ConfigType, M extends boolean> = {
   default?: ValidValue<T, M> | undefined
   description?: string
@@ -113,11 +121,18 @@ export type ConfigOptionMeta<T extends ConfigType, M extends boolean> = {
     ? {}
     : { multiple?: M | undefined; delim?: string | undefined })
 
+/**
+ * A set of {@link ConfigOptionMeta} fields, referenced by their longOption
+ * string values.
+ */
 export type ConfigMetaSet<T extends ConfigType, M extends boolean> = {
   [longOption: string]: ConfigOptionMeta<T, M>
 }
 
-type ConfigSetFromMetaSet<
+/**
+ * Infer {@link ConfigSet} fields from a given {@link ConfigMetaSet}
+ */
+export type ConfigSetFromMetaSet<
   T extends ConfigType,
   M extends boolean,
   S extends ConfigMetaSet<T, M>
@@ -125,7 +140,12 @@ type ConfigSetFromMetaSet<
   [longOption in keyof S]: ConfigOptionBase<T, M>
 }
 
-type MultiType<M extends boolean> = M extends true
+/**
+ * Fields that can be set on a {@link ConfigOptionBase} or
+ * {@link ConfigOptionMeta} based on whether or not the field is known to be
+ * multiple.
+ */
+export type MultiType<M extends boolean> = M extends true
   ? {
       multiple: true
       delim?: string | undefined
@@ -140,7 +160,10 @@ type MultiType<M extends boolean> = M extends true
       delim?: string | undefined
     }
 
-type ConfigOptionBase<T extends ConfigType, M extends boolean> = {
+/**
+ * A config field definition, in its full representation.
+ */
+export type ConfigOptionBase<T extends ConfigType, M extends boolean> = {
   type: T
   short?: string | undefined
   default?: ValidValue<T, M> | undefined
@@ -185,11 +208,18 @@ const isConfigOption = <T extends ConfigType, M extends boolean>(
   (o.default === undefined || isValidValue(o.default, type, multi)) &&
   !!o.multiple === multi
 
-type ConfigSet = {
+/**
+ * A set of {@link ConfigOptionBase} objects, referenced by their longOption
+ * string values.
+ */
+export type ConfigSet = {
   [longOption: string]: ConfigOptionBase<ConfigType, boolean>
 }
 
-type OptionsResults<T extends ConfigSet> = {
+/**
+ * The 'values' field returned by {@link Jack#parse}
+ */
+export type OptionsResults<T extends ConfigSet> = {
   [k in keyof T]?: T[k] extends ConfigOptionBase<'string', false>
     ? string
     : T[k] extends ConfigOptionBase<'string', true>
@@ -205,7 +235,10 @@ type OptionsResults<T extends ConfigSet> = {
     : never
 }
 
-type Parsed<T extends ConfigSet> = {
+/**
+ * The object retured by {@link Jack#parse}
+ */
+export type Parsed<T extends ConfigSet> = {
   values: OptionsResults<T>
   positionals: string[]
 }
@@ -388,19 +421,29 @@ const toParseArgsOptionsConfig = (
   return c
 }
 
-interface Row {
+/**
+ * A row used when generating the {@link Jack#usage} string
+ */
+export interface Row {
   left?: string
   text: string
   skipLine?: boolean
   type?: string
 }
-interface TextRow {
+/**
+ * A heading or description row used when generating the {@link Jack#usage}
+ * string
+ */
+export interface TextRow {
   type: 'heading' | 'description'
   text: string
   left?: ''
   skipLine?: boolean
 }
-type UsageField =
+/**
+ * Either a {@link TextRow} or a reference to a {@link ConfigOptionBase}
+ */
+export type UsageField =
   | TextRow
   | {
       type: 'config'
@@ -408,6 +451,9 @@ type UsageField =
       value: ConfigOptionBase<ConfigType, boolean>
     }
 
+/**
+ * Options provided to the {@link Jack} constructor
+ */
 export interface JackOptions {
   /**
    * Whether to allow positional arguments
@@ -451,6 +497,10 @@ export interface JackOptions {
   stopAtPositional?: boolean
 }
 
+/**
+ * Class returned by the {@link jack} function and all configuration
+ * definition methods.  This is what gets chained together.
+ */
 export class Jack<C extends ConfigSet = {}> {
   #configSet: C
   #shorts: { [k: string]: string }
@@ -469,11 +519,19 @@ export class Jack<C extends ConfigSet = {}> {
     this.#envPrefix = options.envPrefix
     // We need to fib a little, because it's always the same object, but it
     // starts out as having an empty config set.  Then each method that adds
-    // fields returns `new Jack<C & { ...newConfigs }>()`
+    // fields returns `this as Jack<C & { ...newConfigs }>`
     this.#configSet = Object.create(null) as C
     this.#shorts = Object.create(null)
   }
 
+  /**
+   * Parse a string of arguments, and return the resulting
+   * `{ values, positionals }` object.
+   *
+   * If an {@link JackOptions#envPrefix} is set, then it will read default
+   * values from the environment, and write the resulting values back
+   * to the environment as well.
+   */
   parse(args: string[] = process.argv): Parsed<C> {
     if (args === process.argv) {
       args = args.slice(
@@ -597,6 +655,10 @@ export class Jack<C extends ConfigSet = {}> {
     return p
   }
 
+  /**
+   * Validate that any arbitrary object is a valid configuration `values`
+   * object.  Useful when loading config files or other sources.
+   */
   validate(o: any): asserts o is Parsed<C>['values'] {
     if (!o || typeof o !== 'object') {
       throw new Error('Invalid config: not an object')
@@ -629,6 +691,9 @@ export class Jack<C extends ConfigSet = {}> {
     }
   }
 
+  /**
+   * Add a heading to the usage output banner
+   */
   heading(text: string): Jack<C> {
     this.#fields.push({ type: 'heading', text })
     return this
@@ -777,6 +842,9 @@ export class Jack<C extends ConfigSet = {}> {
     }
   }
 
+  /**
+   * Return the usage banner for the given configuration
+   */
   usage(): string {
     if (this.#usage) return this.#usage
     const ui = cliui({ width })
@@ -907,6 +975,9 @@ export class Jack<C extends ConfigSet = {}> {
     return (this.#usage = ui.toString())
   }
 
+  /**
+   * Return the configuration options as a plain object
+   */
   toJSON() {
     return Object.fromEntries(
       Object.entries(this.#configSet).map(([field, def]) => [
@@ -924,6 +995,9 @@ export class Jack<C extends ConfigSet = {}> {
     )
   }
 
+  /**
+   * Custom printer for `util.inspect`
+   */
   [inspect.custom](_: number, options: InspectOptions) {
     return `Jack ${inspect(this.toJSON(), options)}`
   }
@@ -941,4 +1015,7 @@ const normalize = (s: string): string =>
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 
+/**
+ * Main entry point. Create and return a {@link Jack} object.
+ */
 export const jack = (options: JackOptions = {}) => new Jack(options)
