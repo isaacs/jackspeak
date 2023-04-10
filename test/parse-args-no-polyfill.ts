@@ -11,6 +11,10 @@ import { parseArgs as polyfillPA } from '@pkgjs/parseargs'
 import * as util from 'util'
 
 import t from 'tap'
+if (!util.parseArgs) {
+  t.plan(0, 'No util.parseArgs available')
+  process.exit(0)
+}
 t.teardown(() => { Object.defineProperty(process, 'version', verProp) })
 
 t.not(parseArgs, polyfillPA, 'got util.parseArgs')
