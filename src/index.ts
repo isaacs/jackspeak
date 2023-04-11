@@ -192,7 +192,7 @@ const isValidValue = <T extends ConfigType, M extends boolean>(
   return typeof v === type
 }
 
-const isConfigOption = <T extends ConfigType, M extends boolean>(
+export const isConfigOption = <T extends ConfigType, M extends boolean>(
   o: any,
   type: T,
   multi: M
