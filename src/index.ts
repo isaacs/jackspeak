@@ -172,7 +172,7 @@ export type ConfigOptionBase<T extends ConfigType, M extends boolean> = {
   validate?: (v: any) => v is ValidValue<T, M>
 } & MultiType<M>
 
-const isConfigType = (t: string): t is ConfigType =>
+export const isConfigType = (t: string): t is ConfigType =>
   typeof t === 'string' &&
   (t === 'string' || t === 'number' || t === 'boolean')
 
