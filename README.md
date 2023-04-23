@@ -208,6 +208,14 @@ Returns the compiled `usage` string, with all option descriptions
 and heading/description text, wrapped to the appropriate width
 for the terminal.
 
+### `Jack.setConfigValues(options: OptionsResults, src?: string)`
+
+Validate the `options` argument, and set the default value for
+each field that appears in the options.
+
+Values provided will be overridden by environment variables or
+command line arguments.
+
 ## Some Example Code
 
 Also see [the examples

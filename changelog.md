@@ -1,3 +1,11 @@
+# 2.1
+
+- Add `jack.setConfigValues()` method
+
+# 2.0
+
+- Complete rewrite as hybrid TypeScript module
+
 # 1.1
 
 - Cosmetic changes to help output
@@ -14,4 +22,4 @@ Automatic `--help` usage output handling
 
 # 0.0
 
-Basic functionality.  No help or usage output support yet.
+Basic functionality. No help or usage output support yet.

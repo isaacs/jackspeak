@@ -179,6 +179,30 @@ export const isConfigType = (t: string): t is ConfigType =>
 const undefOrType = (v: any, t: string): boolean =>
   v === undefined || typeof v === t
 
+// print the value type, for error message reporting
+const valueType = (
+  v:
+    | string
+    | number
+    | boolean
+    | string[]
+    | number[]
+    | boolean[]
+    | { type: ConfigType; multiple?: boolean }
+): string =>
+  typeof v === 'string'
+    ? 'string'
+    : typeof v === 'boolean'
+    ? 'boolean'
+    : typeof v === 'number'
+    ? 'number'
+    : Array.isArray(v)
+    ? joinTypes([...new Set(v.map(v => valueType(v)))]) + '[]'
+    : `${v.type}${v.multiple ? '[]' : ''}`
+
+const joinTypes = (types: string[]): string =>
+  types.length === 1 ? types[0] : `(${types.join('|')})`
+
 const isValidValue = <T extends ConfigType, M extends boolean>(
   v: any,
   type: T,
@@ -525,12 +549,34 @@ export class Jack<C extends ConfigSet = {}> {
   }
 
   /**
+   * Set the default value (which will still be overridden by env or cli)
+   * as if from a parsed config file. The optional `source` param, if
+   * provided, will be included in error messages if a value is invalid or
+   * unknown.
+   */
+  setConfigValues(values: OptionsResults<C>, source = '') {
+    try {
+      this.validate(values)
+    } catch (er) {
+      throw Object.assign(er as Error, source ? { source } : {})
+    }
+    for (const [field, value] of Object.entries(values)) {
+      const my = this.#configSet[field]
+      my.default = value
+    }
+    return this
+  }
+
+  /**
    * Parse a string of arguments, and return the resulting
    * `{ values, positionals }` object.
    *
    * If an {@link JackOptions#envPrefix} is set, then it will read default
    * values from the environment, and write the resulting values back
    * to the environment as well.
+   *
+   * Environment values always take precedence over any other value, except
+   * an explicit CLI setting.
    */
   parse(args: string[] = process.argv): Parsed<C> {
     if (args === process.argv) {
@@ -669,9 +715,16 @@ export class Jack<C extends ConfigSet = {}> {
         throw new Error(`Unknown config option: ${field}`)
       }
       if (!isValidValue(o[field], config.type, !!config.multiple)) {
-        throw new Error(
-          `Invalid type for ${field} option, expected` +
-            `${config.type}${config.multiple ? '[]' : ''}`
+        throw Object.assign(
+          new Error(
+            `Invalid value ${valueType(
+              o[field]
+            )} for ${field}, expected ${valueType(config)}`
+          ),
+          {
+            field,
+            value: o[field],
+          }
         )
       }
       if (config.validate && !config.validate(o[field])) {
