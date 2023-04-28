@@ -67,7 +67,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "cliui": "^7.0.4"
+    "cliui": "^8.0.1"
   },
   "engines": {
     "node": ">=14"

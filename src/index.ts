@@ -5,20 +5,8 @@ import { parseArgs } from './parse-args.js'
 
 // it's a tiny API, just cast it inline, it's fine
 //@ts-ignore
-import _cliui from 'cliui'
+import cliui from 'cliui'
 import { basename } from 'node:path'
-
-interface CliUI {
-  div(
-    ...p: {
-      text: string
-      padding?: [number, number, number, number]
-      width?: number
-    }[]
-  ): void
-  toString(): string
-}
-const cliui = (o: { width?: number } = {}): CliUI => _cliui(o)
 
 const width = Math.min(
   (process && process.stdout && process.stdout.columns) || 80,
@@ -903,9 +891,12 @@ export class Jack<C extends ConfigSet = {}> {
     const ui = cliui({ width })
     let start = this.#fields[0]?.type === 'heading' ? 1 : 0
     if (this.#fields[0]?.type === 'heading') {
-      ui.div({ text: normalize(this.#fields[0].text) })
+      ui.div({
+        padding: [0, 0, 0, 0],
+        text: normalize(this.#fields[0].text),
+      })
     }
-    ui.div({ text: 'Usage:' })
+    ui.div({ padding: [0, 0, 0, 0], text: 'Usage:' })
     if (this.#options.usage) {
       ui.div({
         text: this.#options.usage,
@@ -936,14 +927,12 @@ export class Jack<C extends ConfigSet = {}> {
         padding: [0, 0, 0, 2],
       })
     }
-    ui.div({ text: '' })
+    ui.div({ padding: [0, 0, 0, 0], text: '' })
     const maybeDesc = this.#fields[start]
     if (maybeDesc?.type === 'description') {
       start++
-      ui.div({
-        text: normalize(maybeDesc.text),
-      })
-      ui.div({ text: '' })
+      ui.div({ padding: [0, 0, 0, 0], text: normalize(maybeDesc.text) })
+      ui.div({ padding: [0, 0, 0, 0], text: '' })
     }
 
     // turn each config type into a row, and figure out the width of the
@@ -1009,15 +998,15 @@ export class Jack<C extends ConfigSet = {}> {
               padding: [0, 1, 0, 2],
               width: maxWidth,
             },
-            { text: row.text }
+            { padding: [0, 0, 0, 0], text: row.text }
           )
         }
         if (row.skipLine) {
-          ui.div({ text: '' })
+          ui.div({ padding: [0, 0, 0, 0], text: '' })
         }
       } else {
         if (row.type === 'heading') {
-          ui.div(row)
+          ui.div({ padding: [0, 0, 0, 0], ...row })
         } else {
           ui.div({ ...row, padding: [1, 0, 1, 2] })
         }
