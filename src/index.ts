@@ -1049,8 +1049,10 @@ export class Jack<C extends ConfigSet = {}> {
 // strings however makes them look nice in the code.
 const normalize = (s: string): string =>
   s
-    // remove single line breaks
-    .replace(/([^\n])\n[ \t]*([^\n])/g, '$1 $2')
+    // remove single line breaks, except for lists
+    .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
+      !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`
+    )
     // normalize mid-line whitespace
     .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
     // two line breaks are enough

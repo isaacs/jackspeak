@@ -399,6 +399,12 @@ data.
 
 To parse TAP data from stdin, specify "-" as a filename.
 
+This is a list:
+
+- one
+- two
+- three
+
   --node-arg=<node-arg>  Can be set multiple times
 
   -O<opts-array> --opts-array=<opts-array>

@@ -19,7 +19,14 @@ t.beforeEach(t => {
       ` Executes all the files and interprets their output as
         TAP formatted test result data.
 
-        To parse TAP data from stdin, specify "-" as a filename.`
+        To parse TAP data from stdin, specify "-" as a filename.
+
+        This is a list:
+
+        - one
+        - two
+        - three
+      `
     )
 
     .optList({
