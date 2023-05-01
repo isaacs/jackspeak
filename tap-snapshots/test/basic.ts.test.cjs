@@ -419,11 +419,9 @@ This is a list:
   -j<n> --jobs=<n>       how many jobs to run in parallel
   -5<n> --ltfive=<n>     must be less than 5
 
-Add Fields with jack.addFields()
+  Add Fields with jack.addFields()
 
-
-  This is helpful text. I'm helping! I'm helping youuuu
-
+    This is helpful text. I'm helping! I'm helping youuuu
 
   --numlistaf=<n>        Can be set multiple times
   --flaglistaf           Can be set multiple times

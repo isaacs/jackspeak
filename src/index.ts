@@ -943,7 +943,7 @@ export class Jack<C extends ConfigSet = {}> {
     const rows: (Row | TextRow)[] = []
     for (const field of this.#fields.slice(start)) {
       if (field.type !== 'config') {
-        if (prev) prev.skipLine = true
+        if (prev?.type === 'config') prev.skipLine = true
         prev = undefined
         field.text = normalize(field.text)
         rows.push(field)
@@ -970,7 +970,7 @@ export class Jack<C extends ConfigSet = {}> {
         value.type === 'boolean'
           ? `${short}--${field.name}`
           : `${short}--${field.name}=<${hint}>`
-      const row: Row = { text, left }
+      const row: Row = { text, left, type: 'config' }
       if (text.length > width - maxMax) {
         row.skipLine = true
       }
@@ -984,6 +984,8 @@ export class Jack<C extends ConfigSet = {}> {
       rows.push(row)
     }
 
+    // every heading/description after the first gets indented by 2
+    // extra spaces.
     for (const row of rows) {
       if (row.left) {
         // If the row is too long, don't wrap it
@@ -1006,9 +1008,9 @@ export class Jack<C extends ConfigSet = {}> {
         }
       } else {
         if (row.type === 'heading') {
-          ui.div({ padding: [0, 0, 0, 0], ...row })
+          ui.div({ ...row, padding: [0, 0, 0, 2] })
         } else {
-          ui.div({ ...row, padding: [1, 0, 1, 2] })
+          ui.div({ ...row, padding: [0, 0, 0, 4] })
         }
         ui.div()
       }
