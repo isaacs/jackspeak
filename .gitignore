@@ -1,6 +1,7 @@
 /*
 /.*
 
+!/examples
 !typedoc.json
 !tsconfig*.json
 !.github

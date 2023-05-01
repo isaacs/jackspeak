@@ -67,7 +67,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "cliui": "^8.0.1"
+    "cliui": "github:isaacs/cliui#isaacs/esm-cjs-consistency"
   },
   "engines": {
     "node": ">=14"
