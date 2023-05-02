@@ -72,7 +72,7 @@ console.log(positionals) // ['some', 'positional', 'args']
 ## `jack(options: JackOptions = {}) => Jack`
 
 Returns a `Jack` object that can be used to chain and add
-field definitions.  The other methods (apart from `validate()`,
+field definitions. The other methods (apart from `validate()`,
 `parse()`, and `usage()` obviously) return the same Jack object,
 updated with the new types, so they can be chained together as
 shown in the code examples.
@@ -122,11 +122,15 @@ If the first usage item defined is a heading, it is always
 treated as level 1, regardless of the argument provided.
 
 Headings level 1 and 2 will have a line of padding underneath
-them.  Headings level 3 through 6 will not.
+them. Headings level 3 through 6 will not.
 
-### `Jack.description(text: string)`
+### `Jack.description(text: string, { pre?: boolean } = {})`
 
 Define a long string description, used in the `usage()` output.
+
+If the `pre` option is set to `true`, then whitespace will not be
+normalized. However, if any line is too long for the width
+allotted, it will still be wrapped.
 
 ## Option Definitions
 
@@ -172,13 +176,13 @@ Define one or more boolean array fields.
 
 ### `Jack.num({ [option: string]: definition, ... })`
 
-Define one or more number fields.  These will be set in the
+Define one or more number fields. These will be set in the
 environment as a stringified number, and included in the `values`
 object as a number.
 
 ### `Jack.numList({ [option: string]: definition, ... })`
 
-Define one or more number list fields.  These will be set in the
+Define one or more number list fields. These will be set in the
 environment as a delimited set of stringified numbers, and
 included in the `values` as a number array.
 
@@ -192,7 +196,7 @@ Define one or more string list fields.
 
 ### `Jack.addFields({ [option: string]: definition, ... })`
 
-Define one or more fields of any type.  Note that `type` and
+Define one or more fields of any type. Note that `type` and
 `multiple` must be set explicitly on each definition when using
 this method.
 
@@ -242,12 +246,14 @@ const j = jack({
   usage: 'foo [options] <files>',
 })
   .heading('The best Foo that ever Fooed')
-  .description(`
+  .description(
+    `
     Executes all the files and interprets their output as
     TAP formatted test result data.
 
     To parse TAP data from stdin, specify "-" as a filename.
-  `)
+  `
+  )
 
   // flags don't take a value, they're boolean on or off, and can be
   // turned off by prefixing with `--no-`
@@ -259,14 +265,14 @@ const j = jack({
       // description is optional as well.
       description: `Make the flags wave`,
       // default value for flags is 'false', unless you change it
-      default: true
+      default: true,
     },
     'no-flag': {
       // you can can always negate a flag with `--no-flag`
       // specifying a negate option will let you define a short
       // single-char option for negation.
       short: 'F',
-      description: `Do not wave the flags`
+      description: `Do not wave the flags`,
     },
   })
 
@@ -283,7 +289,7 @@ const j = jack({
     jobs: {
       short: 'j',
       description: 'how many jobs to run in parallel',
-      default: 1
+      default: 1,
     },
   })
 
@@ -297,7 +303,7 @@ const j = jack({
   // a flagList is an array of booleans, so `-ddd` is [true, true, true]
   // count the `true` values to treat it as a counter.
   .flagList({
-    debug: { short: 'd' }
+    debug: { short: 'd' },
   })
 
   // opts take a value, and is set to the string in the results
@@ -309,8 +315,8 @@ const j = jack({
       short: 'o',
       // optional: make it -o<file> in the help output insead of -o<value>
       hint: 'file',
-      description: `Send the raw output to the specified file.`
-    }
+      description: `Send the raw output to the specified file.`,
+    },
   })
 
 // now we can parse argv like this:

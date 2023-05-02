@@ -73,6 +73,26 @@ const j = jack({
     `When the grolb needs blorging, use this command
      and it will make sure every asdf is a quux.`
   )
+  .description(
+    `A pre-formatted description section
+
+     because
+ '. \\   what if your usage banner
+  '- \\                 needs a baby elephant
+   / /_         .---.
+  / | \\\\,.\\/--.//    )
+  |  \\//        )/  / 
+   \\  ' ^ ^    /    )____.----..  6
+    '.____.    .___/            \\._) 
+       .\\/.                      )
+        '\\                       /
+        _/ \\/    ).        )    (
+       /#  .!    |        /\\    /
+       \\  C// #  /'-----''/ #  / 
+    .   'C/ |    |    |   |    |mrf  ,
+    \\), .. .'OOO-'. ..'OOO'OOO-'. ..\\(,`,
+    { pre: true }
+  )
 
   .heading('Basic Options', 2)
   .optList({

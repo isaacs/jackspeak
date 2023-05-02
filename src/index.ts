@@ -461,6 +461,7 @@ export interface Heading extends Row {
   left?: ''
   skipLine?: boolean
   level: number
+  pre?: false
 }
 const isHeading = (r: { type?: string }): r is Heading =>
   r.type === 'heading'
@@ -476,7 +477,11 @@ export interface Description extends Row {
   text: string
   left?: ''
   skipLine?: boolean
+  pre?: boolean
 }
+
+const isDescription = (r: { type?: string }): r is Description =>
+  r.type === 'description'
 
 /**
  * A heading or description row used when generating the {@link Jack#usage}
@@ -778,8 +783,8 @@ export class Jack<C extends ConfigSet = {}> {
   /**
    * Add a long-form description to the usage output at this position.
    */
-  description(text: string): Jack<C> {
-    this.#fields.push({ type: 'description', text })
+  description(text: string, { pre }: { pre?: boolean } = {}): Jack<C> {
+    this.#fields.push({ type: 'description', text, pre })
     return this
   }
 
@@ -967,9 +972,10 @@ export class Jack<C extends ConfigSet = {}> {
 
     ui.div({ padding: [0, 0, 0, 0], text: '' })
     const maybeDesc = this.#fields[start]
-    if (maybeDesc?.type === 'description') {
+    if (isDescription(maybeDesc)) {
+      const print = normalize(maybeDesc.text, maybeDesc.pre)
       start++
-      ui.div({ padding: [0, 0, 0, 0], text: normalize(maybeDesc.text) })
+      ui.div({ padding: [0, 0, 0, 0], text: print })
       ui.div({ padding: [0, 0, 0, 0], text: '' })
     }
 
@@ -983,7 +989,7 @@ export class Jack<C extends ConfigSet = {}> {
       if (field.type !== 'config') {
         if (prev?.type === 'config') prev.skipLine = true
         prev = undefined
-        field.text = normalize(field.text)
+        field.text = normalize(field.text, !!field.pre)
         rows.push(field)
         continue
       }
@@ -1092,17 +1098,20 @@ export class Jack<C extends ConfigSet = {}> {
 
 // Unwrap and un-indent, so we can wrap description
 // strings however makes them look nice in the code.
-const normalize = (s: string): string =>
-  s
-    // remove single line breaks, except for lists
-    .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
-      !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`
-    )
-    // normalize mid-line whitespace
-    .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
-    // two line breaks are enough
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+const normalize = (s: string, pre: boolean = false): string =>
+  pre
+    // prepend a ZWSP to each line so cliui doesn't strip it.
+    ? s.split('\n').map(l => `\u200b${l}`).join('\n')
+    : s
+        // remove single line breaks, except for lists
+        .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
+          !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`
+        )
+        // normalize mid-line whitespace
+        .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
+        // two line breaks are enough
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
 
 /**
  * Main entry point. Create and return a {@link Jack} object.

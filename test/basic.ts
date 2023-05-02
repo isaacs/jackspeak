@@ -29,14 +29,38 @@ t.beforeEach(t => {
       `
     )
     .heading('Subcommands')
-    .description(`several subcommands are available.
+    .description(
+      `several subcommands are available.
 
-                  they are described below.`)
+                  they are described below.`
+    )
     .heading('bazzle', 3)
     .description('Bazzle the bedazzled razzle mafazzale')
     .heading('blorg', 3)
-    .description(`When the grolb needs blorging, use this command
-                  and it will make sure every asdf is a quux.`)
+    .description(
+      `When the grolb needs blorging, use this command
+       and it will make sure every asdf is a quux.`
+    )
+    .description(
+      ` A pre-formatted description section
+
+     because
+ '. \\   what if your usage banner
+  '- \\                 needs a baby elephant
+   / /_         .---.
+  / | \\\\,.\\/--.//    )
+  |  \\//        )/  / 
+   \\  ' ^ ^    /    )____.----..  6
+    '.____.    .___/            \\._) 
+       .\\/.                      )
+        '\\                       /
+        _/ \\/    ).        )    (
+       /#  .!    |        /\\    /
+       \\  C// #  /'-----''/ #  / 
+    .   'C/ |    |    |   |    |mrf  ,
+    \\), .. .'OOO-'. ..'OOO'OOO-'. ..\\(,`,
+      { pre: true }
+    )
 
     .heading('Options', 2)
     .optList({
