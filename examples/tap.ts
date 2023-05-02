@@ -44,7 +44,37 @@ const j = jack({
 
      Much more documentation available at: https://www.node-tap.org/`
   )
-  .heading('Basic Options')
+
+  .heading('The best Foo that ever Fooed')
+  .description(
+    `
+    Executes all the files and interprets their output as
+    TAP formatted test result data.
+
+    To parse TAP data from stdin, specify "-" as a filename.
+
+    This is a list:
+
+    - one
+    - two
+    - three
+    `
+  )
+  .heading('Subcommands')
+  .description(
+    `several subcommands are available.
+
+     they are described below.`
+  )
+  .heading('bazzle', 2)
+  .description('Bazzle the bedazzled razzle mafazzale')
+  .heading('blorg', 3)
+  .description(
+    `When the grolb needs blorging, use this command
+     and it will make sure every asdf is a quux.`
+  )
+
+  .heading('Basic Options', 2)
   .optList({
     plugin: {
       hint: 'module',

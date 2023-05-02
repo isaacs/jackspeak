@@ -13,6 +13,9 @@ const width = Math.min(
   80
 )
 
+// indentation spaces from heading level
+const indent = (n: number) => (n - 1) * 2
+
 const toEnvKey = (pref: string, key: string): string => {
   return [pref, key.replace(/[^a-zA-Z0-9]+/g, ' ')]
     .join(' ')
@@ -442,16 +445,45 @@ export interface Row {
   skipLine?: boolean
   type?: string
 }
+
 /**
- * A heading or description row used when generating the {@link Jack#usage}
- * string
+ * A heading for a section in the usage, created by the jack.heading()
+ * method.
+ *
+ * First heading is always level 1, subsequent headings default to 2.
+ *
+ * The level of the nearest heading level sets the indentation of the
+ * description that follows.
  */
-export interface TextRow {
-  type: 'heading' | 'description'
+export interface Heading extends Row {
+  type: 'heading'
+  text: string
+  left?: ''
+  skipLine?: boolean
+  level: number
+}
+const isHeading = (r: { type?: string }): r is Heading =>
+  r.type === 'heading'
+
+/**
+ * An arbitrary blob of text describing some stuff, set by the
+ * jack.description() method.
+ *
+ * Indentation determined by level of the nearest header.
+ */
+export interface Description extends Row {
+  type: 'description'
   text: string
   left?: ''
   skipLine?: boolean
 }
+
+/**
+ * A heading or description row used when generating the {@link Jack#usage}
+ * string
+ */
+export type TextRow = Heading | Description
+
 /**
  * Either a {@link TextRow} or a reference to a {@link ConfigOptionBase}
  */
@@ -735,8 +767,11 @@ export class Jack<C extends ConfigSet = {}> {
   /**
    * Add a heading to the usage output banner
    */
-  heading(text: string): Jack<C> {
-    this.#fields.push({ type: 'heading', text })
+  heading(text: string, level?: 1 | 2 | 3 | 4 | 5 | 6): Jack<C> {
+    if (level === undefined) {
+      level = this.#fields.some(r => isHeading(r)) ? 2 : 1
+    }
+    this.#fields.push({ type: 'heading', text, level })
     return this
   }
 
@@ -888,12 +923,14 @@ export class Jack<C extends ConfigSet = {}> {
    */
   usage(): string {
     if (this.#usage) return this.#usage
+    let headingLevel = 1
     const ui = cliui({ width })
-    let start = this.#fields[0]?.type === 'heading' ? 1 : 0
-    if (this.#fields[0]?.type === 'heading') {
+    const first = this.#fields[0]
+    let start = first?.type === 'heading' ? 1 : 0
+    if (first?.type === 'heading') {
       ui.div({
         padding: [0, 0, 0, 0],
-        text: normalize(this.#fields[0].text),
+        text: normalize(first.text),
       })
     }
     ui.div({ padding: [0, 0, 0, 0], text: 'Usage:' })
@@ -927,6 +964,7 @@ export class Jack<C extends ConfigSet = {}> {
         padding: [0, 0, 0, 2],
       })
     }
+
     ui.div({ padding: [0, 0, 0, 0], text: '' })
     const maybeDesc = this.#fields[start]
     if (maybeDesc?.type === 'description') {
@@ -990,14 +1028,15 @@ export class Jack<C extends ConfigSet = {}> {
       if (row.left) {
         // If the row is too long, don't wrap it
         // Bump the right-hand side down a line to make room
+        const configIndent = indent(Math.max(headingLevel, 2))
         if (row.left.length > maxWidth - 2) {
-          ui.div({ text: row.left, padding: [0, 0, 0, 2] })
+          ui.div({ text: row.left, padding: [0, 0, 0, configIndent] })
           ui.div({ text: row.text, padding: [0, 0, 0, maxWidth] })
         } else {
           ui.div(
             {
               text: row.left,
-              padding: [0, 1, 0, 2],
+              padding: [0, 1, 0, configIndent],
               width: maxWidth,
             },
             { padding: [0, 0, 0, 0], text: row.text }
@@ -1007,12 +1046,16 @@ export class Jack<C extends ConfigSet = {}> {
           ui.div({ padding: [0, 0, 0, 0], text: '' })
         }
       } else {
-        if (row.type === 'heading') {
-          ui.div({ ...row, padding: [0, 0, 0, 2] })
+        if (isHeading(row)) {
+          const { level } = row
+          headingLevel = level
+          // only h1 and h2 have bottom padding
+          // h3-h6 do not
+          const b = level <= 2 ? 1 : 0
+          ui.div({ ...row, padding: [0, 0, b, indent(level)] })
         } else {
-          ui.div({ ...row, padding: [0, 0, 0, 4] })
+          ui.div({ ...row, padding: [0, 0, 1, indent(headingLevel + 1)] })
         }
-        ui.div()
       }
     }
 

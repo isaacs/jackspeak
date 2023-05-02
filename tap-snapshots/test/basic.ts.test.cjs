@@ -405,6 +405,21 @@ This is a list:
 - two
 - three
 
+  Subcommands
+
+    several subcommands are available.
+
+    they are described below.
+
+    bazzle
+      Bazzle the bedazzled razzle mafazzale
+
+    blorg
+      When the grolb needs blorging, use this command and it will make sure
+      every asdf is a quux.
+
+  Options
+
   --node-arg=<node-arg>  Can be set multiple times
 
   -O<opts-array> --opts-array=<opts-array>

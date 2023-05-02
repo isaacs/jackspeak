@@ -28,7 +28,17 @@ t.beforeEach(t => {
         - three
       `
     )
+    .heading('Subcommands')
+    .description(`several subcommands are available.
 
+                  they are described below.`)
+    .heading('bazzle', 3)
+    .description('Bazzle the bedazzled razzle mafazzale')
+    .heading('blorg', 3)
+    .description(`When the grolb needs blorging, use this command
+                  and it will make sure every asdf is a quux.`)
+
+    .heading('Options', 2)
     .optList({
       'node-arg': {},
       'opts-array': {

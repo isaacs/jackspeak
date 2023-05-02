@@ -110,9 +110,19 @@ Options:
   programs do, so you can stop parsing and pass the positionals
   to the subcommand to parse.
 
-### `Jack.heading(text: string)`
+### `Jack.heading(text: string, level?: 1 | 2 | 3 | 4 | 5 | 6)`
 
 Define a short string heading, used in the `usage()` output.
+
+Indentation of the heading and subsequent description/config
+usage entries (up until the next heading) is set by the heading
+level.
+
+If the first usage item defined is a heading, it is always
+treated as level 1, regardless of the argument provided.
+
+Headings level 1 and 2 will have a line of padding underneath
+them.  Headings level 3 through 6 will not.
 
 ### `Jack.description(text: string)`
 
