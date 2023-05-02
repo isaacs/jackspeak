@@ -5,7 +5,7 @@ import { parseArgs } from './parse-args.js'
 
 // it's a tiny API, just cast it inline, it's fine
 //@ts-ignore
-import cliui from 'cliui'
+import cliui from '@isaacs/cliui'
 import { basename } from 'node:path'
 
 const width = Math.min(
