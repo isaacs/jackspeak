@@ -1,5 +1,10 @@
 export type ConfigType = 'number' | 'string' | 'boolean'
 
+/**
+ * Given a Jack object, get the typeof its ConfigSet
+ */
+export type Unwrap<J> = J extends Jack<infer C> ? C : never
+
 import { inspect, InspectOptions, ParseArgsConfig } from 'node:util'
 import { parseArgs } from './parse-args.js'
 
