@@ -1,7 +1,6 @@
 import t from 'tap'
 import { inspect } from 'util'
 import { Jack, jack } from '../dist/cjs/index.js'
-jack
 
 t.beforeEach(t => {
   t.context.env = {}
@@ -266,6 +265,19 @@ t.test('defaults to process.env and process.argv', t => {
   t.equal(process.env.JACKSPEAK_TEST_FOO, '1')
   delete process.env.JACKSPEAK_TEST_FOO
   process.argv.pop()
+  t.end()
+})
+
+t.test('multiple is [] if env is empty', t => {
+  const { jack, env } = t.context as {
+    jack: Jack<{
+      gtthree: { type: 'number', multiple: true },
+    }>
+    env: Record<string, string>
+  }
+  env.TEST_GTTHREE = ''
+  const { values } = jack.parse()
+  t.strictSame(values.gtthree, [])
   t.end()
 })
 

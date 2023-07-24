@@ -64,7 +64,9 @@ const fromEnvVal = <T extends ConfigType, M extends boolean>(
   delim: string = '\n'
 ): ValidValue<T, M> =>
   (multiple
-    ? env.split(delim).map(v => fromEnvVal(v, type, false))
+    ? env
+      ? env.split(delim).map(v => fromEnvVal(v, type, false))
+      : []
     : type === 'string'
     ? env
     : type === 'boolean'
@@ -1105,8 +1107,11 @@ export class Jack<C extends ConfigSet = {}> {
 // strings however makes them look nice in the code.
 const normalize = (s: string, pre: boolean = false): string =>
   pre
-    // prepend a ZWSP to each line so cliui doesn't strip it.
-    ? s.split('\n').map(l => `\u200b${l}`).join('\n')
+    ? // prepend a ZWSP to each line so cliui doesn't strip it.
+      s
+        .split('\n')
+        .map(l => `\u200b${l}`)
+        .join('\n')
     : s
         // remove single line breaks, except for lists
         .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
