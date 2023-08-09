@@ -458,8 +458,8 @@ This is a list:
 
   --numlistaf=<n>        Can be set multiple times
   --flaglistaf           Can be set multiple times
-  --optlistaf=<optlistaf Can be set multiple times
-  >
+  --optlistaf=<optlistaf>
+                         Can be set multiple times
   --numaf=<n>
   --flagaf
   --optaf=<optaf>

@@ -1042,7 +1042,7 @@ export class Jack<C extends ConfigSet = {}> {
         // If the row is too long, don't wrap it
         // Bump the right-hand side down a line to make room
         const configIndent = indent(Math.max(headingLevel, 2))
-        if (row.left.length > maxWidth - 2) {
+        if (row.left.length > maxWidth - 3) {
           ui.div({ text: row.left, padding: [0, 0, 0, configIndent] })
           ui.div({ text: row.text, padding: [0, 0, 0, maxWidth] })
         } else {
