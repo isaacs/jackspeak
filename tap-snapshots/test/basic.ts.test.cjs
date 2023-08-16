@@ -482,6 +482,151 @@ This is a list:
                          Send the raw output to the specified file.
 `
 
+exports[`test/basic.ts TAP inspection > must match snapshot 3`] = `
+# The best Foo that ever Fooed
+
+Usage:
+
+\`\`\`
+foo [options] <files>
+\`\`\`
+
+Executes all the files and interprets their output as TAP formatted test result data.
+
+To parse TAP data from stdin, specify "-" as a filename.
+
+This is a list:
+
+- one
+- two
+- three
+
+## Subcommands
+
+several subcommands are available.
+
+they are described below.
+
+### bazzle
+
+Bazzle the bedazzled razzle mafazzale
+
+### blorg
+
+When the grolb needs blorging, use this command and it will make sure every asdf is a quux.
+
+\`\`\`
+ A pre-formatted description section
+
+     because
+ '. \\\\   what if your usage banner
+  '- \\\\                 needs a baby elephant
+   / /_         .---.
+  / | \\\\\\\\,.\\\\/--.//    )
+  |  \\\\//        )/  / 
+   \\\\  ' ^ ^    /    )____.----..  6
+    '.____.    .___/            \\\\._) 
+       .\\\\/.                      )
+        '\\\\                       /
+        _/ \\\\/    ).        )    (
+       /#  .!    |        /\\\\    /
+       \\\\  C// #  /'-----''/ #  / 
+    .   'C/ |    |    |   |    |mrf  ,
+    \\\\), .. .'OOO-'. ..'OOO'OOO-'. ..\\\\(,
+\`\`\`
+
+## Options
+
+### \`--node-arg=<node-arg>\`
+
+Can be set multiple times
+
+### \`-O<opts-array> --opts-array=<opts-array>\`
+
+an array of opts Can be set multiple times
+
+### \`-f --flag\`
+
+Make the flags wave
+
+### \`-F --no-flag\`
+
+Do not wave the flags
+
+### \`--onlytrue\`
+
+only allowed to be true
+
+### \`-R<reporter> --reporter=<reporter>\`
+
+the style of report to display
+
+### \`--notfoo=<notfoo>\`
+
+string that is not "foo"
+
+### \`-j<n> --jobs=<n>\`
+
+how many jobs to run in parallel
+
+### \`-5<n> --ltfive=<n>\`
+
+must be less than 5
+
+## Add Fields with jack.addFields()
+
+This is helpful text. I'm helping! I'm helping youuuu
+
+### \`--numlistaf=<n>\`
+
+Can be set multiple times
+
+### \`--flaglistaf\`
+
+Can be set multiple times
+
+### \`--optlistaf=<optlistaf>\`
+
+Can be set multiple times
+
+### \`--numaf=<n>\`
+
+### \`--flagaf\`
+
+### \`--optaf=<optaf>\`
+
+### \`-3<n> --gtthree=<n>\`
+
+This is long description with some helpful text.
+
+Note how it wraps and is indented. But in the output, it's normalized and only wraps as needed.
+
+That long break is normalized to one line break. One is enough, really.  
+
+Can be set multiple times
+
+### \`--nums=<n>\`
+
+Can be set multiple times
+
+### \`--defnums=<n>\`
+
+Can be set multiple times
+
+### \`-d --debug\`
+
+Can be set multiple times
+
+### \`--alltrue\`
+
+Can be set multiple times
+
+### \`-o<file> --output-file=<file>\`
+
+Send the raw output to the specified file.
+
+`
+
 exports[`test/basic.ts TAP no env prefix, no writing env > must match snapshot 1`] = `
 Object {
   "positionals": Array [],
@@ -496,6 +641,36 @@ Usage:
   basic.ts --foo
 
   --foo
+`
+
+exports[`test/basic.ts TAP no env prefix, no writing env > no short flags usage 2`] = `
+Usage:
+
+\`\`\`
+basic.ts --foo
+\`\`\`
+
+## \`--foo\`
+
+`
+
+exports[`test/basic.ts TAP no env prefix, no writing env > usage markdown without any heading or usage option 1`] = `
+Usage:
+
+\`\`\`
+basic.ts -f --b=<bar> --asdf --baz=<z> --quux=<quux>
+\`\`\`
+
+## \`-f --foo\`
+
+## \`--asdf\`
+
+## \`-b<n> --bar=<n>\`
+
+## \`--baz=<z>\`
+
+## \`--quux=<n>\`
+
 `
 
 exports[`test/basic.ts TAP no env prefix, no writing env > usage without any heading or usage option 1`] = `

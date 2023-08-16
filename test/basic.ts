@@ -186,6 +186,12 @@ t.test('inspection', t => {
   t.matchSnapshot(jack.toJSON())
   t.matchSnapshot(jack.usage())
   t.equal(jack.usage(), jack.usage(), 'returns same string again')
+  t.matchSnapshot(jack.usageMarkdown())
+  t.equal(
+    jack.usageMarkdown(),
+    jack.usageMarkdown(),
+    'returns same string again'
+  )
   t.end()
 })
 
@@ -271,7 +277,7 @@ t.test('defaults to process.env and process.argv', t => {
 t.test('multiple is [] if env is empty', t => {
   const { jack, env } = t.context as {
     jack: Jack<{
-      gtthree: { type: 'number', multiple: true },
+      gtthree: { type: 'number'; multiple: true }
     }>
     env: Record<string, string>
   }
@@ -289,6 +295,14 @@ t.test('no env prefix, no writing env', t => {
   t.matchSnapshot(j.parse(['--foo']))
   t.matchSnapshot(j.usage(), 'usage without any heading or usage option')
   t.matchSnapshot(jack().flag({ foo: {} }).usage(), 'no short flags usage')
+  t.matchSnapshot(
+    j.usageMarkdown(),
+    'usage markdown without any heading or usage option'
+  )
+  t.matchSnapshot(
+    jack().flag({ foo: {} }).usageMarkdown(),
+    'no short flags usage'
+  )
   t.equal(process.env.FOO, undefined)
   t.end()
 })

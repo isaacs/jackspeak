@@ -1,3 +1,12 @@
+# 2.3
+
+- add `jack.usageMarkdown()` method
+
+# 2.2
+
+- add support for {pre:true} on description fields
+- add heading level support
+
 # 2.1
 
 - Add `jack.setConfigValues()` method

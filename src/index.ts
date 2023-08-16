@@ -468,7 +468,7 @@ export interface Heading extends Row {
   left?: ''
   skipLine?: boolean
   level: number
-  pre?: false
+  pre?: boolean
 }
 const isHeading = (r: { type?: string }): r is Heading =>
   r.type === 'heading'
@@ -566,6 +566,7 @@ export class Jack<C extends ConfigSet = {}> {
   #envPrefix?: string
   #allowPositionals: boolean
   #usage?: string
+  #usageMarkdown?: string
 
   constructor(options: JackOptions = {}) {
     this.#options = options
@@ -779,11 +780,15 @@ export class Jack<C extends ConfigSet = {}> {
   /**
    * Add a heading to the usage output banner
    */
-  heading(text: string, level?: 1 | 2 | 3 | 4 | 5 | 6): Jack<C> {
+  heading(
+    text: string,
+    level?: 1 | 2 | 3 | 4 | 5 | 6,
+    { pre = false }: { pre?: boolean } = {}
+  ): Jack<C> {
     if (level === undefined) {
       level = this.#fields.some(r => isHeading(r)) ? 2 : 1
     }
-    this.#fields.push({ type: 'heading', text, level })
+    this.#fields.push({ type: 'heading', text, level, pre })
     return this
   }
 
@@ -935,6 +940,7 @@ export class Jack<C extends ConfigSet = {}> {
    */
   usage(): string {
     if (this.#usage) return this.#usage
+
     let headingLevel = 1
     const ui = cliui({ width })
     const first = this.#fields[0]
@@ -986,6 +992,123 @@ export class Jack<C extends ConfigSet = {}> {
       ui.div({ padding: [0, 0, 0, 0], text: '' })
     }
 
+    const { rows, maxWidth } = this.#usageRows(start)
+
+    // every heading/description after the first gets indented by 2
+    // extra spaces.
+    for (const row of rows) {
+      if (row.left) {
+        // If the row is too long, don't wrap it
+        // Bump the right-hand side down a line to make room
+        const configIndent = indent(Math.max(headingLevel, 2))
+        if (row.left.length > maxWidth - 3) {
+          ui.div({ text: row.left, padding: [0, 0, 0, configIndent] })
+          ui.div({ text: row.text, padding: [0, 0, 0, maxWidth] })
+        } else {
+          ui.div(
+            {
+              text: row.left,
+              padding: [0, 1, 0, configIndent],
+              width: maxWidth,
+            },
+            { padding: [0, 0, 0, 0], text: row.text }
+          )
+        }
+        if (row.skipLine) {
+          ui.div({ padding: [0, 0, 0, 0], text: '' })
+        }
+      } else {
+        if (isHeading(row)) {
+          const { level } = row
+          headingLevel = level
+          // only h1 and h2 have bottom padding
+          // h3-h6 do not
+          const b = level <= 2 ? 1 : 0
+          ui.div({ ...row, padding: [0, 0, b, indent(level)] })
+        } else {
+          ui.div({ ...row, padding: [0, 0, 1, indent(headingLevel + 1)] })
+        }
+      }
+    }
+
+    return (this.#usage = ui.toString())
+  }
+
+  /**
+   * Return the usage banner markdown for the given configuration
+   */
+  usageMarkdown(): string {
+    if (this.#usageMarkdown) return this.#usageMarkdown
+
+    const out: string[] = []
+
+    let headingLevel = 1
+    const first = this.#fields[0]
+    let start = first?.type === 'heading' ? 1 : 0
+    if (first?.type === 'heading') {
+      out.push(`# ${normalizeOneLine(first.text)}`)
+    }
+    out.push('Usage:')
+    if (this.#options.usage) {
+      out.push(normalizeMarkdown(this.#options.usage, true))
+    } else {
+      const cmd = basename(process.argv[1])
+      const shortFlags: string[] = []
+      const shorts: string[][] = []
+      const flags: string[] = []
+      const opts: string[][] = []
+      for (const [field, config] of Object.entries(this.#configSet)) {
+        if (config.short) {
+          if (config.type === 'boolean') shortFlags.push(config.short)
+          else shorts.push([config.short, config.hint || field])
+        } else {
+          if (config.type === 'boolean') flags.push(field)
+          else opts.push([field, config.hint || field])
+        }
+      }
+      const sf = shortFlags.length ? ' -' + shortFlags.join('') : ''
+      const so = shorts.map(([k, v]) => ` --${k}=<${v}>`).join('')
+      const lf = flags.map(k => ` --${k}`).join('')
+      const lo = opts.map(([k, v]) => ` --${k}=<${v}>`).join('')
+      const usage = `${cmd}${sf}${so}${lf}${lo}`.trim()
+      out.push(normalizeMarkdown(usage, true))
+    }
+
+    const maybeDesc = this.#fields[start]
+    if (isDescription(maybeDesc)) {
+      out.push(normalizeMarkdown(maybeDesc.text, maybeDesc.pre))
+      start++
+    }
+
+    const { rows } = this.#usageRows(start)
+
+    // heading level in markdown is number of # ahead of text
+    for (const row of rows) {
+      if (row.left) {
+        out.push(
+          '#'.repeat(headingLevel + 1) +
+            ' ' +
+            normalizeOneLine(row.left, true)
+        )
+        if (row.text) out.push(normalizeMarkdown(row.text))
+      } else if (isHeading(row)) {
+        const { level } = row
+        headingLevel = level
+        out.push(
+          `${'#'.repeat(headingLevel)} ${normalizeOneLine(
+            row.text,
+            row.pre
+          )}`
+        )
+      } else {
+        out.push(normalizeMarkdown(row.text, !!(row as Description).pre))
+      }
+    }
+
+    return (this.#usageMarkdown = out.join('\n\n') + '\n')
+  }
+
+  #usageRows(start: number) {
     // turn each config type into a row, and figure out the width of the
     // left hand indentation for the option descriptions.
     let maxMax = Math.max(12, Math.min(26, Math.floor(width / 3)))
@@ -1035,44 +1158,7 @@ export class Jack<C extends ConfigSet = {}> {
       rows.push(row)
     }
 
-    // every heading/description after the first gets indented by 2
-    // extra spaces.
-    for (const row of rows) {
-      if (row.left) {
-        // If the row is too long, don't wrap it
-        // Bump the right-hand side down a line to make room
-        const configIndent = indent(Math.max(headingLevel, 2))
-        if (row.left.length > maxWidth - 3) {
-          ui.div({ text: row.left, padding: [0, 0, 0, configIndent] })
-          ui.div({ text: row.text, padding: [0, 0, 0, maxWidth] })
-        } else {
-          ui.div(
-            {
-              text: row.left,
-              padding: [0, 1, 0, configIndent],
-              width: maxWidth,
-            },
-            { padding: [0, 0, 0, 0], text: row.text }
-          )
-        }
-        if (row.skipLine) {
-          ui.div({ padding: [0, 0, 0, 0], text: '' })
-        }
-      } else {
-        if (isHeading(row)) {
-          const { level } = row
-          headingLevel = level
-          // only h1 and h2 have bottom padding
-          // h3-h6 do not
-          const b = level <= 2 ? 1 : 0
-          ui.div({ ...row, padding: [0, 0, b, indent(level)] })
-        } else {
-          ui.div({ ...row, padding: [0, 0, 1, indent(headingLevel + 1)] })
-        }
-      }
-    }
-
-    return (this.#usage = ui.toString())
+    return { rows, maxWidth }
   }
 
   /**
@@ -1122,6 +1208,21 @@ const normalize = (s: string, pre: boolean = false): string =>
         // two line breaks are enough
         .replace(/\n{3,}/g, '\n\n')
         .trim()
+
+// normalize for markdown printing, remove leading spaces on lines
+const normalizeMarkdown = (s: string, pre: boolean = false): string => {
+  const n = normalize(s, pre).replace(/\\/g, '\\\\')
+  return pre
+    ? `\`\`\`\n${n.replace(/\u200b/g, '')}\n\`\`\``
+    : n.replace(/\n +/g, '\n').trim()
+}
+
+const normalizeOneLine = (s: string, pre: boolean = false) => {
+  const n = normalize(s, pre)
+    .replace(/[\s\u200b]+/g, ' ')
+    .trim()
+  return pre ? `\`${n}\`` : n
+}
 
 /**
  * Main entry point. Create and return a {@link Jack} object.

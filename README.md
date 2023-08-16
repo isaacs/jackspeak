@@ -230,6 +230,13 @@ each field that appears in the options.
 Values provided will be overridden by environment variables or
 command line arguments.
 
+### `Jack.usageMarkdown(): string`
+
+Returns the compiled `usage` string, with all option descriptions
+and heading/description text, but as markdown instead of
+formatted for a terminal, for generating HTML documentation for
+your CLI.
+
 ## Some Example Code
 
 Also see [the examples
