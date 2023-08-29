@@ -245,14 +245,9 @@ Jack {
     short: '3',
     description: 'This is long description with some helpful text.\\n' +
       '\\n' +
-      "          Note how it wraps and is indented. But in the output, it's\\n" +
-      '          normalized and only wraps as needed.\\n' +
+      "Note how it wraps and is indented. But in the output, it's normalized and only wraps as needed.\\n" +
       '\\n' +
-      '\\n' +
-      '\\n' +
-      '          That long break is normalized to one line break. One is enough,\\n' +
-      '          really.\\n' +
-      '        ',
+      'That long break is normalized to one line break. One is enough, really.',
     validate: [Function: validate]
   },
   nums: { type: 'number', multiple: true },
@@ -305,14 +300,9 @@ Object {
     "description": String(
       This is long description with some helpful text.
       
-                Note how it wraps and is indented. But in the output, it's
-                normalized and only wraps as needed.
+      Note how it wraps and is indented. But in the output, it's normalized and only wraps as needed.
       
-      
-      
-                That long break is normalized to one line break. One is enough,
-                really.
-              
+      That long break is normalized to one line break. One is enough, really.
     ),
     "multiple": true,
     "short": "3",

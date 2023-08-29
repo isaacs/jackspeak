@@ -1173,7 +1173,9 @@ export class Jack<C extends ConfigSet = {}> {
           ...(def.multiple ? { multiple: true } : {}),
           ...(def.delim ? { delim: def.delim } : {}),
           ...(def.short ? { short: def.short } : {}),
-          ...(def.description ? { description: def.description } : {}),
+          ...(def.description
+            ? { description: normalize(def.description) }
+            : {}),
           ...(def.validate ? { validate: def.validate } : {}),
           ...(def.default !== undefined ? { default: def.default } : {}),
         },
@@ -1207,6 +1209,8 @@ const normalize = (s: string, pre: boolean = false): string =>
         .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
         // two line breaks are enough
         .replace(/\n{3,}/g, '\n\n')
+        // remove any spaces at the start of a line
+        .replace(/\n[ \t]+/g, '\n')
         .trim()
 
 // normalize for markdown printing, remove leading spaces on lines
