@@ -735,6 +735,18 @@ export class Jack<C extends ConfigSet = {}> {
   }
 
   /**
+   * do not set fields as 'no-foo' if 'foo' exists and both are bools
+   * just set foo.
+   */
+  #noNoFields(f: string, val: any, s: string = f) {
+    if (!f.startsWith('no-') || typeof val !== 'boolean') return
+    const yes = f.substring('no-'.length)
+    if (this.#configSet[yes]?.type === 'boolean') {
+      throw new Error(`do not set '${s}', instead set '${yes}' as desired.`)
+    }
+  }
+
+  /**
    * Validate that any arbitrary object is a valid configuration `values`
    * object.  Useful when loading config files or other sources.
    */
@@ -743,6 +755,7 @@ export class Jack<C extends ConfigSet = {}> {
       throw new Error('Invalid config: not an object')
     }
     for (const field in o) {
+      this.#noNoFields(field, o[field])
       const config = this.#configSet[field]
       if (!config) {
         throw new Error(`Unknown config option: ${field}`)
