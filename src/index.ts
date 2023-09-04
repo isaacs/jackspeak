@@ -741,6 +741,8 @@ export class Jack<C extends ConfigSet = {}> {
   #noNoFields(f: string, val: any, s: string = f) {
     if (!f.startsWith('no-') || typeof val !== 'boolean') return
     const yes = f.substring('no-'.length)
+    // recurse so we get the core config key we care about.
+    this.#noNoFields(yes, val, s)
     if (this.#configSet[yes]?.type === 'boolean') {
       throw new Error(`do not set '${s}', instead set '${yes}' as desired.`)
     }
