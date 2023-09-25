@@ -1,4 +1,4 @@
-import('../dist/mjs/index.js').then(({ jack }) => {
+import('../dist/esm/index.js').then(({ jack }) => {
   const j = jack({
     usage: `
 git tag [-a | -s | -u <key-id>] [-f] [-m <msg> | -F <file>] [-e]

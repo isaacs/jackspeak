@@ -199,7 +199,9 @@ const valueType = (
     : `${v.type}${v.multiple ? '[]' : ''}`
 
 const joinTypes = (types: string[]): string =>
-  types.length === 1 ? types[0] : `(${types.join('|')})`
+  types.length === 1 && typeof types[0] === 'string'
+    ? types[0]
+    : `(${types.join('|')})`
 
 const isValidValue = <T extends ConfigType, M extends boolean>(
   v: any,
@@ -400,6 +402,11 @@ const toParseArgsOptionsConfig = (
   const c: Exclude<ParseArgsConfig['options'], undefined> = {}
   for (const longOption in options) {
     const config = options[longOption]
+    /* c8 ignore start */
+    if (!config) {
+      throw new Error('config must be an object: ' + longOption)
+    }
+    /* c8 ignore start */
     if (isConfigOption(config, 'number', true)) {
       c[longOption] = {
         type: 'string',
@@ -425,8 +432,9 @@ const toParseArgsOptionsConfig = (
         default: conf.default,
       }
     }
+    const clo = c[longOption] as ConfigOptionBase<ConfigType, boolean>
     if (typeof config.short === 'string') {
-      c[longOption].short = config.short
+      clo.short = config.short
     }
 
     if (
@@ -595,6 +603,12 @@ export class Jack<C extends ConfigSet = {}> {
     }
     for (const [field, value] of Object.entries(values)) {
       const my = this.#configSet[field]
+      // already validated, just for TS's benefit
+      /* c8 ignore start */
+      if (!my) {
+        throw new Error('unexpected field in config set: ' + field)
+      }
+      /* c8 ignore stop */
       my.default = value
     }
     return this
@@ -704,8 +718,9 @@ export class Jack<C extends ConfigSet = {}> {
           const pv = p.values as {
             [k: string]: (string | number | boolean)[]
           }
-          pv[token.name] = pv[token.name] ?? []
-          pv[token.name].push(value)
+          const tn = pv[token.name] ?? []
+          pv[token.name] = tn
+          tn.push(value)
         } else {
           const pv = p.values as { [k: string]: string | number | boolean }
           pv[token.name] = value
@@ -721,7 +736,7 @@ export class Jack<C extends ConfigSet = {}> {
     }
 
     for (const [field, value] of Object.entries(p.values)) {
-      const valid = this.#configSet[field].validate
+      const valid = this.#configSet[field]?.validate
       if (valid && !valid(value)) {
         throw new Error(
           `Invalid value provided for --${field}: ${JSON.stringify(value)}`
@@ -744,7 +759,9 @@ export class Jack<C extends ConfigSet = {}> {
     // recurse so we get the core config key we care about.
     this.#noNoFields(yes, val, s)
     if (this.#configSet[yes]?.type === 'boolean') {
-      throw new Error(`do not set '${s}', instead set '${yes}' as desired.`)
+      throw new Error(
+        `do not set '${s}', instead set '${yes}' as desired.`
+      )
     }
   }
 
@@ -787,7 +804,7 @@ export class Jack<C extends ConfigSet = {}> {
       const my = this.#configSet[field]
       this.#env[toEnvKey(this.#envPrefix, field)] = toEnvVal(
         value,
-        my.delim
+        my?.delim
       )
     }
   }
@@ -973,7 +990,7 @@ export class Jack<C extends ConfigSet = {}> {
         padding: [0, 0, 0, 2],
       })
     } else {
-      const cmd = basename(process.argv[1])
+      const cmd = basename(String(process.argv[1]))
       const shortFlags: string[] = []
       const shorts: string[][] = []
       const flags: string[] = []
@@ -1000,7 +1017,7 @@ export class Jack<C extends ConfigSet = {}> {
 
     ui.div({ padding: [0, 0, 0, 0], text: '' })
     const maybeDesc = this.#fields[start]
-    if (isDescription(maybeDesc)) {
+    if (maybeDesc && isDescription(maybeDesc)) {
       const print = normalize(maybeDesc.text, maybeDesc.pre)
       start++
       ui.div({ padding: [0, 0, 0, 0], text: print })
@@ -1067,7 +1084,7 @@ export class Jack<C extends ConfigSet = {}> {
     if (this.#options.usage) {
       out.push(normalizeMarkdown(this.#options.usage, true))
     } else {
-      const cmd = basename(process.argv[1])
+      const cmd = basename(String(process.argv[1]))
       const shortFlags: string[] = []
       const shorts: string[][] = []
       const flags: string[] = []
@@ -1090,7 +1107,7 @@ export class Jack<C extends ConfigSet = {}> {
     }
 
     const maybeDesc = this.#fields[start]
-    if (isDescription(maybeDesc)) {
+    if (maybeDesc && isDescription(maybeDesc)) {
       out.push(normalizeMarkdown(maybeDesc.text, maybeDesc.pre))
       start++
     }

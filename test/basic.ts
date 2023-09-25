@@ -1,6 +1,6 @@
 import t from 'tap'
 import { inspect } from 'util'
-import { Jack, jack } from '../dist/cjs/index.js'
+import { Jack, jack } from '../dist/esm/index.js'
 
 t.beforeEach(t => {
   t.context.env = {}

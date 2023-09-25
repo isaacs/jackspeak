@@ -1,5 +1,5 @@
 import t from 'tap'
-import { jack, JackOptions } from '../dist/cjs/index.js'
+import { jack, JackOptions } from '../dist/esm/index.js'
 
 const newJack = (opts: JackOptions = {}) =>
   jack(opts)

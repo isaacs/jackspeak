@@ -5,31 +5,25 @@
  * Make sure to inspect the output below.  Do not ignore changes!
  */
 'use strict'
-exports[`test/basic.ts --foo TAP defaults to process.env and process.argv > default parse, no _eval 1`] = `
+exports[`TAP --foo > TAP > defaults to process.env and process.argv > default parse, with _eval 1`] = `
 Object {
   "foo": true,
 }
 `
 
-exports[`test/basic.ts --foo TAP defaults to process.env and process.argv > default parse, with _eval 1`] = `
-Object {
-  "foo": true,
-}
-`
-
-exports[`test/basic.ts TAP --flag=wave {} > throw 1`] = `
+exports[`TAP > TAP > --flag=wave {} > throw 1`] = `
 Error: Flag --flag does not take a value, received 'wave' {
   "name": "Error",
 }
 `
 
-exports[`test/basic.ts TAP --jobs=workit {} > throw 1`] = `
+exports[`TAP > TAP > --jobs=workit {} > throw 1`] = `
 Error: Invalid value 'workit' provided for '--jobs' option, expected number {
   "name": "Error",
 }
 `
 
-exports[`test/basic.ts TAP --numlistaf=1 --numlistaf=2 --flaglistaf --no-flaglistaf --optlistaf=x --optlistaf=y --numaf=3 --numaf=4 --flagaf --no-flagaf --optaf=z --optaf=a {} > env after parse 1`] = `
+exports[`TAP > TAP > --numlistaf=1 --numlistaf=2 --flaglistaf --no-flaglistaf --optlistaf=x --optlistaf=y --numaf=3 --numaf=4 --flagaf --no-flagaf --optaf=z --optaf=a {} > env after parse 1`] = `
 Object {
   "TEST_DEFNUMS": String(
     1
@@ -56,7 +50,7 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP --numlistaf=1 --numlistaf=2 --flaglistaf --no-flaglistaf --optlistaf=x --optlistaf=y --numaf=3 --numaf=4 --flagaf --no-flagaf --optaf=z --optaf=a {} > parse results 1`] = `
+exports[`TAP > TAP > --numlistaf=1 --numlistaf=2 --flaglistaf --no-flaglistaf --optlistaf=x --optlistaf=y --numaf=3 --numaf=4 --flagaf --no-flagaf --optaf=z --optaf=a {} > parse results 1`] = `
 Object {
   "positionals": Array [],
   "values": Object {
@@ -86,7 +80,13 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP --nums 1 --nums 2 --gtthree 4 --node-arg=--x=y {} > env after parse 1`] = `
+exports[`TAP > TAP > --nums {} > throw 1`] = `
+Error: No value provided for --nums, expected number {
+  "name": "Error",
+}
+`
+
+exports[`TAP > TAP > --nums 1 --nums 2 --gtthree 4 --node-arg=--x=y {} > env after parse 1`] = `
 Object {
   "TEST_DEFNUMS": String(
     1
@@ -104,7 +104,7 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP --nums 1 --nums 2 --gtthree 4 --node-arg=--x=y {} > parse results 1`] = `
+exports[`TAP > TAP > --nums 1 --nums 2 --gtthree 4 --node-arg=--x=y {} > parse results 1`] = `
 Object {
   "positionals": Array [],
   "values": Object {
@@ -129,19 +129,13 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP --nums {} > throw 1`] = `
-Error: No value provided for --nums, expected number {
-  "name": "Error",
-}
-`
-
-exports[`test/basic.ts TAP --unknownthing=yolo {} > throw 1`] = `
+exports[`TAP > TAP > --unknownthing=yolo {} > throw 1`] = `
 Error: Unknown option '--unknownthing'. To specify a positional argument starting with a '-', place it at the end of the command after '--', as in '-- --unknownthing' {
   "name": "Error",
 }
 `
 
-exports[`test/basic.ts TAP -O foo -f -F --flag -ddd -j2 {} > env after parse 1`] = `
+exports[`TAP > TAP > -O foo -f -F --flag -ddd -j2 {} > env after parse 1`] = `
 Object {
   "TEST_DEBUG": String(
     1
@@ -159,7 +153,7 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP -O foo -f -F --flag -ddd -j2 {} > parse results 1`] = `
+exports[`TAP > TAP > -O foo -f -F --flag -ddd -j2 {} > parse results 1`] = `
 Object {
   "positionals": Array [],
   "values": Object {
@@ -182,13 +176,153 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP -Oasdf -f -F --flag -ddd -j2 {} > throw 1`] = `
+exports[`TAP > TAP > -Oasdf -f -F --flag -ddd -j2 {} > throw 1`] = `
 Error: Invalid value provided for --opts-array: ["asdf"] {
   "name": "Error",
 }
 `
 
-exports[`test/basic.ts TAP inspection > inspect 1`] = `
+exports[`TAP > TAP > no env prefix, no writing env > must match snapshot 1`] = `
+Object {
+  "positionals": Array [],
+  "values": Object {
+    "foo": true,
+  },
+}
+`
+
+exports[`TAP > TAP > no env prefix, no writing env > no short flags usage 1`] = `
+Usage:
+  basic.ts --foo
+
+  --foo
+`
+
+exports[`TAP > TAP > no env prefix, no writing env > no short flags usage 2`] = `
+Usage:
+
+\`\`\`
+basic.ts --foo
+\`\`\`
+
+## \`--foo\`
+
+`
+
+exports[`TAP > TAP > no env prefix, no writing env > usage markdown without any heading or usage option 1`] = `
+Usage:
+
+\`\`\`
+basic.ts -f --b=<bar> --asdf --baz=<z> --quux=<quux>
+\`\`\`
+
+## \`-f --foo\`
+
+## \`--asdf\`
+
+## \`-b<n> --bar=<n>\`
+
+## \`--baz=<z>\`
+
+## \`--quux=<n>\`
+
+`
+
+exports[`TAP > TAP > no env prefix, no writing env > usage without any heading or usage option 1`] = `
+Usage:
+  basic.ts -f --b=<bar> --asdf --baz=<z> --quux=<quux>
+
+  -f --foo
+  --asdf
+  -b<n> --bar=<n>
+  --baz=<z>
+  --quux=<n>
+`
+
+exports[`TAP > TAP > pos -F itional -j 32 {"TEST_JOBS":"123","TEST_FLAG":"1","TEST_REPORTER":"reprep"} > env after parse 1`] = `
+Object {
+  "TEST_DEFNUMS": String(
+    1
+    2
+    3
+  ),
+  "TEST_FLAG": "0",
+  "TEST_JOBS": "32",
+  "TEST_REPORTER": "reprep",
+}
+`
+
+exports[`TAP > TAP > pos -F itional -j 32 {"TEST_JOBS":"123","TEST_FLAG":"1","TEST_REPORTER":"reprep"} > parse results 1`] = `
+Object {
+  "positionals": Array [
+    "pos",
+    "itional",
+  ],
+  "values": Object {
+    "defnums": Array [
+      1,
+      2,
+      3,
+    ],
+    "flag": false,
+    "jobs": 32,
+    "reporter": "reprep",
+  },
+}
+`
+
+exports[`TAP > TAP > pos -j 32 {"TEST_DEBUG":"1","TEST_FLAG":"0"} > env after parse 1`] = `
+Object {
+  "TEST_DEBUG": "1",
+  "TEST_DEFNUMS": String(
+    1
+    2
+    3
+  ),
+  "TEST_FLAG": "0",
+  "TEST_JOBS": "32",
+}
+`
+
+exports[`TAP > TAP > pos -j 32 {"TEST_DEBUG":"1","TEST_FLAG":"0"} > parse results 1`] = `
+Object {
+  "positionals": Array [
+    "pos",
+  ],
+  "values": Object {
+    "debug": Array [
+      true,
+    ],
+    "defnums": Array [
+      1,
+      2,
+      3,
+    ],
+    "flag": false,
+    "jobs": 32,
+  },
+}
+`
+
+exports[`TAP > TAP > stop at positional > must match snapshot 1`] = `
+Object {
+  "positionals": Array [
+    "positional",
+    "--otherthing=x",
+  ],
+  "values": Object {
+    "xyz": 1,
+  },
+}
+`
+
+exports[`test/basic.ts --foo > TAP > defaults to process.env and process.argv > default parse, no _eval 1`] = `
+Object {
+  "foo": true,
+}
+`
+
+exports[`test/basic.ts > TAP > inspection > inspect 1`] = `
 Jack {
   'node-arg': { type: 'string', multiple: true },
   'opts-array': {
@@ -262,7 +396,7 @@ Jack {
 }
 `
 
-exports[`test/basic.ts TAP inspection > must match snapshot 1`] = `
+exports[`test/basic.ts > TAP > inspection > must match snapshot 1`] = `
 Object {
   "alltrue": Object {
     "multiple": true,
@@ -379,7 +513,7 @@ Object {
 }
 `
 
-exports[`test/basic.ts TAP inspection > must match snapshot 2`] = `
+exports[`test/basic.ts > TAP > inspection > must match snapshot 2`] = `
 The best Foo that ever Fooed
 Usage:
   foo [options] <files>
@@ -472,7 +606,7 @@ This is a list:
                          Send the raw output to the specified file.
 `
 
-exports[`test/basic.ts TAP inspection > must match snapshot 3`] = `
+exports[`test/basic.ts > TAP > inspection > must match snapshot 3`] = `
 # The best Foo that ever Fooed
 
 Usage:
@@ -617,140 +751,6 @@ Send the raw output to the specified file.
 
 `
 
-exports[`test/basic.ts TAP no env prefix, no writing env > must match snapshot 1`] = `
-Object {
-  "positionals": Array [],
-  "values": Object {
-    "foo": true,
-  },
-}
-`
-
-exports[`test/basic.ts TAP no env prefix, no writing env > no short flags usage 1`] = `
-Usage:
-  basic.ts --foo
-
-  --foo
-`
-
-exports[`test/basic.ts TAP no env prefix, no writing env > no short flags usage 2`] = `
-Usage:
-
-\`\`\`
-basic.ts --foo
-\`\`\`
-
-## \`--foo\`
-
-`
-
-exports[`test/basic.ts TAP no env prefix, no writing env > usage markdown without any heading or usage option 1`] = `
-Usage:
-
-\`\`\`
-basic.ts -f --b=<bar> --asdf --baz=<z> --quux=<quux>
-\`\`\`
-
-## \`-f --foo\`
-
-## \`--asdf\`
-
-## \`-b<n> --bar=<n>\`
-
-## \`--baz=<z>\`
-
-## \`--quux=<n>\`
-
-`
-
-exports[`test/basic.ts TAP no env prefix, no writing env > usage without any heading or usage option 1`] = `
-Usage:
-  basic.ts -f --b=<bar> --asdf --baz=<z> --quux=<quux>
-
-  -f --foo
-  --asdf
-  -b<n> --bar=<n>
-  --baz=<z>
-  --quux=<n>
-`
-
-exports[`test/basic.ts TAP pos -F itional -j 32 {"TEST_JOBS":"123","TEST_FLAG":"1","TEST_REPORTER":"reprep"} > env after parse 1`] = `
-Object {
-  "TEST_DEFNUMS": String(
-    1
-    2
-    3
-  ),
-  "TEST_FLAG": "0",
-  "TEST_JOBS": "32",
-  "TEST_REPORTER": "reprep",
-}
-`
-
-exports[`test/basic.ts TAP pos -F itional -j 32 {"TEST_JOBS":"123","TEST_FLAG":"1","TEST_REPORTER":"reprep"} > parse results 1`] = `
-Object {
-  "positionals": Array [
-    "pos",
-    "itional",
-  ],
-  "values": Object {
-    "defnums": Array [
-      1,
-      2,
-      3,
-    ],
-    "flag": false,
-    "jobs": 32,
-    "reporter": "reprep",
-  },
-}
-`
-
-exports[`test/basic.ts TAP pos -j 32 {"TEST_DEBUG":"1","TEST_FLAG":"0"} > env after parse 1`] = `
-Object {
-  "TEST_DEBUG": "1",
-  "TEST_DEFNUMS": String(
-    1
-    2
-    3
-  ),
-  "TEST_FLAG": "0",
-  "TEST_JOBS": "32",
-}
-`
-
-exports[`test/basic.ts TAP pos -j 32 {"TEST_DEBUG":"1","TEST_FLAG":"0"} > parse results 1`] = `
-Object {
-  "positionals": Array [
-    "pos",
-  ],
-  "values": Object {
-    "debug": Array [
-      true,
-    ],
-    "defnums": Array [
-      1,
-      2,
-      3,
-    ],
-    "flag": false,
-    "jobs": 32,
-  },
-}
-`
-
-exports[`test/basic.ts TAP stop at positional > must match snapshot 1`] = `
-Object {
-  "positionals": Array [
-    "positional",
-    "--otherthing=x",
-  ],
-  "values": Object {
-    "xyz": 1,
-  },
-}
-`
-
-exports[`test/basic.ts TAP validate object > successful validate 1`] = `
+exports[`test/basic.ts > TAP > validate object > successful validate 1`] = `
 undefined
 `

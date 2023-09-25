@@ -23,7 +23,7 @@ if (
   (major === 18 && minor < 11) ||
   (major === 16 && minor < 19)
 ) {
-/* c8 ignore stop */
+  /* c8 ignore stop */
   pa = require('@pkgjs/parseargs').parseArgs
 }
 

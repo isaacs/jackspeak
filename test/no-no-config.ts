@@ -1,12 +1,12 @@
 import t from 'tap'
-import { Jack, jack } from '../dist/cjs/index.js'
+import { jack } from '../dist/esm/index.js'
 
 const j = jack({
   envPrefix: 'TEST',
   env: {
     TEST_FOO: '1',
-    TEST_NO_FOO: '0'
-  }
+    TEST_NO_FOO: '0',
+  },
 }).flag({
   foo: {},
   'no-foo': {},

@@ -1,310 +1,296 @@
 Usage:
-  tap [options] <files>
+  tap [<options>] [<cmd> ...[<args>]]
 
 Executes all the files and interprets their output as TAP formatted test result
-data.
+data. If no files are specified, then tap will search for testy-looking files,
+and run those. (See '--test-regex' below.)
 
 To parse TAP data from stdin, specify "-" as a filename.
 
 Short options are parsed gnu-style, so for example '-bCRspec' would be
 equivalent to '--bail --no-color --reporter=spec'
 
-If the --check-coverage or --coverage-report options are provided, but no test
-files are specified, then a coverage report or coverage check will be run on the
-data from the last test run.
-
-Coverage is never enabled for stdin.
+Coverage is not enabled for stdin.
 
 Much more documentation available at: https://www.node-tap.org/
 
-Basic Options:
+The best Foo that ever Fooed
 
-  -R<type> --reporter=<type>
-                         Use the specified reporter. Defaults to 'classic' when
-                         colors are in use, or 'tap' when colors are disabled.
+  Executes all the files and interprets their output as TAP formatted test
+  result data.
 
-                         Available reporters: classic doc dot dump json
-                         jsonstream landing list markdown min nyan progress
-                         silent spec tap xunit
+  To parse TAP data from stdin, specify "-" as a filename.
 
-  -b --bail              Bail out on first failure
-  -B --no-bail           Do not bail out on first failure (default)
-  --comments             Print all tap comments to process.stderr
-  --no-comments          switch off the --comments flag
-  -c --color             Use colors (Default for TTY)
-  -C --no-color          Do not use colors (Default for non-TTY)
+  This is a list:
 
-  -s<file> --save=<file> If <file> exists, then it should be a line- delimited
-                         list of test files to run. If <file> is not present,
-                         then all command-line positional arguments are run.
+  - one
+  - two
+  - three
 
-                         After the set of test files are run, any failed test
-                         files are written back to the save file.
+  Subcommands
 
-                         This way, repeated runs with -s<file> will re-run
-                         failures until all the failures are passing, and then
-                         once again run all tests.
+    several subcommands are available.
 
-                         Its a good idea to .gitignore the file used for this
-                         purpose, as it will churn a lot.
+    they are described below.
 
-  -O --only              Only run tests with {only: true} option, or created
-                         with t.only(...) function.
+  bazzle
 
-  --no-only              switch off the --only flag
+    Bazzle the bedazzled razzle mafazzale
+
+    blorg
+      When the grolb needs blorging, use this command and it will make sure
+      every asdf is a quux.
+
+      ​A pre-formatted description section
+      ​
+      ​     because
+      ​ '. \   what if your usage banner
+      ​  '- \                 needs a baby elephant
+      ​   / /_         .---.
+      ​  / | \\,.\/--.//    )
+      ​  |  \//        )/  /
+      ​   \  ' ^ ^    /    )____.----..  6
+      ​    '.____.    .___/            \._)
+      ​       .\/.                      )
+      ​        '\                       /
+      ​        _/ \/    ).        )    (
+      ​       /#  .!    |        /\    /
+      ​       \  C// #  /'-----''/ #  /
+      ​    .   'C/ |    |    |   |    |mrf  ,
+      ​    \), .. .'OOO-'. ..'OOO'OOO-'. ..\(,
+
+  Basic Options
+
+  --plugin=<module>    Configure the tap Test class with the specified plugin.
+
+                       Typically this is set in a .taprc file, not on the
+                       command line, and can be managed using the 'tap plugin
+                       <add|rm>' command.
+
+                       If the set of plugins does not match that which tap was
+                       built with previously, then it will rebuild the Test
+                       class prior to running tests.
+
+                       To *exclude* a plugin which has been previously included
+                       (perhaps by being part of tap's default set), add it to
+                       this list prefixed by a '!' character.
+
+                       Can be set multiple times
+
+  -R<reporter> --reporter=<reporter>
+                       Use the specified reporter. Defaults to 'base' when
+                       colors are in use, or 'tap' when colors are disabled.
+
+                       In addition to the built-in reporters provided by the
+                       treport and tap-mocha-reporter modules, the reporter
+                       option can also specify a command-line program or a
+                       module to load via require().
+
+                       Command-line programs receive the raw TAP output on their
+                       stdin.
+
+                       Modules loaded via require() must export either a
+                       writable stream class or a React.Component subclass.
+                       Writable streams are instantiated and piped into. React
+                       components are rendered using Ink, with tap={tap} as
+                       their only property.
+
+  -r<arg> --reporter-arg=<arg>
+                       Args to pass to command-line reporters. Ignored when
+                       using built-in reporters or module reporters.
+
+                       Can be set multiple times
+
+  --coverage-reporter=<type>
+                       Output coverage information using the specified istanbul
+                       coverage reporter type.
+
+                       Default is 'text' when running on the command line, or
+                       'text-lcov' when piping to coveralls.
+
+                       If 'html' is used, then the report will be opened in a
+                       web browser after running.
+
+                       This can be run on its own at any time after a test run
+                       that included coverage.
+
+                       Built-in coverage reporters: clover cobertura html json
+                       json-summary lcov lcovonly none teamcity text text-lcov
+                       text-summary
+
+  -F --save-fixture    Do not clean up fixtures created with t.testdir()
+  -b --bail            Bail out on first failure
+  -B --no-bail         Do not bail out on first failure (default)
+  --comments           Print all tap comments to process.stderr
+  -c --color           Use colors (Default for TTY)
+  -C --no-color        Do not use colors (Default for non-TTY)
+  -S --snapshot        Generate snapshot files for 't.matchSnapshot()'
+                       assertions.
+
+  -w --watch           Watch for changes in the test suite or covered program.
+
+                       Runs the suite normally one time, and from then on,
+                       re-run just the portions of the suite that are required
+                       whenever a file changes.
+
+                       Opens a REPL to trigger tests and perform various
+                       actions.
+
+  -n --changed         Only run tests for files that have changed since the last
+                       run.
+
+                       If no prior test run data exists, then all default files
+                       are run, as if --changed was not specified.
+
+  -s --save            If <file> exists, then it should be a line- delimited
+                       list of test files to run. If <file> is not present, then
+                       all command-line positional arguments are run.
+
+                       After the set of test files are run, any failed test
+                       files are written back to the save file.
+
+                       This way, repeated runs with -s<file> will re-run
+                       failures until all the failures are passing, and then
+                       once again run all tests.
+
+                       Its a good idea to .gitignore the file used for this
+                       purpose, as it will churn a lot.
+
+  -O --only            Only run tests with {only: true} option, or created with
+                       t.only(...) function.
 
   -g<pattern> --grep=<pattern>
-                         Only run subtests tests matching the specified pattern.
+                       Only run subtests tests matching the specified pattern.
 
-                         Patterns are matched against top-level subtests in each
-                         file. To filter tests at subsequent levels, specify
-                         this option multiple times.
+                       Patterns are matched against top-level subtests in each
+                       file. To filter tests at subsequent levels, specify this
+                       option multiple times.
 
-                         To specify regular expression flags, format pattern
-                         like a JavaScript RegExp literal. For example: '/xyz/i'
-                         for case-insensitive matching.
+                       To specify regular expression flags, format pattern like
+                       a JavaScript RegExp literal. For example: '/xyz/i' for
+                       case-insensitive matching.
 
-                         Can be set multiple times
+                       Can be set multiple times
 
-  -i --invert            Invert the matches to --grep patterns. (Like grep -v)
-  -I --no-invert         switch off the --invert flag
+  -i --invert          Invert the matches to --grep patterns. (Like grep -v)
+  -I --no-invert       Do not invert the matches to --grep patterns. (default)
 
-  -t<n> --timeout=<n>    Time out test files after <n> seconds. Defaults to 30,
-                         or the value of the TAP_TIMEOUT environment variable.
-                         Setting to 0 allows tests to run forever.
+  --diag               Set to show diagnostics by default for both passing
+                       tests. If not set, then diagnostics are printed by
+                       default for failing tests, and not for passing tests.
 
-  -T --no-timeout        Do not time out tests. Equivalent to --timeout=0.
+  --no-diag            Do not show diagnostics by default for passing or failing
+                       tests. If not set, then diagnostics are printed by
+                       default for failing tests, and not for passing tests.
 
-Running Parallel Tests:
+  -t<n> --timeout=<n>  Time out test files after <n> seconds. Defaults to 30.
+                       Setting to 0 allows tests to run forever.
 
-  Tap can run multiple test files in parallel. This generally results in a
-  speedier test run, but can also cause problems if your test files are not
-  designed to be independent from one another.
+                       When a test process calls t.setTimeout(n) on the
+                       top-level tap object, it also updates this value for that
+                       specific process.
 
-  -j<n> --jobs=<n>       Run up to <n> test files in parallel Note that this
-                         causes tests to be run in "buffered" mode, so
-                         line-by-line results cannot be reported, and older TAP
-                         parsers may get upset.
+  --files=<filename>   Alternative way to specify test set rather than using
+                       positional arguments. Supported as an option so that test
+                       file arguments can be specified in .taprc and
+                       package.json files.
 
-  -J --jobs-auto         Run test files in parallel (auto calculated) Note that
-                         this causes tests to be run in "buffered" mode, so
-                         line-by-line results cannot be reported, and older TAP
-                         parsers may get upset.
+                       Can be set multiple times
 
-Code Coverage Options:
+  Test Running Options
 
-  Tap uses the nyc module internally to provide code coverage, so there is no
-  need to invoke nyc yourself or depend on it directly unless you want to use it
-  in other scenarios.
+  -j<n> --jobs=<n>     Run up to <n> test files in parallel.
 
-  --100                  Enforce full coverage, 100%. Sets branches, statements,
-                         functions, and lines to 100.
+                       By default, this will be set to the number of CPUs on the
+                       system (16).
 
-  -cov --coverage        Capture coverage information using 'nyc'
+                       Set --jobs=1 to disable parallelization entirely.
 
-                         If a COVERALLS_REPO_TOKEN environment variable is set,
-                         then coverage is captured by default and sent to the
-                         coveralls.io service.
+  --before=<module>    A node program to be run before test files are executed.
 
-  -no-cov --no-coverage  Do not capture coverage information. Note that if nyc
-                         is already loaded, then the coverage info will still be
-                         captured.
+                       Exiting with a non-zero status code or a signal will fail
+                       the test run and exit the process in error.
 
-  --coverage-report=<type>
-                         Output coverage information using the specified
-                         istanbul/nyc reporter type.
+  --after=<module>     A node program to be executed after tests are finished.
 
-                         Default is 'text' when running on the command line, or
-                         'text-lcov' when piping to coveralls.
+                       This will be run even if a test in the series fails with
+                       a bailout, but it will *not* be run if a --before script
+                       fails.
 
-                         If 'html' is used, then the report will be opened in a
-                         web browser after running.
+                       Exiting with a non-zero status code or a signal will fail
+                       the test run and exit the process in error.
 
-                         This can be run on its own at any time after a test run
-                         that included coverage.
+  -o<filename> --output-file=<filename>
+                       Send the raw TAP output to the specified file. Reporter
+                       output will still be printed to stdout, but the file will
+                       contain the raw TAP for later replay or analysis.
 
-  --no-coverage-report   Do not output a coverage report, even if coverage
-                         information is generated.
+  -d<dir> --output-dir=<dir>
+                       Send the raw TAP output to the specified directory. A
+                       separate .tap file will be created for each test file
+                       that is run. Reporter output will still be printed to
+                       stdout, but the files will contain the raw TAP for later
+                       replay or analysis.
 
-  --no-browser           Do not open a web browser after generating an html
-                         coverage report
+                       Files will be created to match the folder structure and
+                       filenames of test files run, but with '.tap' appended to
+                       the filenames.
 
-Coverage Enfocement Options:
+  --include=<pattern>  A glob expression pattern indicating tests to run if no
+                       positional arguments are provided to the 'tap run'
+                       command.
 
-  These options enable you to specify that the test will fail if a given
-  coverage level is not met. Setting any of the options below will trigger the
-  --coverage and --check-coverage flags.
+                       By default, tap will search for all files ending in .ts,
+                       .tsx, .cts, .mts, .js, .jsx, .cjs, or .mjs, in a
+                       top-level folder named test, tests, or __tests__, or any
+                       file ending in '.spec.' or '.test.' before a supported
+                       extension, or a top-level file named 'test.(js,jsx,...)'
+                       or 'tests.(js,jsx,...)'
 
-  The most stringent is --100. You can find a list of projects running their
-  tests like this at: https://www.node-tap.org/100
+                       No files excluded by the 'exclude' option will be loaded,
+                       meaning so dependencies, build artifacts in 'dist', and
+                       test fixtures and snapshots will be ignored.
 
-  If you run tests in this way, please add your project to the list.
+  --exclude=<pattern>  A glob pattern indicating which filenames should NEVER be
+                       run as tests. This overrides the 'include' option.
 
-  --check-coverage       Check whether coverage is within thresholds provided.
-                         Setting this explicitly will default --coverage to
-                         true.
+                       Defaults to excluding any folders named dist, fixture, or
+                       fixtures.
 
-                         This can be run on its own any time after a test run
-                         that included coverage.
+                       Note: folders named tap-snapshots, node_modules, .git,
+                       and .hg are ALWAYS excluded from the default test file
+                       set. If you wish to run tests in these folders, then name
+                       the test files on the command line as positional
+                       arguments.
 
-  --no-check-coverage    switch off the --check-coverage flag
-  --branches=<n>         what % of branches must be covered?
-  --functions=<n>        what % of functions must be covered?
-  --lines=<n>            what % of lines must be covered?
-  --statements=<n>       what % of statements must be covered?
+  --test-arg=<arg>     Pass an argument to test files spawned by the tap command
+                       line executable. This can be specified multiple times to
+                       pass multiple args to test scripts.
 
-Other Options:
+                       Can be set multiple times
 
-  -h --help              Show this helpful output
-  --no-help              switch off the --help flag
-  -v --version           Show the version of this program.
-  --no-version           switch off the --version flag
+  --test-env=<key=value>
+                       Pass a key=value (ie, --test-env=key=value) to set an
+                       environment variable in the process where tests are run.
 
-  --test-arg=<arg>       Pass an argument to test files spawned by the tap
-                         command line executable. This can be specified multiple
-                         times to pass multiple args to test scripts.
-                         Can be set multiple times
+                       If a value is not provided, such as '--test-env=key',
+                       then the key is ensured to not be set in the environment.
+                       To set a key to the empty string, use --test-env=key=
 
-  --nyc-arg=<arg>        Pass an argument to nyc when running child processes
-                         with coverage enabled. This can be specified multiple
-                         times to pass multiple args to nyc.
-                         Can be set multiple times
+                       Can be set multiple times
 
-  --node-arg=<arg>       Pass an argument to Node binary in all child processes.
-                         Run 'node --help' to see a list of all relevant
-                         arguments. This can be specified multiple times to pass
-                         multiple args to Node.
-                         Can be set multiple times
+  --node-arg=<arg>     Pass an argument to Node binary in all child processes.
+                       Run 'node --help' to see a list of all relevant
+                       arguments. This can be specified multiple times to pass
+                       multiple args to Node.
 
-  -gc --expose-gc        Expose the gc() function to Node.js tests
-  --debug                Run JavaScript tests with node --debug
-  --debug-brk            Run JavaScript tests with node --debug-brk
-  --harmony              Enable all Harmony flags in JavaScript tests
-  --strict               Run JS tests in 'use strict' mode
+                       Can be set multiple times
 
-  --nyc-help             Print nyc usage banner. Useful for viewing options for
-                         --nyc-arg.
+  Other Options
 
-  --no-nyc-help          switch off the --nyc-help flag
-  --nyc-version          Print version of nyc used by tap.
-  --no-nyc-version       switch off the --nyc-version flag
-  --dump-config          Dump the config options in JSON format
-  --no-dump-config       switch off the --dump-config flag
+  --debug              Turn on debug mode
+  -V --versions        Show the version of tap and relevant tap libraries in
+                       use.
 
-  -o<file> --output-file=<file>
-                         Send the raw TAP output to the specified file. Reporter
-                         output will still be printed to stdout, but the file
-                         will contain the raw TAP for later replay or analysis.
-
-  --                     Stop parsing flags, and treat any additional command
-                         line arguments as filenames.
-
-Environment Variables:
-
-  TAP_CHILD_ID           Test files have this value set to a numeric value when
-                         run through the test runner. It also appears on the
-                         root tap object as `tap.childId`.
-
-  TAP_SNAPSHOT           Set to '1' to generate snapshot files for
-                         't.matchSnapshot()' assertions.
-
-  TAP_RCFILE             A yaml formatted file which can set any of the above
-                         options. Defaults to $HOME/.taprc
-
-  TAP_TIMEOUT            Default value for --timeout option.
-
-  TAP_COLORS             Set to '1' to force color output, or '0' to prevent
-                         color output.
-
-  TAP_BAIL               Bail out on the first test failure. Used internally
-                         when '--bailout' is set.
-
-  TAP                    Set to '1' to force standard TAP output, and suppress
-                         any reporters. Used when running child tests so that
-                         their output is parseable by the test harness.
-
-  TAP_DIAG               Set to '1' to show diagnostics by default for passing
-                         tests. Set to '0' to NOT show diagnostics by default
-                         for failing tests. If not one of these two values, then
-                         diagnostics are printed by default for failing tests,
-                         and not for passing tests.
-
-  TAP_BUFFER             Set to '1' to run subtests in buffered mode by default.
-
-  TAP_DEV_LONGSTACK      Set to '1' to include node-tap internals in stack
-                         traces. By default, these are included only when the
-                         current working directory is the tap project itself.
-                         Note that node internals are always excluded.
-
-  TAP_DEV_SHORTSTACK     Set to '1' to exclude node-tap internals in stack
-                         traces, even if the current working directory is the
-                         tap project itself.
-
-  TAP_DEBUG              Set to '1' to turn on debug mode.
-  NODE_DEBUG             Include 'tap' to turn on debug mode.
-
-  TAP_GREP               A '\n'-delimited list of grep patterns to apply to root
-                         level test objects. (This is an implementation detail
-                         for how the '--grep' option works.)
-
-  TAP_GREP_INVERT        Set to '1' to invert the meaning of the patterns in
-                         TAP_GREP. (Implementation detail for how the '--invert'
-                         flag works.)
-
-  _TAP_COVERAGE_         Reserved for internal use.
-
-Config Files:
-
-  You can create a yaml file with any of the options above. By default, the file
-  at ~/.taprc will be loaded, but the TAP_RCFILE environment variable can modify
-  this.
-
-  Run 'tap --dump-config' for a listing of what can be set in that file. Each of
-  the keys corresponds to one of the options above.
-
-[ '--help' ]
-{
-  _: [],
-  reporter: undefined,
-  bail: false,
-  comments: false,
-  color: false,
-  save: undefined,
-  only: false,
-  grep: [],
-  invert: false,
-  timeout: 30,
-  jobs: 1,
-  coverage: false,
-  'coverage-report': undefined,
-  'check-coverage': false,
-  branches: 0,
-  functions: 0,
-  lines: 90,
-  statements: 0,
-  help: true,
-  version: false,
-  'test-arg': [],
-  'nyc-arg': [],
-  'node-arg': [],
-  'nyc-help': false,
-  'nyc-version': false,
-  'dump-config': false,
-  'output-file': undefined,
-  TAP_CHILD_ID: false,
-  TAP_SNAPSHOT: false,
-  TAP_RCFILE: '',
-  TAP_TIMEOUT: undefined,
-  TAP_COLORS: false,
-  TAP_BAIL: false,
-  TAP: false,
-  TAP_DIAG: false,
-  TAP_BUFFER: false,
-  TAP_DEV_LONGSTACK: false,
-  TAP_DEV_SHORTSTACK: false,
-  TAP_DEBUG: false,
-  NODE_DEBUG: '',
-  TAP_GREP: [],
-  TAP_GREP_INVERT: false,
-  _TAP_COVERAGE_: false
-}
+  -v --version         Show the version of this program.
+  -h --help            show this help banner
