@@ -1,7 +1,7 @@
 const verProp = Object.getOwnPropertyDescriptor(process, 'version')
 if (!verProp) throw new Error('no version on process??')
 Object.defineProperty(process, 'version', {
-  value: 'v18.14.0',
+  value: 'v20.7.0',
   configurable: true,
   writable: true,
 })

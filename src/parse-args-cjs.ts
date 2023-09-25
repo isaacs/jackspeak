@@ -11,8 +11,19 @@ const pvs = pv
   .split('.')
   .map(s => parseInt(s, 10))
 
+/* c8 ignore start */
+const [major = 0, minor = 0] = pvs
+/* c8 ignore stop */
+
 let { parseArgs: pa } = util
-if (!pa || pvs[0] > 18 || pvs[1] < 11) {
+/* c8 ignore start */
+if (
+  !pa ||
+  major < 16 ||
+  (major === 18 && minor < 11) ||
+  (major === 16 && minor < 19)
+) {
+/* c8 ignore stop */
   pa = require('@pkgjs/parseargs').parseArgs
 }
 
