@@ -1,6 +1,6 @@
 {
   "name": "jackspeak",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "A very strict and proper argument parser.",
   "type": "module",
   "exports": {
