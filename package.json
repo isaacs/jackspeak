@@ -49,12 +49,12 @@
     "@types/pkgjs__parseargs": "^0.10.1",
     "prettier": "^2.8.6",
     "tap": "^18.1.4",
+    "tshy": "^1.1.1",
     "typedoc": "^0.25.1",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@isaacs/cliui": "^8.0.2",
-    "tshy": "^1.1.1"
+    "@isaacs/cliui": "^8.0.2"
   },
   "engines": {
     "node": ">=14"
