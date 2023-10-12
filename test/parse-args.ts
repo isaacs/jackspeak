@@ -26,7 +26,7 @@ for (const [version, usesPolyfill] of cases) {
       '../dist/esm/parse-args.js',
       { util: { ...UTIL, parseArgs: undefined }}
     )) as typeof import('../dist/esm/parse-args.js')
-    t.equal(noUtilPA === polyParseArgs, true)
+    t.equal(noUtilPA, polyParseArgs)
   })
 }
 
