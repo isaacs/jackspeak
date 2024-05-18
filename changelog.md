@@ -1,3 +1,8 @@
+# 3.0
+
+- Move custom `Error` fields to the `cause` property where they
+  belong.
+
 # 2.3
 
 - add `jack.usageMarkdown()` method
