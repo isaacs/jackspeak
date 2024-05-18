@@ -1,7 +1,7 @@
 import { parseArgs as polyParseArgs } from '@pkgjs/parseargs'
 import t from 'tap'
-import { parseArgs as utilParseArgs } from 'util'
 import * as UTIL from 'util'
+import { parseArgs as utilParseArgs } from 'util'
 
 // [version, usesPolyfill]
 const cases: [string | undefined, boolean][] = [
@@ -18,15 +18,14 @@ for (const [version, usesPolyfill] of cases) {
   t.test(String(version), async t => {
     t.intercept(process, 'version', { value: version })
     const { parseArgs } = (await t.mockImport(
-      '../dist/esm/parse-args.js'
+      '../dist/esm/parse-args.js',
     )) as typeof import('../dist/esm/parse-args.js')
     t.equal(parseArgs === polyParseArgs, usesPolyfill)
     t.equal(parseArgs === utilParseArgs, !usesPolyfill)
     const { parseArgs: noUtilPA } = (await t.mockImport(
       '../dist/esm/parse-args.js',
-      { util: { ...UTIL, parseArgs: undefined }}
+      { util: { ...UTIL, parseArgs: undefined } },
     )) as typeof import('../dist/esm/parse-args.js')
     t.equal(noUtilPA, polyParseArgs)
   })
 }
-

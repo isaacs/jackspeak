@@ -61,48 +61,56 @@ t.test('env and cli override config data', t => {
   const j = newJack()
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ foo: 'unknown' }), {
-    source: undefined,
     message: 'Unknown config option: foo',
+    cause: { source: undefined },
   })
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ num: 'unknown' }), {
-    source: undefined,
     message: `Invalid value string for num, expected number`,
+    cause: { source: undefined },
   })
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ strs: true }), {
-    source: undefined,
     message: `Invalid value boolean for strs, expected string[]`,
+    cause: { source: undefined },
   })
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ bools: ['a', 'b'] }), {
-    source: undefined,
     message: 'Invalid value string[] for bools, expected boolean[]',
-    field: 'bools',
-    value: ['a', 'b'],
+    cause: {
+      path: undefined,
+      name: 'bools',
+      found: ['a', 'b'],
+    },
   })
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ bools: ['a', true] }), {
-    source: undefined,
     message:
       'Invalid value (string|boolean)[] for bools, expected boolean[]',
-    field: 'bools',
-    value: ['a', true],
+    cause: {
+      path: undefined,
+      name: 'bools',
+      found: ['a', true],
+    },
   })
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ bools: ['a', true] }, 'blah.rc'), {
-    source: 'blah.rc',
     message:
       'Invalid value (string|boolean)[] for bools, expected boolean[]',
-    field: 'bools',
-    value: ['a', true],
+    cause: {
+      path: 'blah.rc',
+      name: 'bools',
+      found: ['a', true],
+    },
   })
   //@ts-expect-error
   t.throws(() => j.setConfigValues({ bool: 1 }, 'blah.rc'), {
-    source: 'blah.rc',
     message: 'Invalid value number for bool, expected boolean',
-    field: 'bool',
-    value: 1,
+    cause: {
+      path: 'blah.rc',
+      name: 'bool',
+      found: 1,
+    },
   })
   t.end()
 })

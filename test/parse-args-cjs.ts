@@ -31,7 +31,7 @@ for (const [version, usesPolyfill] of cases) {
       {
         '@pkgjs/parseargs': { parseArgs: polyParseArgs },
         util: { ...UTIL, parseArgs: undefined },
-      }
+      },
     ) as typeof import('../dist/commonjs/parse-args.js')
     t.equal(noUtilPA === polyParseArgs, true)
   })

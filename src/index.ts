@@ -15,7 +15,7 @@ import { basename } from 'node:path'
 
 const width = Math.min(
   (process && process.stdout && process.stdout.columns) || 80,
-  80
+  80,
 )
 
 // indentation spaces from heading level
@@ -31,26 +31,20 @@ const toEnvKey = (pref: string, key: string): string => {
 
 const toEnvVal = (
   value: string | boolean | number | string[] | boolean[] | number[],
-  delim: string = '\n'
+  delim: string = '\n',
 ): string => {
   const str =
-    typeof value === 'string'
-      ? value
-      : typeof value === 'boolean'
-      ? value
-        ? '1'
-        : '0'
-      : typeof value === 'number'
-      ? String(value)
-      : Array.isArray(value)
-      ? value
-          .map((v: string | number | boolean) => toEnvVal(v))
-          .join(delim)
-      : /* c8 ignore start */
-        undefined
+    typeof value === 'string' ? value
+    : typeof value === 'boolean' ?
+      value ? '1'
+      : '0'
+    : typeof value === 'number' ? String(value)
+    : Array.isArray(value) ?
+      value.map((v: string | number | boolean) => toEnvVal(v)).join(delim)
+    : /* c8 ignore start */ undefined
   if (typeof str !== 'string') {
     throw new Error(
-      `could not serialize value to environment: ${JSON.stringify(value)}`
+      `could not serialize value to environment: ${JSON.stringify(value)}`,
     )
   }
   /* c8 ignore stop */
@@ -61,47 +55,31 @@ const fromEnvVal = <T extends ConfigType, M extends boolean>(
   env: string,
   type: T,
   multiple: M,
-  delim: string = '\n'
+  delim: string = '\n',
 ): ValidValue<T, M> =>
-  (multiple
-    ? env
-      ? env.split(delim).map(v => fromEnvVal(v, type, false))
-      : []
-    : type === 'string'
-    ? env
-    : type === 'boolean'
-    ? env === '1'
-    : +env.trim()) as ValidValue<T, M>
+  (multiple ?
+    env ? env.split(delim).map(v => fromEnvVal(v, type, false))
+    : []
+  : type === 'string' ? env
+  : type === 'boolean' ? env === '1'
+  : +env.trim()) as ValidValue<T, M>
 
 /**
  * Defines the type of value that is valid, given a config definition's
  * {@link ConfigType} and boolean multiple setting
  */
-export type ValidValue<T extends ConfigType, M extends boolean> = [
-  T,
-  M
-] extends ['number', true]
-  ? number[]
-  : [T, M] extends ['string', true]
-  ? string[]
-  : [T, M] extends ['boolean', true]
-  ? boolean[]
-  : [T, M] extends ['number', false]
-  ? number
-  : [T, M] extends ['string', false]
-  ? string
-  : [T, M] extends ['boolean', false]
-  ? boolean
-  : [T, M] extends ['string', boolean]
-  ? string | string[]
-  : [T, M] extends ['boolean', boolean]
-  ? boolean | boolean[]
-  : [T, M] extends ['number', boolean]
-  ? number | number[]
-  : [T, M] extends [ConfigType, false]
-  ? string | number | boolean
-  : [T, M] extends [ConfigType, true]
-  ? string[] | number[] | boolean[]
+export type ValidValue<T extends ConfigType, M extends boolean> =
+  [T, M] extends ['number', true] ? number[]
+  : [T, M] extends ['string', true] ? string[]
+  : [T, M] extends ['boolean', true] ? boolean[]
+  : [T, M] extends ['number', false] ? number
+  : [T, M] extends ['string', false] ? string
+  : [T, M] extends ['boolean', false] ? boolean
+  : [T, M] extends ['string', boolean] ? string | string[]
+  : [T, M] extends ['boolean', boolean] ? boolean | boolean[]
+  : [T, M] extends ['number', boolean] ? number | number[]
+  : [T, M] extends [ConfigType, false] ? string | number | boolean
+  : [T, M] extends [ConfigType, true] ? string[] | number[] | boolean[]
   : string | number | boolean | string[] | number[] | boolean[]
 
 /**
@@ -115,9 +93,8 @@ export type ConfigOptionMeta<T extends ConfigType, M extends boolean> = {
   short?: string | undefined
   type?: T
 } & (T extends 'boolean' ? {} : { hint?: string | undefined }) &
-  (M extends false
-    ? {}
-    : { multiple?: M | undefined; delim?: string | undefined })
+  (M extends false ? {}
+  : { multiple?: M | undefined; delim?: string | undefined })
 
 /**
  * A set of {@link ConfigOptionMeta} fields, referenced by their longOption
@@ -133,7 +110,7 @@ export type ConfigMetaSet<T extends ConfigType, M extends boolean> = {
 export type ConfigSetFromMetaSet<
   T extends ConfigType,
   M extends boolean,
-  S extends ConfigMetaSet<T, M>
+  S extends ConfigMetaSet<T, M>,
 > = {
   [longOption in keyof S]: ConfigOptionBase<T, M>
 }
@@ -143,13 +120,14 @@ export type ConfigSetFromMetaSet<
  * {@link ConfigOptionMeta} based on whether or not the field is known to be
  * multiple.
  */
-export type MultiType<M extends boolean> = M extends true
-  ? {
+export type MultiType<M extends boolean> =
+  M extends true ?
+    {
       multiple: true
       delim?: string | undefined
     }
-  : M extends false
-  ? {
+  : M extends false ?
+    {
       multiple?: false | undefined
       delim?: undefined
     }
@@ -186,27 +164,24 @@ const valueType = (
     | string[]
     | number[]
     | boolean[]
-    | { type: ConfigType; multiple?: boolean }
+    | { type: ConfigType; multiple?: boolean },
 ): string =>
-  typeof v === 'string'
-    ? 'string'
-    : typeof v === 'boolean'
-    ? 'boolean'
-    : typeof v === 'number'
-    ? 'number'
-    : Array.isArray(v)
-    ? joinTypes([...new Set(v.map(v => valueType(v)))]) + '[]'
-    : `${v.type}${v.multiple ? '[]' : ''}`
+  typeof v === 'string' ? 'string'
+  : typeof v === 'boolean' ? 'boolean'
+  : typeof v === 'number' ? 'number'
+  : Array.isArray(v) ?
+    joinTypes([...new Set(v.map(v => valueType(v)))]) + '[]'
+  : `${v.type}${v.multiple ? '[]' : ''}`
 
 const joinTypes = (types: string[]): string =>
-  types.length === 1 && typeof types[0] === 'string'
-    ? types[0]
-    : `(${types.join('|')})`
+  types.length === 1 && typeof types[0] === 'string' ?
+    types[0]
+  : `(${types.join('|')})`
 
 const isValidValue = <T extends ConfigType, M extends boolean>(
   v: any,
   type: T,
-  multi: M
+  multi: M,
 ): v is ValidValue<T, M> => {
   if (multi) {
     if (!Array.isArray(v)) return false
@@ -219,7 +194,7 @@ const isValidValue = <T extends ConfigType, M extends boolean>(
 export const isConfigOption = <T extends ConfigType, M extends boolean>(
   o: any,
   type: T,
-  multi: M
+  multi: M,
 ): o is ConfigOptionBase<T, M> =>
   !!o &&
   typeof o === 'object' &&
@@ -244,19 +219,13 @@ export type ConfigSet = {
  * The 'values' field returned by {@link Jack#parse}
  */
 export type OptionsResults<T extends ConfigSet> = {
-  [k in keyof T]?: T[k] extends ConfigOptionBase<'string', false>
-    ? string
-    : T[k] extends ConfigOptionBase<'string', true>
-    ? string[]
-    : T[k] extends ConfigOptionBase<'number', false>
-    ? number
-    : T[k] extends ConfigOptionBase<'number', true>
-    ? number[]
-    : T[k] extends ConfigOptionBase<'boolean', false>
-    ? boolean
-    : T[k] extends ConfigOptionBase<'boolean', true>
-    ? boolean[]
-    : never
+  [k in keyof T]?: T[k] extends ConfigOptionBase<'string', false> ? string
+  : T[k] extends ConfigOptionBase<'string', true> ? string[]
+  : T[k] extends ConfigOptionBase<'number', false> ? number
+  : T[k] extends ConfigOptionBase<'number', true> ? number[]
+  : T[k] extends ConfigOptionBase<'boolean', false> ? boolean
+  : T[k] extends ConfigOptionBase<'boolean', true> ? boolean[]
+  : never
 }
 
 /**
@@ -268,15 +237,14 @@ export type Parsed<T extends ConfigSet> = {
 }
 
 function num(
-  o: ConfigOptionMeta<'number', false> = {}
+  o: ConfigOptionMeta<'number', false> = {},
 ): ConfigOptionBase<'number', false> {
   const { default: def, validate: val, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'number', false)) {
     throw new TypeError('invalid default value')
   }
-  const validate = val
-    ? (val as (v: any) => v is ValidValue<'number', false>)
-    : undefined
+  const validate =
+    val ? (val as (v: any) => v is ValidValue<'number', false>) : undefined
   return {
     ...rest,
     default: def,
@@ -287,15 +255,14 @@ function num(
 }
 
 function numList(
-  o: ConfigOptionMeta<'number', true> = {}
+  o: ConfigOptionMeta<'number', true> = {},
 ): ConfigOptionBase<'number', true> {
   const { default: def, validate: val, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'number', true)) {
     throw new TypeError('invalid default value')
   }
-  const validate = val
-    ? (val as (v: any) => v is ValidValue<'number', true>)
-    : undefined
+  const validate =
+    val ? (val as (v: any) => v is ValidValue<'number', true>) : undefined
   return {
     ...rest,
     default: def,
@@ -306,15 +273,14 @@ function numList(
 }
 
 function opt(
-  o: ConfigOptionMeta<'string', false> = {}
+  o: ConfigOptionMeta<'string', false> = {},
 ): ConfigOptionBase<'string', false> {
   const { default: def, validate: val, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'string', false)) {
     throw new TypeError('invalid default value')
   }
-  const validate = val
-    ? (val as (v: any) => v is ValidValue<'string', false>)
-    : undefined
+  const validate =
+    val ? (val as (v: any) => v is ValidValue<'string', false>) : undefined
   return {
     ...rest,
     default: def,
@@ -325,15 +291,14 @@ function opt(
 }
 
 function optList(
-  o: ConfigOptionMeta<'string', true> = {}
+  o: ConfigOptionMeta<'string', true> = {},
 ): ConfigOptionBase<'string', true> {
   const { default: def, validate: val, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'string', true)) {
     throw new TypeError('invalid default value')
   }
-  const validate = val
-    ? (val as (v: any) => v is ValidValue<'string', true>)
-    : undefined
+  const validate =
+    val ? (val as (v: any) => v is ValidValue<'string', true>) : undefined
   return {
     ...rest,
     default: def,
@@ -344,7 +309,7 @@ function optList(
 }
 
 function flag(
-  o: ConfigOptionMeta<'boolean', false> = {}
+  o: ConfigOptionMeta<'boolean', false> = {},
 ): ConfigOptionBase<'boolean', false> {
   const {
     hint,
@@ -355,8 +320,9 @@ function flag(
   if (def !== undefined && !isValidValue(def, 'boolean', false)) {
     throw new TypeError('invalid default value')
   }
-  const validate = val
-    ? (val as (v: any) => v is ValidValue<'boolean', false>)
+  const validate =
+    val ?
+      (val as (v: any) => v is ValidValue<'boolean', false>)
     : undefined
   if (hint !== undefined) {
     throw new TypeError('cannot provide hint for flag')
@@ -371,7 +337,7 @@ function flag(
 }
 
 function flagList(
-  o: ConfigOptionMeta<'boolean', true> = {}
+  o: ConfigOptionMeta<'boolean', true> = {},
 ): ConfigOptionBase<'boolean', true> {
   const {
     hint,
@@ -382,9 +348,8 @@ function flagList(
   if (def !== undefined && !isValidValue(def, 'boolean', true)) {
     throw new TypeError('invalid default value')
   }
-  const validate = val
-    ? (val as (v: any) => v is ValidValue<'boolean', true>)
-    : undefined
+  const validate =
+    val ? (val as (v: any) => v is ValidValue<'boolean', true>) : undefined
   if (hint !== undefined) {
     throw new TypeError('cannot provide hint for flag list')
   }
@@ -397,7 +362,7 @@ function flagList(
   }
 }
 const toParseArgsOptionsConfig = (
-  options: ConfigSet
+  options: ConfigSet,
 ): Exclude<ParseArgsConfig['options'], undefined> => {
   const c: Exclude<ParseArgsConfig['options'], undefined> = {}
   for (const longOption in options) {
@@ -418,9 +383,9 @@ const toParseArgsOptionsConfig = (
         type: 'string',
         multiple: false,
         default:
-          config.default === undefined
-            ? undefined
-            : String(config.default),
+          config.default === undefined ?
+            undefined
+          : String(config.default),
       }
     } else {
       const conf = config as
@@ -599,14 +564,24 @@ export class Jack<C extends ConfigSet = {}> {
     try {
       this.validate(values)
     } catch (er) {
-      throw Object.assign(er as Error, source ? { source } : {})
+      const e = er as Error
+      if (source && e && typeof e === 'object') {
+        if (e.cause && typeof e.cause === 'object') {
+          Object.assign(e.cause, { path: source })
+        } else {
+          e.cause = { path: source }
+        }
+      }
+      throw e
     }
     for (const [field, value] of Object.entries(values)) {
       const my = this.#configSet[field]
       // already validated, just for TS's benefit
       /* c8 ignore start */
       if (!my) {
-        throw new Error('unexpected field in config set: ' + field)
+        throw new Error('unexpected field in config set: ' + field, {
+          cause: { found: field },
+        })
       }
       /* c8 ignore stop */
       my.default = value
@@ -628,7 +603,7 @@ export class Jack<C extends ConfigSet = {}> {
   parse(args: string[] = process.argv): Parsed<C> {
     if (args === process.argv) {
       args = args.slice(
-        (process as { _eval?: string })._eval !== undefined ? 1 : 2
+        (process as { _eval?: string })._eval !== undefined ? 1 : 2,
       )
     }
     if (this.#envPrefix) {
@@ -684,21 +659,34 @@ export class Jack<C extends ConfigSet = {}> {
             `Unknown option '${token.rawName}'. ` +
               `To specify a positional argument starting with a '-', ` +
               `place it at the end of the command after '--', as in ` +
-              `'-- ${token.rawName}'`
+              `'-- ${token.rawName}'`,
+            {
+              cause: {
+                found:
+                  token.rawName + (token.value ? `=${token.value}` : ''),
+              },
+            },
           )
         }
         if (value === undefined) {
           if (token.value === undefined) {
             if (my.type !== 'boolean') {
               throw new Error(
-                `No value provided for ${token.rawName}, expected ${my.type}`
+                `No value provided for ${token.rawName}, expected ${my.type}`,
+                {
+                  cause: {
+                    name: token.rawName,
+                    wanted: valueType(my),
+                  },
+                },
               )
             }
             value = true
           } else {
             if (my.type === 'boolean') {
               throw new Error(
-                `Flag ${token.rawName} does not take a value, received '${token.value}'`
+                `Flag ${token.rawName} does not take a value, received '${token.value}'`,
+                { cause: { found: token } },
               )
             }
             if (my.type === 'string') {
@@ -708,7 +696,14 @@ export class Jack<C extends ConfigSet = {}> {
               if (value !== value) {
                 throw new Error(
                   `Invalid value '${token.value}' provided for ` +
-                    `'${token.rawName}' option, expected number`
+                    `'${token.rawName}' option, expected number`,
+                  {
+                    cause: {
+                      name: token.rawName,
+                      found: token.value,
+                      wanted: 'number',
+                    },
+                  },
                 )
               }
             }
@@ -739,7 +734,10 @@ export class Jack<C extends ConfigSet = {}> {
       const valid = this.#configSet[field]?.validate
       if (valid && !valid(value)) {
         throw new Error(
-          `Invalid value provided for --${field}: ${JSON.stringify(value)}`
+          `Invalid value provided for --${field}: ${JSON.stringify(
+            value,
+          )}`,
+          { cause: { name: field, found: value } },
         )
       }
     }
@@ -760,7 +758,8 @@ export class Jack<C extends ConfigSet = {}> {
     this.#noNoFields(yes, val, s)
     if (this.#configSet[yes]?.type === 'boolean') {
       throw new Error(
-        `do not set '${s}', instead set '${yes}' as desired.`
+        `do not set '${s}', instead set '${yes}' as desired.`,
+        { cause: { found: s, wanted: yes } },
       )
     }
   }
@@ -771,29 +770,36 @@ export class Jack<C extends ConfigSet = {}> {
    */
   validate(o: any): asserts o is Parsed<C>['values'] {
     if (!o || typeof o !== 'object') {
-      throw new Error('Invalid config: not an object')
+      throw new Error('Invalid config: not an object', {
+        cause: { found: o },
+      })
     }
     for (const field in o) {
       this.#noNoFields(field, o[field])
       const config = this.#configSet[field]
       if (!config) {
-        throw new Error(`Unknown config option: ${field}`)
+        throw new Error(`Unknown config option: ${field}`, {
+          cause: { found: field },
+        })
       }
       if (!isValidValue(o[field], config.type, !!config.multiple)) {
-        throw Object.assign(
-          new Error(
-            `Invalid value ${valueType(
-              o[field]
-            )} for ${field}, expected ${valueType(config)}`
-          ),
+        throw new Error(
+          `Invalid value ${valueType(
+            o[field],
+          )} for ${field}, expected ${valueType(config)}`,
           {
-            field,
-            value: o[field],
-          }
+            cause: {
+              name: field,
+              found: o[field],
+              wanted: valueType(config),
+            },
+          },
         )
       }
       if (config.validate && !config.validate(o[field])) {
-        throw new Error(`Invalid config value for ${field}: ${o[field]}`)
+        throw new Error(`Invalid config value for ${field}: ${o[field]}`, {
+          cause: { name: field, found: o[field] },
+        })
       }
     }
   }
@@ -804,7 +810,7 @@ export class Jack<C extends ConfigSet = {}> {
       const my = this.#configSet[field]
       this.#env[toEnvKey(this.#envPrefix, field)] = toEnvVal(
         value,
-        my?.delim
+        my?.delim,
       )
     }
   }
@@ -815,7 +821,7 @@ export class Jack<C extends ConfigSet = {}> {
   heading(
     text: string,
     level?: 1 | 2 | 3 | 4 | 5 | 6,
-    { pre = false }: { pre?: boolean } = {}
+    { pre = false }: { pre?: boolean } = {},
   ): Jack<C> {
     if (level === undefined) {
       level = this.#fields.some(r => isHeading(r)) ? 2 : 1
@@ -836,7 +842,7 @@ export class Jack<C extends ConfigSet = {}> {
    * Add one or more number fields.
    */
   num<F extends ConfigMetaSet<'number', false>>(
-    fields: F
+    fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'number', false, F>> {
     return this.#addFields(fields, num)
   }
@@ -845,7 +851,7 @@ export class Jack<C extends ConfigSet = {}> {
    * Add one or more multiple number fields.
    */
   numList<F extends ConfigMetaSet<'number', true>>(
-    fields: F
+    fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'number', true, F>> {
     return this.#addFields(fields, numList)
   }
@@ -854,7 +860,7 @@ export class Jack<C extends ConfigSet = {}> {
    * Add one or more string option fields.
    */
   opt<F extends ConfigMetaSet<'string', false>>(
-    fields: F
+    fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'string', false, F>> {
     return this.#addFields(fields, opt)
   }
@@ -863,7 +869,7 @@ export class Jack<C extends ConfigSet = {}> {
    * Add one or more multiple string option fields.
    */
   optList<F extends ConfigMetaSet<'string', true>>(
-    fields: F
+    fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'string', true, F>> {
     return this.#addFields(fields, optList)
   }
@@ -872,7 +878,7 @@ export class Jack<C extends ConfigSet = {}> {
    * Add one or more flag fields.
    */
   flag<F extends ConfigMetaSet<'boolean', false>>(
-    fields: F
+    fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'boolean', false, F>> {
     return this.#addFields(fields, flag)
   }
@@ -881,7 +887,7 @@ export class Jack<C extends ConfigSet = {}> {
    * Add one or more multiple flag fields.
    */
   flagList<F extends ConfigMetaSet<'boolean', true>>(
-    fields: F
+    fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'boolean', true, F>> {
     return this.#addFields(fields, flagList)
   }
@@ -908,10 +914,10 @@ export class Jack<C extends ConfigSet = {}> {
   #addFields<
     T extends ConfigType,
     M extends boolean,
-    F extends ConfigMetaSet<T, M>
+    F extends ConfigMetaSet<T, M>,
   >(
     fields: F,
-    fn: (m: ConfigOptionMeta<T, M>) => ConfigOptionBase<T, M>
+    fn: (m: ConfigOptionMeta<T, M>) => ConfigOptionBase<T, M>,
   ): Jack<C & ConfigSetFromMetaSet<T, M, F>> {
     type NextC = C & ConfigSetFromMetaSet<T, M, F>
     const next = this as unknown as Jack<NextC>
@@ -927,8 +933,8 @@ export class Jack<C extends ConfigSet = {}> {
             value: option as ConfigOptionBase<ConfigType, boolean>,
           })
           return [name, option]
-        })
-      )
+        }),
+      ),
     )
     return next
   }
@@ -937,7 +943,7 @@ export class Jack<C extends ConfigSet = {}> {
     if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(name)) {
       throw new TypeError(
         `Invalid option name: ${name}, ` +
-          `must be '-' delimited ASCII alphanumeric`
+          `must be '-' delimited ASCII alphanumeric`,
       )
     }
     if (this.#configSet[name]) {
@@ -946,20 +952,20 @@ export class Jack<C extends ConfigSet = {}> {
     if (this.#shorts[name]) {
       throw new TypeError(
         `Cannot redefine option ${name}, already ` +
-          `in use for ${this.#shorts[name]}`
+          `in use for ${this.#shorts[name]}`,
       )
     }
     if (field.short) {
       if (!/^[a-zA-Z0-9]$/.test(field.short)) {
         throw new TypeError(
           `Invalid ${name} short option: ${field.short}, ` +
-            'must be 1 ASCII alphanumeric character'
+            'must be 1 ASCII alphanumeric character',
         )
       }
       if (this.#shorts[field.short]) {
         throw new TypeError(
           `Invalid ${name} short option: ${field.short}, ` +
-            `already in use for ${this.#shorts[field.short]}`
+            `already in use for ${this.#shorts[field.short]}`,
         )
       }
       this.#shorts[field.short] = name
@@ -1043,7 +1049,7 @@ export class Jack<C extends ConfigSet = {}> {
               padding: [0, 1, 0, configIndent],
               width: maxWidth,
             },
-            { padding: [0, 0, 0, 0], text: row.text }
+            { padding: [0, 0, 0, 0], text: row.text },
           )
         }
         if (row.skipLine) {
@@ -1120,7 +1126,7 @@ export class Jack<C extends ConfigSet = {}> {
         out.push(
           '#'.repeat(headingLevel + 1) +
             ' ' +
-            normalizeOneLine(row.left, true)
+            normalizeOneLine(row.left, true),
         )
         if (row.text) out.push(normalizeMarkdown(row.text))
       } else if (isHeading(row)) {
@@ -1129,8 +1135,8 @@ export class Jack<C extends ConfigSet = {}> {
         out.push(
           `${'#'.repeat(headingLevel)} ${normalizeOneLine(
             row.text,
-            row.pre
-          )}`
+            row.pre,
+          )}`,
         )
       } else {
         out.push(normalizeMarkdown(row.text, !!(row as Description).pre))
@@ -1162,20 +1168,17 @@ export class Jack<C extends ConfigSet = {}> {
       const text = normalize(desc + dmDelim + mult)
       const hint =
         value.hint ||
-        (value.type === 'number'
-          ? 'n'
-          : value.type === 'string'
-          ? field.name
-          : undefined)
-      const short = !value.short
-        ? ''
-        : value.type === 'boolean'
-        ? `-${value.short} `
+        (value.type === 'number' ? 'n'
+        : value.type === 'string' ? field.name
+        : undefined)
+      const short =
+        !value.short ? ''
+        : value.type === 'boolean' ? `-${value.short} `
         : `-${value.short}<${hint}> `
       const left =
-        value.type === 'boolean'
-          ? `${short}--${field.name}`
-          : `${short}--${field.name}=<${hint}>`
+        value.type === 'boolean' ?
+          `${short}--${field.name}`
+        : `${short}--${field.name}=<${hint}>`
       const row: Row = { text, left, type: 'config' }
       if (text.length > width - maxMax) {
         row.skipLine = true
@@ -1205,13 +1208,13 @@ export class Jack<C extends ConfigSet = {}> {
           ...(def.multiple ? { multiple: true } : {}),
           ...(def.delim ? { delim: def.delim } : {}),
           ...(def.short ? { short: def.short } : {}),
-          ...(def.description
-            ? { description: normalize(def.description) }
-            : {}),
+          ...(def.description ?
+            { description: normalize(def.description) }
+          : {}),
           ...(def.validate ? { validate: def.validate } : {}),
           ...(def.default !== undefined ? { default: def.default } : {}),
         },
-      ])
+      ]),
     )
   }
 
@@ -1226,30 +1229,30 @@ export class Jack<C extends ConfigSet = {}> {
 // Unwrap and un-indent, so we can wrap description
 // strings however makes them look nice in the code.
 const normalize = (s: string, pre: boolean = false): string =>
-  pre
-    ? // prepend a ZWSP to each line so cliui doesn't strip it.
-      s
-        .split('\n')
-        .map(l => `\u200b${l}`)
-        .join('\n')
-    : s
-        // remove single line breaks, except for lists
-        .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
-          !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`
-        )
-        // normalize mid-line whitespace
-        .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
-        // two line breaks are enough
-        .replace(/\n{3,}/g, '\n\n')
-        // remove any spaces at the start of a line
-        .replace(/\n[ \t]+/g, '\n')
-        .trim()
+  pre ?
+    // prepend a ZWSP to each line so cliui doesn't strip it.
+    s
+      .split('\n')
+      .map(l => `\u200b${l}`)
+      .join('\n')
+  : s
+      // remove single line breaks, except for lists
+      .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
+        !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`,
+      )
+      // normalize mid-line whitespace
+      .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
+      // two line breaks are enough
+      .replace(/\n{3,}/g, '\n\n')
+      // remove any spaces at the start of a line
+      .replace(/\n[ \t]+/g, '\n')
+      .trim()
 
 // normalize for markdown printing, remove leading spaces on lines
 const normalizeMarkdown = (s: string, pre: boolean = false): string => {
   const n = normalize(s, pre).replace(/\\/g, '\\\\')
-  return pre
-    ? `\`\`\`\n${n.replace(/\u200b/g, '')}\n\`\`\``
+  return pre ?
+      `\`\`\`\n${n.replace(/\u200b/g, '')}\n\`\`\``
     : n.replace(/\n +/g, '\n').trim()
 }
 

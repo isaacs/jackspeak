@@ -25,20 +25,20 @@ t.beforeEach(t => {
         - one
         - two
         - three
-      `
+      `,
     )
     .heading('Subcommands')
     .description(
       `several subcommands are available.
 
-                  they are described below.`
+                  they are described below.`,
     )
     .heading('bazzle', 3)
     .description('Bazzle the bedazzled razzle mafazzale')
     .heading('blorg', 3)
     .description(
       `When the grolb needs blorging, use this command
-       and it will make sure every asdf is a quux.`
+       and it will make sure every asdf is a quux.`,
     )
     .description(
       ` A pre-formatted description section
@@ -58,7 +58,7 @@ t.beforeEach(t => {
        \\  C// #  /'-----''/ #  / 
     .   'C/ |    |    |   |    |mrf  ,
     \\), .. .'OOO-'. ..'OOO'OOO-'. ..\\(,`,
-      { pre: true }
+      { pre: true },
     )
 
     .heading('Options', 2)
@@ -190,7 +190,7 @@ t.test('inspection', t => {
   t.equal(
     jack.usageMarkdown(),
     jack.usageMarkdown(),
-    'returns same string again'
+    'returns same string again',
   )
   t.end()
 })
@@ -297,11 +297,11 @@ t.test('no env prefix, no writing env', t => {
   t.matchSnapshot(jack().flag({ foo: {} }).usage(), 'no short flags usage')
   t.matchSnapshot(
     j.usageMarkdown(),
-    'usage markdown without any heading or usage option'
+    'usage markdown without any heading or usage option',
   )
   t.matchSnapshot(
     jack().flag({ foo: {} }).usageMarkdown(),
-    'no short flags usage'
+    'no short flags usage',
   )
   t.equal(process.env.FOO, undefined)
   t.end()
@@ -329,6 +329,7 @@ const cases: [a: string[], e?: { [k: string]: string }, inv?: boolean][] =
     ],
     [['--nums', '1', '--nums', '2', '--gtthree', '4', '--node-arg=--x=y']],
     [['--unknownthing=yolo'], {}, true],
+    [['--unknownthing'], {}, true],
     [['--nums'], {}, true],
     [['--flag=wave'], {}, true],
     [['--jobs=workit'], {}, true],
@@ -359,7 +360,7 @@ for (const [args, e = {}, invalid] of cases) {
     if (invalid) {
       t.matchSnapshot(
         t.throws(() => jack.parse(args)),
-        'throw'
+        'throw',
       )
     } else {
       t.matchSnapshot(jack.parse(args), 'parse results')
