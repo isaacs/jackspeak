@@ -95,14 +95,14 @@ export type ConfigOptionMeta<
   O extends
     | undefined
     | (T extends 'boolean' ? never
-      : T extends 'string' ? string[]
-      : T extends 'number' ? number[]
-      : number[] | string[]) =
+      : T extends 'string' ? readonly string[]
+      : T extends 'number' ? readonly number[]
+      : readonly number[] | readonly string[]) =
     | undefined
     | (T extends 'boolean' ? never
-      : T extends 'string' ? string[]
-      : T extends 'number' ? number[]
-      : number[] | string[]),
+      : T extends 'string' ? readonly string[]
+      : T extends 'number' ? readonly number[]
+      : readonly number[] | readonly string[]),
 > = {
   default?:
     | undefined
@@ -129,7 +129,10 @@ export type ConfigOptionMeta<
  * A set of {@link ConfigOptionMeta} fields, referenced by their longOption
  * string values.
  */
-export type ConfigMetaSet<T extends ConfigType, M extends boolean = boolean> = {
+export type ConfigMetaSet<
+  T extends ConfigType,
+  M extends boolean = boolean,
+> = {
   [longOption: string]: ConfigOptionMeta<T, M>
 }
 
@@ -263,7 +266,9 @@ export type ConfigSet = {
  * The 'values' field returned by {@link Jack#parse}
  */
 export type OptionsResults<T extends ConfigSet> = {
-  [k in keyof T]?: T[k]['validOptions'] extends string[] | number[] ?
+  [k in keyof T]?: T[k]['validOptions'] extends (
+    readonly string[] | readonly number[]
+  ) ?
     T[k] extends ConfigOptionBase<'string' | 'number', false> ?
       T[k]['validOptions'][number]
     : T[k] extends ConfigOptionBase<'string' | 'number', true> ?

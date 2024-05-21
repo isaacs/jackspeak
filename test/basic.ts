@@ -381,21 +381,21 @@ t.test('validate against options', t => {
   }).addFields({
     'vo-opt': {
       type: 'string',
-      validOptions: ['x', 'y'],
+      validOptions: ['x', 'y'] as const,
     },
     'vo-optlist': {
       type: 'string',
       multiple: true,
-      validOptions: ['x', 'y'],
+      validOptions: ['x', 'y'] as const,
     },
     'vo-num': {
       type: 'number',
-      validOptions: [1, 2],
+      validOptions: [1, 2] as const,
     },
     'vo-numlist': {
       type: 'number',
       multiple: true,
-      validOptions: [1, 2],
+      validOptions: [1, 2] as const,
     },
   })
   t.throws(() => j.validate({ 'vo-opt': 'a' }))
@@ -465,6 +465,10 @@ t.test('validate against options', t => {
       validOptions: ['x', 'y'],
     },
   })
+
+  const v = j.parse([]).values
+  //@ts-expect-error
+  v['vo-opt'] = 'a'
 
   t.matchSnapshot(j.usage())
   t.end()
