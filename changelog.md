@@ -2,6 +2,9 @@
 
 - Add `validOptions` config option, to specify a discrete set of
   acceptable values.
+- `validate` methods now take an `unknown` argument, which is
+  more appropriate than `any` as it encourages more deliberate
+  type assertions.
 
 # 3.0
 
