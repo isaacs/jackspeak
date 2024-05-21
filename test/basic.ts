@@ -1,6 +1,6 @@
 import t from 'tap'
 import { inspect } from 'util'
-import { Jack, jack } from '../dist/esm/index.js'
+import { isConfigOption, Jack, jack } from '../src/index.js'
 
 t.beforeEach(t => {
   t.context.env = {}
@@ -369,3 +369,103 @@ for (const [args, e = {}, invalid] of cases) {
     t.end()
   })
 }
+
+t.test('validate against options', t => {
+  const j = jack({
+    // This will be auto-generated from the descriptions if not supplied
+    // top level usage line, printed by -h
+    // will be auto-generated if not specified
+    usage: 'foo [options] <files>',
+    env: t.context.env,
+    envPrefix: 'TEST',
+  }).addFields({
+    'vo-opt': {
+      type: 'string',
+      validOptions: ['x', 'y'],
+    },
+    'vo-optlist': {
+      type: 'string',
+      multiple: true,
+      validOptions: ['x', 'y'],
+    },
+    'vo-num': {
+      type: 'number',
+      validOptions: [1, 2],
+    },
+    'vo-numlist': {
+      type: 'number',
+      multiple: true,
+      validOptions: [1, 2],
+    },
+  })
+  t.throws(() => j.validate({ 'vo-opt': 'a' }))
+  t.throws(() => j.validate({ 'vo-optlist': ['a'] }))
+  t.throws(() => j.validate({ 'vo-num': 9 }))
+  t.throws(() => j.validate({ 'vo-numlist': [9] }))
+  j.validate({
+    'vo-opt': 'x',
+    'vo-optlist': ['y'],
+    'vo-num': 1,
+    'vo-numlist': [2],
+  }) as void
+
+  // invalid validOptions
+  //@ts-expect-error
+  t.throws(() => j.num({ n: { validOptions: ['x'] } }))
+  //@ts-expect-error
+  t.throws(() => j.numList({ n: { validOptions: ['x'] } }))
+  //@ts-expect-error
+  t.throws(() => j.opt({ n: { validOptions: [1] } }))
+  //@ts-expect-error
+  t.throws(() => j.optList({ n: { validOptions: [1] } }))
+
+  t.equal(
+    isConfigOption(
+      {
+        type: 'string',
+        multiple: true,
+        validOptions: ['hello'],
+      },
+      'string',
+      true,
+    ),
+    true,
+  )
+
+  t.equal(
+    isConfigOption(
+      {
+        type: 'string',
+        multiple: true,
+        validOptions: [1],
+      },
+      'string',
+      true,
+    ),
+    false,
+  )
+
+  t.equal(
+    isConfigOption(
+      {
+        type: 'boolean',
+        validOptions: [true],
+      },
+      'boolean',
+      false,
+    ),
+    false,
+    'flags cannot have validOptions',
+  )
+
+  t.throws(() => j.parse(['--vo-opt=a']), {
+    cause: {
+      name: 'vo-opt',
+      found: 'a',
+      validOptions: ['x', 'y'],
+    },
+  })
+
+  t.matchSnapshot(j.usage())
+  t.end()
+})

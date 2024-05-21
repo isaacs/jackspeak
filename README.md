@@ -155,6 +155,9 @@ Options:
   in the usage output, like `--option=<hint>`
 - `validate` A function that returns false (or throws) if an
   option value is invalid.
+- `validOptions` An array of strings or numbers that define the
+  valid values that can be set. This is not allowed on `boolean`
+  (flag) options. May be used along with a `validate()` method.
 - `default` A default value for the field. Note that this may be
   overridden by an environment variable, if present.
 

@@ -19,17 +19,17 @@ let {
   parseArgs: pa,
 }: typeof import('util') | typeof import('@pkgjs/parseargs') = util
 
-/* c8 ignore start */
+/* c8 ignore start - version specific */
 if (
   !pa ||
   major < 16 ||
   (major === 18 && minor < 11) ||
   (major === 16 && minor < 19)
 ) {
-  /* c8 ignore stop */
   // Ignore because we will clobber it for commonjs
   //@ts-ignore
   pa = (await import('@pkgjs/parseargs')).parseArgs
 }
+/* c8 ignore stop */
 
 export const parseArgs = pa as typeof import('util')['parseArgs']

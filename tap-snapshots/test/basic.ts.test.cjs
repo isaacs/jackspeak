@@ -353,6 +353,19 @@ Object {
 }
 `
 
+exports[`TAP > TAP > validate against options > must match snapshot 1`] = `
+Usage:
+  foo [options] <files>
+
+  --vo-opt=<vo-opt>  Valid options: "x", "y"
+  --vo-optlist=<vo-optlist>
+                     Valid options: "x", "y"
+                     Can be set multiple times
+  --vo-num=<n>       Valid options: 1, 2
+  --vo-numlist=<n>   Valid options: 1, 2
+                     Can be set multiple times
+`
+
 exports[`test/basic.ts --foo > TAP > defaults to process.env and process.argv > default parse, no _eval 1`] = `
 Object {
   "foo": true,
@@ -602,7 +615,8 @@ This is a list:
   --node-arg=<node-arg>  Can be set multiple times
 
   -O<opts-array> --opts-array=<opts-array>
-                         an array of opts Can be set multiple times
+                         an array of opts
+                         Can be set multiple times
   -f --flag              Make the flags wave
   -F --no-flag           Do not wave the flags
   --onlytrue             only allowed to be true
@@ -762,7 +776,7 @@ This is long description with some helpful text.
 
 Note how it wraps and is indented. But in the output, it's normalized and only wraps as needed.
 
-That long break is normalized to one line break. One is enough, really.  
+That long break is normalized to one line break. One is enough, really.
 
 Can be set multiple times
 
