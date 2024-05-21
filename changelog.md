@@ -1,3 +1,8 @@
+# 3.1
+
+- Add `validOptions` config option, to specify a discrete set of
+  acceptable values.
+
 # 3.0
 
 - Move custom `Error` fields to the `cause` property where they
