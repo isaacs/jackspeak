@@ -129,7 +129,7 @@ export type ConfigOptionMeta<
  * A set of {@link ConfigOptionMeta} fields, referenced by their longOption
  * string values.
  */
-export type ConfigMetaSet<T extends ConfigType, M extends boolean> = {
+export type ConfigMetaSet<T extends ConfigType, M extends boolean = boolean> = {
   [longOption: string]: ConfigOptionMeta<T, M>
 }
 
@@ -1006,7 +1006,7 @@ export class Jack<C extends ConfigSet = {}> {
   /**
    * Add one or more multiple number fields.
    */
-  numList<F extends ConfigMetaSet<'number', true>>(
+  numList<F extends ConfigMetaSet<'number'>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'number', true, F>> {
     return this.#addFields(fields, numList)
@@ -1024,7 +1024,7 @@ export class Jack<C extends ConfigSet = {}> {
   /**
    * Add one or more multiple string option fields.
    */
-  optList<F extends ConfigMetaSet<'string', true>>(
+  optList<F extends ConfigMetaSet<'string'>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'string', true, F>> {
     return this.#addFields(fields, optList)
@@ -1042,7 +1042,7 @@ export class Jack<C extends ConfigSet = {}> {
   /**
    * Add one or more multiple flag fields.
    */
-  flagList<F extends ConfigMetaSet<'boolean', true>>(
+  flagList<F extends ConfigMetaSet<'boolean'>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'boolean', true, F>> {
     return this.#addFields(fields, flagList)
