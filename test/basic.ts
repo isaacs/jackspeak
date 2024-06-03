@@ -503,3 +503,37 @@ t.test('parseRaw', t => {
   t.equal(process.env.FOO_XYZ, '123', 'env not modified')
   t.end()
 })
+
+t.test('description with fenced code blocks', t => {
+  const j = jack({})
+    .num({
+      xyz: {
+        description: `Sometimes, there's a number and you care about
+                      doing something special with that number, like
+
+                      \`\`\`
+                      console.log(
+                        heloo, number
+
+
+                        such a fine day we're having,isn't it?
+
+                      Ok, goodbye then.
+                      )
+                      \`\`\`
+
+                      this is some stuff that happens later
+
+                      \`\`\`
+                      just one line, no indentation
+                      \`\`\`
+
+                      nothing in this one:
+                      \`\`\`
+        \`\`\`
+                      `
+      },
+    })
+  t.matchSnapshot(j.usage())
+  t.end()
+})

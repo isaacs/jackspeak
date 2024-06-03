@@ -219,6 +219,40 @@ Error: Invalid value provided for --opts-array: ["asdf"] {
 }
 `
 
+exports[`TAP > TAP > description with fenced code blocks > must match snapshot 1`] = `
+Usage:
+  basic.ts --xyz=<xyz>
+
+  --xyz=<n>  Sometimes, there's a number and you care about doing something
+             special with that number, like
+
+             \`\`\`
+             ​
+             ​console.log(
+             ​  heloo, number
+             ​
+             ​
+             ​  such a fine day we're having,isn't it?
+             ​
+             ​Ok, goodbye then.
+             ​)
+             ​
+             \`\`\`
+
+             this is some stuff that happens later
+
+             \`\`\`
+             ​
+             ​just one line, no indentation
+             ​
+             \`\`\`
+
+             nothing in this one:
+             \`\`\`
+             \`\`\`
+
+`
+
 exports[`TAP > TAP > no env prefix, no writing env > must match snapshot 1`] = `
 Object {
   "positionals": Array [],

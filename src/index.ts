@@ -1409,25 +1409,59 @@ export class Jack<C extends ConfigSet = {}> {
 
 // Unwrap and un-indent, so we can wrap description
 // strings however makes them look nice in the code.
-const normalize = (s: string, pre: boolean = false): string =>
-  pre ?
+const normalize = (s: string, pre = false) => {
+  if (pre)
     // prepend a ZWSP to each line so cliui doesn't strip it.
-    s
+    return s
       .split('\n')
       .map(l => `\u200b${l}`)
       .join('\n')
-  : s
-      // remove single line breaks, except for lists
-      .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
-        !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`,
+  return s
+    .split(/^\s*```\s*$/gm)
+    .map((s, i) => {
+      if (i % 2 === 1) {
+        if (!s.trim()) {
+          return `\`\`\`\n\`\`\`\n`
+        }
+        // outdent the ``` blocks, but preserve whitespace otherwise.
+        const split = s.split('\n')
+        const si = split.reduce((shortest, l) => {
+          /* c8 ignore next */
+          const ind = l.match(/^\s*/)?.[0] ?? ''
+          if (ind.length) return Math.min(ind.length, shortest)
+          else return shortest
+        }, Infinity)
+        /* c8 ignore next */
+        const i = isFinite(si) ? si : 0
+        return (
+          '\n```\n' +
+          s
+            .split('\n')
+            .map(
+              s =>
+                `\u200b${s.substring(i)}`,
+            )
+            .join('\n') +
+          '\n```\n'
+        )
+      }
+      return (
+        s
+          // remove single line breaks, except for lists
+          .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
+            !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`,
+          )
+          // normalize mid-line whitespace
+          .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
+          // two line breaks are enough
+          .replace(/\n{3,}/g, '\n\n')
+          // remove any spaces at the start of a line
+          .replace(/\n[ \t]+/g, '\n')
+          .trim()
       )
-      // normalize mid-line whitespace
-      .replace(/([^\n])[ \t]+([^\n])/g, '$1 $2')
-      // two line breaks are enough
-      .replace(/\n{3,}/g, '\n\n')
-      // remove any spaces at the start of a line
-      .replace(/\n[ \t]+/g, '\n')
-      .trim()
+    })
+    .join('\n')
+}
 
 // normalize for markdown printing, remove leading spaces on lines
 const normalizeMarkdown = (s: string, pre: boolean = false): string => {
