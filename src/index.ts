@@ -1434,7 +1434,7 @@ const normalize = (s: string, pre = false) => {
         /* c8 ignore next */
         const i = isFinite(si) ? si : 0
         return (
-          '\n```\n' +
+          '\n```' +
           s
             .split('\n')
             .map(
@@ -1442,7 +1442,7 @@ const normalize = (s: string, pre = false) => {
                 `\u200b${s.substring(i)}`,
             )
             .join('\n') +
-          '\n```\n'
+          '```\n'
         )
       }
       return (

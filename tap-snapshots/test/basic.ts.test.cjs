@@ -226,8 +226,7 @@ Usage:
   --xyz=<n>  Sometimes, there's a number and you care about doing something
              special with that number, like
 
-             \`\`\`
-             ​
+             \`\`\`​
              ​console.log(
              ​  heloo, number
              ​
@@ -236,16 +235,13 @@ Usage:
              ​
              ​Ok, goodbye then.
              ​)
-             ​
-             \`\`\`
+             ​\`\`\`
 
              this is some stuff that happens later
 
-             \`\`\`
-             ​
+             \`\`\`​
              ​just one line, no indentation
-             ​
-             \`\`\`
+             ​\`\`\`
 
              nothing in this one:
              \`\`\`
