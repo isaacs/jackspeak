@@ -1,11 +1,13 @@
 import * as util from 'util'
 
 const pv =
-  typeof process === 'object' &&
-  !!process &&
-  typeof process.version === 'string'
-    ? process.version
-    : 'v0.0.0'
+  (
+    typeof process === 'object' &&
+    !!process &&
+    typeof process.version === 'string'
+  ) ?
+    process.version
+  : 'v0.0.0'
 const pvs = pv
   .replace(/^v/, '')
   .split('.')

@@ -262,7 +262,7 @@ const j = jack({
     TAP formatted test result data.
 
     To parse TAP data from stdin, specify "-" as a filename.
-  `
+  `,
   )
 
   // flags don't take a value, they're boolean on or off, and can be

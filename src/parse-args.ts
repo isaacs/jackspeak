@@ -1,11 +1,13 @@
 import * as util from 'util'
 
 const pv =
-  typeof process === 'object' &&
-  !!process &&
-  typeof process.version === 'string'
-    ? process.version
-    : 'v0.0.0'
+  (
+    typeof process === 'object' &&
+    !!process &&
+    typeof process.version === 'string'
+  ) ?
+    process.version
+  : 'v0.0.0'
 const pvs = pv
   .replace(/^v/, '')
   .split('.')
@@ -32,4 +34,4 @@ if (
 }
 /* c8 ignore stop */
 
-export const parseArgs = pa as typeof import('util')['parseArgs']
+export const parseArgs = pa as (typeof import('util'))['parseArgs']

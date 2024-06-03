@@ -3,9 +3,9 @@ import { jack } from '../dist/commonjs/index.js'
 import * as os from 'node:os'
 const defaultParallel = Math.max(
   16,
-  typeof os.availableParallelism === 'function'
-    ? os.availableParallelism()
-    : Math.min(os.cpus().length, 1)
+  typeof os.availableParallelism === 'function' ?
+    os.availableParallelism()
+  : Math.min(os.cpus().length, 1),
 )
 
 const coverageReporters = [
@@ -42,7 +42,7 @@ const j = jack({
 
      Coverage is not enabled for stdin.
 
-     Much more documentation available at: https://www.node-tap.org/`
+     Much more documentation available at: https://www.node-tap.org/`,
   )
 
   .heading('The best Foo that ever Fooed')
@@ -58,20 +58,20 @@ const j = jack({
     - one
     - two
     - three
-    `
+    `,
   )
   .heading('Subcommands')
   .description(
     `several subcommands are available.
 
-     they are described below.`
+     they are described below.`,
   )
   .heading('bazzle', 2)
   .description('Bazzle the bedazzled razzle mafazzale')
   .heading('blorg', 3)
   .description(
     `When the grolb needs blorging, use this command
-     and it will make sure every asdf is a quux.`
+     and it will make sure every asdf is a quux.`,
   )
   .description(
     `A pre-formatted description section
@@ -91,7 +91,7 @@ const j = jack({
        \\  C// #  /'-----''/ #  / 
     .   'C/ |    |    |   |    |mrf  ,
     \\), .. .'OOO-'. ..'OOO'OOO-'. ..\\(,`,
-    { pre: true }
+    { pre: true },
   )
 
   .heading('Basic Options', 2)
@@ -469,7 +469,7 @@ try {
   else {
     console.log({ values, positionals })
     console.log(
-      Object.entries(process.env).filter(([k]) => k.startsWith('TAP'))
+      Object.entries(process.env).filter(([k]) => k.startsWith('TAP')),
     )
   }
 } catch (e) {

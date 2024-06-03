@@ -1,6 +1,6 @@
 /*
 /.*
-
+!/.prettierignore
 !/examples
 !typedoc.json
 !tsconfig*.json
