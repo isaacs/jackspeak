@@ -758,7 +758,7 @@ export class Jack<C extends ConfigSet = {}> {
         p.positionals.push(token.value)
         if (this.#options.stopAtPositional) {
           p.positionals.push(...args.slice(token.index + 1))
-          return p
+          break
         }
       } else if (token.kind === 'option') {
         let value: string | number | boolean | undefined = undefined

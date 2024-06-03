@@ -314,6 +314,17 @@ t.test('stop at positional', t => {
     .num({ xyz: {} })
     .parse(['--xyz=1', 'positional', '--otherthing=x'])
   t.matchSnapshot({ values, positionals })
+  t.throws(() =>
+    jack({
+      stopAtPositional: true,
+    })
+      .num({
+        xyz: {
+          validate: n => n === 1,
+        },
+      })
+      .parse(['--xyz=2', 'positional', '--otherthing=x']),
+  )
   t.end()
 })
 
