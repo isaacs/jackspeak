@@ -1425,6 +1425,9 @@ const normalize = (s: string, pre = false) => {
         }
         // outdent the ``` blocks, but preserve whitespace otherwise.
         const split = s.split('\n')
+        // throw out the \n at the start and end
+        split.pop()
+        split.shift()
         const si = split.reduce((shortest, l) => {
           /* c8 ignore next */
           const ind = l.match(/^\s*/)?.[0] ?? ''
@@ -1434,15 +1437,13 @@ const normalize = (s: string, pre = false) => {
         /* c8 ignore next */
         const i = isFinite(si) ? si : 0
         return (
-          '\n```' +
-          s
-            .split('\n')
-            .map(
+          '\n```\n' +
+          split.map(
               s =>
                 `\u200b${s.substring(i)}`,
             )
             .join('\n') +
-          '```\n'
+          '\n```\n'
         )
       }
       return (
