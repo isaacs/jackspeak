@@ -739,6 +739,27 @@ export class Jack<C extends ConfigSet = {}> {
       }
     }
 
+    const p = this.parseRaw(args)
+
+    for (const [field, c] of Object.entries(this.#configSet)) {
+      if (c.default !== undefined && !(field in p.values)) {
+        //@ts-ignore
+        p.values[field] = c.default
+      }
+    }
+
+    this.#writeEnv(p)
+
+    return p
+  }
+
+  /**
+   * Only parse the command line arguments passed in.
+   * Does not strip off the `node script.js` bits, so it must be just the
+   * arguments you wish to have parsed.
+   * Does not read from or write to the environment, or set defaults.
+   */
+  parseRaw(args: string[]): Parsed<C> {
     const options = toParseArgsOptionsConfig(this.#configSet)
     const result = parseArgs({
       args,
@@ -846,13 +867,6 @@ export class Jack<C extends ConfigSet = {}> {
       }
     }
 
-    for (const [field, c] of Object.entries(this.#configSet)) {
-      if (c.default !== undefined && !(field in p.values)) {
-        //@ts-ignore
-        p.values[field] = c.default
-      }
-    }
-
     for (const [field, value] of Object.entries(p.values)) {
       const valid = this.#configSet[field]?.validate
       const validOptions = this.#configSet[field]?.validOptions
@@ -878,8 +892,6 @@ export class Jack<C extends ConfigSet = {}> {
         )
       }
     }
-
-    this.#writeEnv(p)
 
     return p
   }

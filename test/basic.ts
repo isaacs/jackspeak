@@ -484,3 +484,22 @@ t.test('validate against options', t => {
   t.matchSnapshot(j.usage())
   t.end()
 })
+
+t.test('parseRaw', t => {
+  t.intercept(process, 'env', { value: { FOO_XYZ: '123' } })
+  const j = jack({
+    envPrefix: 'FOO',
+  }).num({
+    xyz: {
+      default: 345,
+      validate: (n: unknown) => Number(n) % 2 === 1,
+    }
+  })
+  const p = j.parseRaw(['--xyz=235'])
+  t.equal(p.values.xyz, 235)
+  t.throws(() => j.parseRaw(['--xyz=12']))
+  t.throws(() => j.parseRaw(['--xyz=hello']))
+  t.equal(j.parseRaw([]).values.xyz, undefined)
+  t.equal(process.env.FOO_XYZ, '123', 'env not modified')
+  t.end()
+})
