@@ -13,13 +13,6 @@ import { parseArgs } from './parse-args.js'
 import cliui from '@isaacs/cliui'
 import { basename } from 'node:path'
 
-export type ValidOptions<T extends ConfigType> =
-  | undefined
-  | (T extends 'boolean' ? never
-    : T extends 'string' ? readonly string[]
-    : T extends 'number' ? readonly number[]
-    : readonly number[] | readonly string[])
-
 const width = Math.min(
   (process && process.stdout && process.stdout.columns) || 80,
   80,
@@ -99,7 +92,17 @@ export type ValidValue<
 export type ConfigOptionMeta<
   T extends ConfigType,
   M extends boolean = boolean,
-  O extends ValidOptions<T> = ValidOptions<T>
+  O extends
+    | undefined
+    | (T extends 'boolean' ? never
+      : T extends 'string' ? readonly string[]
+      : T extends 'number' ? readonly number[]
+      : readonly number[] | readonly string[]) =
+    | undefined
+    | (T extends 'boolean' ? never
+      : T extends 'string' ? readonly string[]
+      : T extends 'number' ? readonly number[]
+      : readonly number[] | readonly string[]),
 > = {
   default?:
     | undefined
@@ -141,11 +144,7 @@ export type ConfigSetFromMetaSet<
   M extends boolean,
   S extends ConfigMetaSet<T, M>,
 > = {
-  [longOption in keyof S]: ConfigOptionBase<
-    T,
-    M,
-    S[longOption]['validOptions']
-  >
+  [longOption in keyof S]: ConfigOptionBase<T, M>
 }
 
 /**
@@ -175,7 +174,6 @@ export type MultiType<M extends boolean> =
 export type ConfigOptionBase<
   T extends ConfigType,
   M extends boolean = boolean,
-  O extends ValidOptions<T> = ValidOptions<T>,
 > = {
   type: T
   short?: string | undefined
@@ -183,9 +181,11 @@ export type ConfigOptionBase<
   description?: string
   hint?: T extends 'boolean' ? undefined : string | undefined
   validate?: (v: unknown) => v is ValidValue<T, M>
-} & (
-  O extends undefined ? { validOptions?: O } : { validOptions: O }
-)& MultiType<M>
+  validOptions?: T extends 'boolean' ? undefined
+  : T extends 'string' ? readonly string[]
+  : T extends 'number' ? readonly number[]
+  : readonly number[] | readonly string[]
+} & MultiType<M>
 
 export const isConfigType = (t: string): t is ConfigType =>
   typeof t === 'string' &&
@@ -239,7 +239,7 @@ export const isConfigOption = <T extends ConfigType, M extends boolean>(
   o: any,
   type: T,
   multi: M,
-): o is ConfigOptionBase<T, M, (typeof o)['validOptions']> =>
+): o is ConfigOptionBase<T, M> =>
   !!o &&
   typeof o === 'object' &&
   isConfigType(o.type) &&
@@ -269,13 +269,9 @@ export type OptionsResults<T extends ConfigSet> = {
   [k in keyof T]?: T[k]['validOptions'] extends (
     readonly string[] | readonly number[]
   ) ?
-    T[k] extends (
-      ConfigOptionBase<'string' | 'number', false, T[k]['validOptions']>
-    ) ?
+    T[k] extends ConfigOptionBase<'string' | 'number', false> ?
       T[k]['validOptions'][number]
-    : T[k] extends (
-      ConfigOptionBase<'string' | 'number', true, T[k]['validOptions']>
-    ) ?
+    : T[k] extends ConfigOptionBase<'string' | 'number', true> ?
       T[k]['validOptions'][number][]
     : never
   : T[k] extends ConfigOptionBase<'string', false> ? string
@@ -297,7 +293,7 @@ export type Parsed<T extends ConfigSet> = {
 
 function num(
   o: ConfigOptionMeta<'number', false> = {},
-): ConfigOptionBase<'number', false, (typeof o)['validOptions']> {
+): ConfigOptionBase<'number', false> {
   const { default: def, validate: val, validOptions, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'number', false)) {
     throw new TypeError('invalid default value', {
@@ -331,7 +327,7 @@ function num(
 
 function numList(
   o: ConfigOptionMeta<'number'> = {},
-): ConfigOptionBase<'number', true, (typeof o)['validOptions']> {
+): ConfigOptionBase<'number', true> {
   const { default: def, validate: val, validOptions, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'number', true)) {
     throw new TypeError('invalid default value', {
@@ -365,7 +361,7 @@ function numList(
 
 function opt(
   o: ConfigOptionMeta<'string', false> = {},
-): ConfigOptionBase<'string', false, (typeof o)['validOptions']> {
+): ConfigOptionBase<'string', false> {
   const { default: def, validate: val, validOptions, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'string', false)) {
     throw new TypeError('invalid default value', {
@@ -399,7 +395,7 @@ function opt(
 
 function optList(
   o: ConfigOptionMeta<'string'> = {},
-): ConfigOptionBase<'string', true, (typeof o)['validOptions']> {
+): ConfigOptionBase<'string', true> {
   const { default: def, validate: val, validOptions, ...rest } = o
   if (def !== undefined && !isValidValue(def, 'string', true)) {
     throw new TypeError('invalid default value', {
@@ -433,7 +429,7 @@ function optList(
 
 function flag(
   o: ConfigOptionMeta<'boolean', false> = {},
-): ConfigOptionBase<'boolean', false, undefined> {
+): ConfigOptionBase<'boolean', false> {
   const {
     hint,
     default: def,
@@ -462,7 +458,7 @@ function flag(
 
 function flagList(
   o: ConfigOptionMeta<'boolean'> = {},
-): ConfigOptionBase<'boolean', true, undefined> {
+): ConfigOptionBase<'boolean', true> {
   const {
     hint,
     default: def,
@@ -1094,9 +1090,7 @@ export class Jack<C extends ConfigSet = {}> {
     F extends ConfigMetaSet<T, M>,
   >(
     fields: F,
-    fn: (
-      m: ConfigOptionMeta<T, M, ValidOptions<T>>,
-    ) => ConfigOptionBase<T, M>,
+    fn: (m: ConfigOptionMeta<T, M>) => ConfigOptionBase<T, M>,
   ): Jack<C & ConfigSetFromMetaSet<T, M, F>> {
     type NextC = C & ConfigSetFromMetaSet<T, M, F>
     const next = this as unknown as Jack<NextC>
@@ -1444,7 +1438,11 @@ const normalize = (s: string, pre = false) => {
         const i = isFinite(si) ? si : 0
         return (
           '\n```\n' +
-          split.map(s => `\u200b${s.substring(i)}`).join('\n') +
+          split.map(
+              s =>
+                `\u200b${s.substring(i)}`,
+            )
+            .join('\n') +
           '\n```\n'
         )
       }

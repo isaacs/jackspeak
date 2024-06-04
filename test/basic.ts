@@ -493,7 +493,7 @@ t.test('parseRaw', t => {
     xyz: {
       default: 345,
       validate: (n: unknown) => Number(n) % 2 === 1,
-    },
+    }
   })
   const p = j.parseRaw(['--xyz=235'])
   t.equal(p.values.xyz, 235)
@@ -505,60 +505,35 @@ t.test('parseRaw', t => {
 })
 
 t.test('description with fenced code blocks', t => {
-  const j = jack({}).num({
-    xyz: {
-      description: `Sometimes, there's a number and you care about
-                    doing something special with that number, like
-
-                    \`\`\`
-                    console.log(
-                      heloo, number
-
-
-                      such a fine day we're having,isn't it?
-
-                    Ok, goodbye then.
-                    )
-                    \`\`\`
-
-                    this is some stuff that happens later
-
-                    \`\`\`
-                    just one line, no indentation
-                    \`\`\`
-
-                    nothing in this one:
-                    \`\`\`
-                        \`\`\`
-                      `,
-    },
-  })
-  t.matchSnapshot(j.usage())
-  t.end()
-})
-
-t.test('verify validOptions show up as values[key] type', t => {
   const j = jack({})
-    .opt({
-      foo: {
-        validOptions: ['bar', 'baz'],
-      } as const,
-    })
     .num({
-      n: { validOptions: [1, 2, 3] } as const,
+      xyz: {
+        description: `Sometimes, there's a number and you care about
+                      doing something special with that number, like
+
+                      \`\`\`
+                      console.log(
+                        heloo, number
+
+
+                        such a fine day we're having,isn't it?
+
+                      Ok, goodbye then.
+                      )
+                      \`\`\`
+
+                      this is some stuff that happens later
+
+                      \`\`\`
+                      just one line, no indentation
+                      \`\`\`
+
+                      nothing in this one:
+                      \`\`\`
+        \`\`\`
+                      `
+      },
     })
-
-  const { values } = j.parse([])
-  values.foo = 'bar'
-  values.foo = 'baz'
-  //@ts-expect-error
-  values.foo = 'asdf'
-
-  values.n = 1
-  values.n = 2
-  values.n = 3
-  //@ts-expect-error
-  values.n = 0
-  t.pass('typechecks passed')
+  t.matchSnapshot(j.usage())
   t.end()
 })
