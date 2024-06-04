@@ -471,7 +471,8 @@ Jack {
   'output-file': {
     type: 'string',
     short: 'o',
-    description: 'Send the raw output to the specified file.'
+    description: 'Send the raw output to the specified file.',
+    hint: 'file'
   }
 }
 `
@@ -582,6 +583,7 @@ Object {
   },
   "output-file": Object {
     "description": "Send the raw output to the specified file.",
+    "hint": "file",
     "short": "o",
     "type": "string",
   },

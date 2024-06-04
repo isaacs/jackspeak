@@ -1394,6 +1394,7 @@ export class Jack<C extends ConfigSet = {}> {
           ...(def.validate ? { validate: def.validate } : {}),
           ...(def.validOptions ? { validOptions: def.validOptions } : {}),
           ...(def.default !== undefined ? { default: def.default } : {}),
+          ...(def.hint ? { hint: def.hint } : {}),
         },
       ]),
     )
