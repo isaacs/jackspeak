@@ -647,6 +647,13 @@ export interface JackOptions {
    * @default false
    */
   stopAtPositional?: boolean
+
+  /**
+   * Conditional `stopAtPositional`. If set to a `(string)=>boolean` function,
+   * will be called with each positional argument encountered. If the function
+   * returns true, then parsing will stop at that point.
+   */
+  stopAtPositionalTest?: (arg: string) => boolean
 }
 
 /**
@@ -777,7 +784,10 @@ export class Jack<C extends ConfigSet = {}> {
     for (const token of result.tokens) {
       if (token.kind === 'positional') {
         p.positionals.push(token.value)
-        if (this.#options.stopAtPositional) {
+        if (
+          this.#options.stopAtPositional ||
+          this.#options.stopAtPositionalTest?.(token.value)
+        ) {
           p.positionals.push(...args.slice(token.index + 1))
           break
         }
@@ -1439,11 +1449,7 @@ const normalize = (s: string, pre = false) => {
         const i = isFinite(si) ? si : 0
         return (
           '\n```\n' +
-          split.map(
-              s =>
-                `\u200b${s.substring(i)}`,
-            )
-            .join('\n') +
+          split.map(s => `\u200b${s.substring(i)}`).join('\n') +
           '\n```\n'
         )
       }

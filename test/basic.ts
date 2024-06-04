@@ -328,6 +328,17 @@ t.test('stop at positional', t => {
   t.end()
 })
 
+t.test('stop at positional test', t => {
+  const { values, positionals } = jack({
+    stopAtPositionalTest: s => s === 'stop'
+  })
+    .num({ xyz: {} })
+    .parse(['--xyz=1', 'positional', '--xyz=2', 'stop', '--otherthing=x'])
+  t.strictSame(values, { xyz: 2 })
+  t.strictSame(positionals, ['positional', 'stop', '--otherthing=x'])
+  t.end()
+})
+
 // [argv, env, invalid]
 const cases: [a: string[], e?: { [k: string]: string }, inv?: boolean][] =
   [
