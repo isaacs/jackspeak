@@ -35,16 +35,16 @@ import { jack } from 'jackspeak'
 
 const { positionals, values } = jack({ envPrefix: 'FOO' })
   .flag({
-    asdf: { description: 'sets the asfd flag', short: 'a', default: true },
-    'no-asdf': { description: 'unsets the asdf flag', short: 'A' },
-    foo: { description: 'another boolean', short: 'f' },
+    asdf: { description: 'sets the asfd flag', short: 'a', default: true } as const,
+    'no-asdf': { description: 'unsets the asdf flag', short: 'A' } as const,
+    foo: { description: 'another boolean', short: 'f' } as const,
   })
   .optList({
     'ip-addrs': {
       description: 'addresses to ip things',
       delim: ',', // defaults to '\n'
       default: ['127.0.0.1'],
-    },
+    } as const,
   })
   .parse([
     'some',
@@ -138,6 +138,12 @@ Configs are defined by calling the appropriate field definition
 method with an object where the keys are the long option name,
 and the value defines the config.
 
+It's best to define the option definitions `as const`, so that
+`validOptions` all type information be inferred fully through to
+the resulting parsed values. (It'll do its best with what it's
+given otherwise, but you won't get the `validOptions` showing up
+as the only possible values according to TS.)
+
 Options:
 
 - `type` Only needed for the `addFields` method, as the others
@@ -161,7 +167,7 @@ Options:
 - `default` A default value for the field. Note that this may be
   overridden by an environment variable, if present.
 
-### `Jack.flag({ [option: string]: definition, ... })`
+### `Jack.flag({ [option: string]: definition as const, ... })`
 
 Define one or more boolean fields.
 
@@ -173,31 +179,31 @@ If a boolean option named `no-${optionName}` with the same
 `multiple` setting is in the configuration, then that will be
 treated as a negating flag.
 
-### `Jack.flagList({ [option: string]: definition, ... })`
+### `Jack.flagList({ [option: string]: definition as const, ... })`
 
 Define one or more boolean array fields.
 
-### `Jack.num({ [option: string]: definition, ... })`
+### `Jack.num({ [option: string]: definition as const, ... })`
 
 Define one or more number fields. These will be set in the
 environment as a stringified number, and included in the `values`
 object as a number.
 
-### `Jack.numList({ [option: string]: definition, ... })`
+### `Jack.numList({ [option: string]: definition as const, ... })`
 
 Define one or more number list fields. These will be set in the
 environment as a delimited set of stringified numbers, and
 included in the `values` as a number array.
 
-### `Jack.opt({ [option: string]: definition, ... })`
+### `Jack.opt({ [option: string]: definition as const, ... })`
 
 Define one or more string option fields.
 
-### `Jack.optList({ [option: string]: definition, ... })`
+### `Jack.optList({ [option: string]: definition as const, ... })`
 
 Define one or more string list fields.
 
-### `Jack.addFields({ [option: string]: definition, ... })`
+### `Jack.addFields({ [option: string]: definition as const, ... })`
 
 Define one or more fields of any type. Note that `type` and
 `multiple` must be set explicitly on each definition when using
