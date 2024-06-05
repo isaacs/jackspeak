@@ -731,11 +731,14 @@ export class Jack<C extends ConfigSet = {}> {
    * an explicit CLI setting.
    */
   parse(args: string[] = process.argv): Parsed<C> {
-    if (args === process.argv) {
-      args = args.slice(
-        (process as { _eval?: string })._eval !== undefined ? 1 : 2,
-      )
-    }
+    this.loadEnvDefaults()
+    const p = this.parseRaw(args)
+    this.applyDefaults(p)
+    this.writeEnv(p)
+    return p
+  }
+
+  loadEnvDefaults() {
     if (this.#envPrefix) {
       for (const [field, my] of Object.entries(this.#configSet)) {
         const ek = toEnvKey(this.#envPrefix, field)
@@ -745,19 +748,15 @@ export class Jack<C extends ConfigSet = {}> {
         }
       }
     }
+  }
 
-    const p = this.parseRaw(args)
-
+  applyDefaults(p: Parsed<C>) {
     for (const [field, c] of Object.entries(this.#configSet)) {
       if (c.default !== undefined && !(field in p.values)) {
         //@ts-ignore
         p.values[field] = c.default
       }
     }
-
-    this.#writeEnv(p)
-
-    return p
   }
 
   /**
@@ -767,6 +766,12 @@ export class Jack<C extends ConfigSet = {}> {
    * Does not read from or write to the environment, or set defaults.
    */
   parseRaw(args: string[]): Parsed<C> {
+    if (args === process.argv) {
+      args = args.slice(
+        (process as { _eval?: string })._eval !== undefined ? 1 : 2,
+      )
+    }
+
     const options = toParseArgsOptionsConfig(this.#configSet)
     const result = parseArgs({
       args,
@@ -987,7 +992,7 @@ export class Jack<C extends ConfigSet = {}> {
     }
   }
 
-  #writeEnv(p: Parsed<C>) {
+  writeEnv(p: Parsed<C>) {
     if (!this.#env || !this.#envPrefix) return
     for (const [field, value] of Object.entries(p.values)) {
       const my = this.#configSet[field]
