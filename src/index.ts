@@ -896,7 +896,7 @@ export class Jack<C extends ConfigSet = {}> {
         cause = { name: field, found: value, validOptions: validOptions }
       }
       if (valid && !valid(value)) {
-        cause = cause || { name: field, found: value }
+        cause ??= { name: field, found: value }
       }
       if (cause) {
         throw new Error(
@@ -982,7 +982,7 @@ export class Jack<C extends ConfigSet = {}> {
         }
       }
       if (config.validate && !config.validate(value)) {
-        cause = cause || { name: field, found: value }
+        cause ??= { name: field, found: value }
       }
       if (cause) {
         throw new Error(`Invalid config value for ${field}: ${value}`, {
