@@ -1,3 +1,22 @@
+# 4.0
+
+- Require modern node versions
+
+# 3.4
+
+- abstract out post-parse actions, slice process.argv in parseRaw
+
+# 3.3
+
+- Add `stopAtPositionalTest` method
+
+# 3.2
+
+- still validate if stopAtPositional is set
+- add parseRaw() method, to parse without side effects
+- improve fenced code sections in usage output
+- add hint to toJSON output
+
 # 3.1
 
 - Add `validOptions` config option, to specify a discrete set of
