@@ -330,7 +330,7 @@ t.test('stop at positional', t => {
 
 t.test('stop at positional test', t => {
   const { values, positionals } = jack({
-    stopAtPositionalTest: s => s === 'stop'
+    stopAtPositionalTest: s => s === 'stop',
   })
     .num({ xyz: {} })
     .parse(['--xyz=1', 'positional', '--xyz=2', 'stop', '--otherthing=x'])
@@ -400,35 +400,64 @@ t.test('validate against options', t => {
     usage: 'foo [options] <files>',
     env: t.context.env,
     envPrefix: 'TEST',
-  }).addFields({
-    'vo-opt': {
-      type: 'string',
-      validOptions: ['x', 'y'] as const,
-    },
-    'vo-optlist': {
-      type: 'string',
-      multiple: true,
-      validOptions: ['x', 'y'] as const,
-    },
-    'vo-num': {
-      type: 'number',
-      validOptions: [1, 2] as const,
-    },
-    'vo-numlist': {
-      type: 'number',
-      multiple: true,
-      validOptions: [1, 2] as const,
-    },
   })
+    .addFields({
+      'vo-opt': {
+        type: 'string',
+        validOptions: ['x', 'y'] as const,
+      },
+      'vo-optlist': {
+        type: 'string',
+        multiple: true,
+        validOptions: ['x', 'y'] as const,
+      },
+      'vo-num': {
+        type: 'number',
+        validOptions: [1, 2] as const,
+      },
+      'vo-numlist': {
+        type: 'number',
+        multiple: true,
+        validOptions: [1, 2] as const,
+      },
+    })
+    .opt({
+      'vo-by-opt': {
+        validOptions: ['x', 'y'] as const,
+      },
+    })
+    .optList({
+      'vo-by-optlist': {
+        validOptions: ['x', 'y'] as const,
+      },
+    })
+    .num({
+      'vo-by-num': {
+        validOptions: [1, 2] as const,
+      },
+    })
+    .numList({
+      'vo-by-numlist': {
+        validOptions: [1, 2] as const,
+      },
+    })
   t.throws(() => j.validate({ 'vo-opt': 'a' }))
   t.throws(() => j.validate({ 'vo-optlist': ['a'] }))
   t.throws(() => j.validate({ 'vo-num': 9 }))
   t.throws(() => j.validate({ 'vo-numlist': [9] }))
+  t.throws(() => j.validate({ 'vo-by-opt': 'a' }))
+  t.throws(() => j.validate({ 'vo-by-optlist': ['a'] }))
+  t.throws(() => j.validate({ 'vo-by-num': 9 }))
+  t.throws(() => j.validate({ 'vo-by-numlist': [9] }))
   j.validate({
     'vo-opt': 'x',
     'vo-optlist': ['y'],
     'vo-num': 1,
     'vo-numlist': [2],
+    'vo-by-opt': 'x',
+    'vo-by-optlist': ['y'],
+    'vo-by-num': 1,
+    'vo-by-numlist': [2],
   }) as void
 
   // invalid validOptions
@@ -440,6 +469,17 @@ t.test('validate against options', t => {
   t.throws(() => j.opt({ n: { validOptions: [1] } }))
   //@ts-expect-error
   t.throws(() => j.optList({ n: { validOptions: [1] } }))
+
+  // types
+  const { values } = j.parse()
+  const _voOpt: 'x' | 'y' = values['vo-opt']!
+  const _voOptList: ('x' | 'y')[] = values['vo-optlist']!
+  const _voNum: 1 | 2 = values['vo-num']!
+  const _voNumList: (1 | 2)[] = values['vo-numlist']!
+  const _opt: 'x' | 'y' = values['vo-by-opt']!
+  const _optList: ('x' | 'y')[] = values['vo-by-optlist']!
+  const _num: 1 | 2 = values['vo-by-num']!
+  const _numList: (1 | 2)[] = values['vo-by-numlist']!
 
   t.equal(
     isConfigOption(
@@ -504,7 +544,7 @@ t.test('parseRaw', t => {
     xyz: {
       default: 345,
       validate: (n: unknown) => Number(n) % 2 === 1,
-    }
+    },
   })
   const p = j.parseRaw(['--xyz=235'])
   t.equal(p.values.xyz, 235)
@@ -516,10 +556,9 @@ t.test('parseRaw', t => {
 })
 
 t.test('description with fenced code blocks', t => {
-  const j = jack({})
-    .num({
-      xyz: {
-        description: `Sometimes, there's a number and you care about
+  const j = jack({}).num({
+    xyz: {
+      description: `Sometimes, there's a number and you care about
                       doing something special with that number, like
 
                       \`\`\`
@@ -542,9 +581,9 @@ t.test('description with fenced code blocks', t => {
                       nothing in this one:
                       \`\`\`
         \`\`\`
-                      `
-      },
-    })
+                      `,
+    },
+  })
   t.matchSnapshot(j.usage())
   t.end()
 })

@@ -91,5 +91,8 @@
   "author": "Isaac Z. Schlueter <i@izs.me>",
   "optionalDependencies": {
     "@pkgjs/parseargs": "^0.11.0"
+  },
+  "tap": {
+    "typecheck": true
   }
 }

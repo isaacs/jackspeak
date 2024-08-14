@@ -387,13 +387,22 @@ exports[`TAP > TAP > validate against options > must match snapshot 1`] = `
 Usage:
   foo [options] <files>
 
-  --vo-opt=<vo-opt>  Valid options: "x", "y"
+  --vo-opt=<vo-opt>    Valid options: "x", "y"
   --vo-optlist=<vo-optlist>
-                     Valid options: "x", "y"
-                     Can be set multiple times
-  --vo-num=<n>       Valid options: 1, 2
-  --vo-numlist=<n>   Valid options: 1, 2
-                     Can be set multiple times
+                       Valid options: "x", "y"
+                       Can be set multiple times
+  --vo-num=<n>         Valid options: 1, 2
+  --vo-numlist=<n>     Valid options: 1, 2
+                       Can be set multiple times
+  --vo-by-opt=<vo-by-opt>
+                       Valid options: "x", "y"
+
+  --vo-by-optlist=<vo-by-optlist>
+                       Valid options: "x", "y"
+                       Can be set multiple times
+  --vo-by-num=<n>      Valid options: 1, 2
+  --vo-by-numlist=<n>  Valid options: 1, 2
+                       Can be set multiple times
 `
 
 exports[`test/basic.ts --foo > TAP > defaults to process.env and process.argv > default parse, no _eval 1`] = `
