@@ -256,13 +256,6 @@ export type ConfigSet = {
   [longOption: string]: ConfigOptionBase<ConfigType>
 }
 
-type HasReadonlyValidOptions<T extends ConfigOptionMeta<ConfigType>> =
-  T['validOptions'] extends readonly string[] | readonly number[] ?
-    T extends ConfigOptionBase<'string' | 'number', false> ? true
-    : T extends ConfigOptionBase<'string' | 'number', true> ? true
-    : false
-  : false
-
 type OptionsResult<T extends ConfigOptionMeta<ConfigType>> =
   T['validOptions'] extends readonly string[] | readonly number[] ?
     T extends ConfigOptionBase<'string' | 'number', false> ?
@@ -278,21 +271,23 @@ type OptionsResult<T extends ConfigOptionMeta<ConfigType>> =
   : T extends ConfigOptionBase<'boolean', true> ? boolean[]
   : never
 
+type OptionsResultKey<T extends ConfigSet, K extends keyof T> =
+  T[K]['default'] extends ConfigValue ?
+    T[K]['validOptions'] extends readonly string[] | readonly number[] ?
+      T[K] extends ConfigOptionBase<'string' | 'number', false> ? K
+      : T[K] extends ConfigOptionBase<'string' | 'number', true> ? K
+      : never
+    : never
+  : never
+
 /**
  * The 'values' field returned by {@link Jack#parse}
  */
 export type OptionsResults<T extends ConfigSet> = {
-  [k in keyof T as T[k]['default'] extends ConfigValue ?
-    HasReadonlyValidOptions<T[k]> extends true ?
-      k
-    : never
-  : never]: OptionsResult<T[k]>
+  [k in keyof T as OptionsResultKey<T, k>]: OptionsResult<T[k]>
 } & {
-  [k in keyof T as T[k]['default'] extends ConfigValue ?
-    HasReadonlyValidOptions<T[k]> extends true ?
-      never
-    : k
-  : k]?: OptionsResult<T[k]>
+  [k in keyof T as OptionsResultKey<T, k> extends never ? k
+  : never]?: OptionsResult<T[k]>
 }
 
 /**
