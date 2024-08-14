@@ -1,5 +1,9 @@
 export type ConfigType = 'number' | 'string' | 'boolean'
 
+type ConfigValueSingle = string | boolean | number
+type ConfigValueMulti = string[] | boolean[] | number[]
+type ConfigValue = ConfigValueSingle | ConfigValueMulti
+
 /**
  * Given a Jack object, get the typeof its ConfigSet
  */
@@ -29,10 +33,7 @@ const toEnvKey = (pref: string, key: string): string => {
     .replace(/ /g, '_')
 }
 
-const toEnvVal = (
-  value: string | boolean | number | string[] | boolean[] | number[],
-  delim: string = '\n',
-): string => {
+const toEnvVal = (value: ConfigValue, delim: string = '\n'): string => {
   const str =
     typeof value === 'string' ? value
     : typeof value === 'boolean' ?
@@ -40,7 +41,7 @@ const toEnvVal = (
       : '0'
     : typeof value === 'number' ? String(value)
     : Array.isArray(value) ?
-      value.map((v: string | number | boolean) => toEnvVal(v)).join(delim)
+      value.map((v: ConfigValue) => toEnvVal(v)).join(delim)
     : /* c8 ignore start */ undefined
   if (typeof str !== 'string') {
     throw new Error(
@@ -81,9 +82,9 @@ export type ValidValue<
   : [T, M] extends ['string', boolean] ? string | string[]
   : [T, M] extends ['boolean', boolean] ? boolean | boolean[]
   : [T, M] extends ['number', boolean] ? number | number[]
-  : [T, M] extends [ConfigType, false] ? string | number | boolean
-  : [T, M] extends [ConfigType, true] ? string[] | number[] | boolean[]
-  : string | number | boolean | string[] | number[] | boolean[]
+  : [T, M] extends [ConfigType, false] ? ConfigValueSingle
+  : [T, M] extends [ConfigType, true] ? ConfigValueMulti
+  : ConfigValue
 
 /**
  * The meta information for a config option definition, when the
@@ -201,14 +202,7 @@ const isValidOption = (v: unknown, vo: readonly unknown[]): boolean =>
 
 // print the value type, for error message reporting
 const valueType = (
-  v:
-    | string
-    | number
-    | boolean
-    | string[]
-    | number[]
-    | boolean[]
-    | { type: ConfigType; multiple?: boolean },
+  v: ConfigValue | { type: ConfigType; multiple?: boolean },
 ): string =>
   typeof v === 'string' ? 'string'
   : typeof v === 'boolean' ? 'boolean'
@@ -262,25 +256,43 @@ export type ConfigSet = {
   [longOption: string]: ConfigOptionBase<ConfigType>
 }
 
+type HasReadonlyValidOptions<T extends ConfigOptionMeta<ConfigType>> =
+  T['validOptions'] extends readonly string[] | readonly number[] ?
+    T extends ConfigOptionBase<'string' | 'number', false> ? true
+    : T extends ConfigOptionBase<'string' | 'number', true> ? true
+    : false
+  : false
+
+type OptionsResult<T extends ConfigOptionMeta<ConfigType>> =
+  T['validOptions'] extends readonly string[] | readonly number[] ?
+    T extends ConfigOptionBase<'string' | 'number', false> ?
+      T['validOptions'][number]
+    : T extends ConfigOptionBase<'string' | 'number', true> ?
+      T['validOptions'][number][]
+    : never
+  : T extends ConfigOptionBase<'string', false> ? string
+  : T extends ConfigOptionBase<'string', true> ? string[]
+  : T extends ConfigOptionBase<'number', false> ? number
+  : T extends ConfigOptionBase<'number', true> ? number[]
+  : T extends ConfigOptionBase<'boolean', false> ? boolean
+  : T extends ConfigOptionBase<'boolean', true> ? boolean[]
+  : never
+
 /**
  * The 'values' field returned by {@link Jack#parse}
  */
 export type OptionsResults<T extends ConfigSet> = {
-  [k in keyof T]?: T[k]['validOptions'] extends (
-    readonly string[] | readonly number[]
-  ) ?
-    T[k] extends ConfigOptionBase<'string' | 'number', false> ?
-      T[k]['validOptions'][number]
-    : T[k] extends ConfigOptionBase<'string' | 'number', true> ?
-      T[k]['validOptions'][number][]
+  [k in keyof T as T[k]['default'] extends ConfigValue ?
+    HasReadonlyValidOptions<T[k]> extends true ?
+      k
     : never
-  : T[k] extends ConfigOptionBase<'string', false> ? string
-  : T[k] extends ConfigOptionBase<'string', true> ? string[]
-  : T[k] extends ConfigOptionBase<'number', false> ? number
-  : T[k] extends ConfigOptionBase<'number', true> ? number[]
-  : T[k] extends ConfigOptionBase<'boolean', false> ? boolean
-  : T[k] extends ConfigOptionBase<'boolean', true> ? boolean[]
-  : never
+  : never]: OptionsResult<T[k]>
+} & {
+  [k in keyof T as T[k]['default'] extends ConfigValue ?
+    HasReadonlyValidOptions<T[k]> extends true ?
+      never
+    : k
+  : k]?: OptionsResult<T[k]>
 }
 
 /**
@@ -714,7 +726,7 @@ export class Jack<C extends ConfigSet = {}> {
         })
       }
       /* c8 ignore stop */
-      my.default = value
+      my.default = value as ConfigValue
     }
     return this
   }
@@ -783,7 +795,7 @@ export class Jack<C extends ConfigSet = {}> {
     })
 
     const p: Parsed<C> = {
-      values: {},
+      values: {} as OptionsResults<C>,
       positionals: [],
     }
     for (const token of result.tokens) {
@@ -797,7 +809,7 @@ export class Jack<C extends ConfigSet = {}> {
           break
         }
       } else if (token.kind === 'option') {
-        let value: string | number | boolean | undefined = undefined
+        let value: ConfigValue | undefined = undefined
         if (token.name.startsWith('no-')) {
           const my = this.#configSet[token.name]
           const pname = token.name.substring('no-'.length)
@@ -870,13 +882,13 @@ export class Jack<C extends ConfigSet = {}> {
         }
         if (my.multiple) {
           const pv = p.values as {
-            [k: string]: (string | number | boolean)[]
+            [k: string]: ConfigValue[]
           }
           const tn = pv[token.name] ?? []
           pv[token.name] = tn
           tn.push(value)
         } else {
-          const pv = p.values as { [k: string]: string | number | boolean }
+          const pv = p.values as { [k: string]: ConfigValue }
           pv[token.name] = value
         }
       }
@@ -997,7 +1009,7 @@ export class Jack<C extends ConfigSet = {}> {
     for (const [field, value] of Object.entries(p.values)) {
       const my = this.#configSet[field]
       this.#env[toEnvKey(this.#envPrefix, field)] = toEnvVal(
-        value,
+        value as ConfigValue,
         my?.delim,
       )
     }
