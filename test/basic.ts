@@ -536,6 +536,90 @@ t.test('validate against options', t => {
   t.end()
 })
 
+t.test('valid options with defaults', async t => {
+  const j = jack({
+    usage: 'foo [options] <files>',
+    env: t.context.env,
+    envPrefix: 'TEST',
+  })
+    .addFields({
+      'vo-opt': {
+        type: 'string',
+        validOptions: ['x', 'y'] as const,
+        default: 'x',
+      },
+      'vo-optlist': {
+        type: 'string',
+        multiple: true,
+        validOptions: ['x', 'y'] as const,
+        default: ['x'],
+      },
+      'vo-num': {
+        type: 'number',
+        validOptions: [1, 2] as const,
+        default: 1,
+      },
+      'vo-numlist': {
+        type: 'number',
+        multiple: true,
+        validOptions: [1, 2] as const,
+        default: [2],
+      },
+      'no-vo-opt': {
+        type: 'string',
+        default: 'x',
+      },
+    })
+    .opt({
+      'vo-by-opt': {
+        validOptions: ['x', 'y'] as const,
+        default: 'x',
+      },
+    })
+    .optList({
+      'vo-by-optlist': {
+        validOptions: ['x', 'y'] as const,
+        default: ['x'],
+      },
+    })
+    .num({
+      'vo-by-num': {
+        validOptions: [1, 2] as const,
+        default: 1,
+      },
+    })
+    .numList({
+      'vo-by-numlist': {
+        validOptions: [1, 2] as const,
+        default: [1],
+      },
+    })
+
+  // types with no non-null assertions
+  const { values } = j.parse()
+  const _voOpt: 'x' | 'y' = values['vo-opt']
+  const _voOptList: ('x' | 'y')[] = values['vo-optlist']
+  const _voNum: 1 | 2 = values['vo-num']
+  const _voNumList: (1 | 2)[] = values['vo-numlist']
+  const _opt: 'x' | 'y' = values['vo-by-opt']
+  const _optList: ('x' | 'y')[] = values['vo-by-optlist']
+  const _num: 1 | 2 = values['vo-by-num']
+  const _numList: (1 | 2)[] = values['vo-by-numlist']
+  //@ts-expect-error
+  const _noVoOpt: 'x' | 'y' = values['no-vo-opt']
+
+  const v = j.parse([]).values
+  //@ts-expect-error
+  delete v['vo-opt']
+  //@ts-expect-error
+  v['vo-opt'] = undefined
+  //@ts-expect-error
+  v['vo-opt'] = null
+  // these are ok because there are no valid options with the default
+  values['no-vo-opt'] = undefined
+  delete values['no-vo-opt']
+})
+
 t.test('parseRaw', t => {
   t.intercept(process, 'env', { value: { FOO_XYZ: '123' } })
   const j = jack({
