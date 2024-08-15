@@ -2,15 +2,15 @@ import t from 'tap'
 import { inspect } from 'util'
 import { isConfigOption, Jack, jack } from '../src/index.js'
 
-t.beforeEach(t => {
-  t.context.env = {}
-  t.context.jack = jack({
+const context = ({ env = {} } = {}) => ({
+  env,
+  jack: jack({
     // Optional
     // This will be auto-generated from the descriptions if not supplied
     // top level usage line, printed by -h
     // will be auto-generated if not specified
     usage: 'foo [options] <files>',
-    env: t.context.env,
+    env,
     envPrefix: 'TEST',
   })
     .heading('The best Foo that ever Fooed')
@@ -177,11 +177,11 @@ t.beforeEach(t => {
         hint: 'file',
         description: `Send the raw output to the specified file.`,
       },
-    })
+    }),
 })
 
 t.test('inspection', t => {
-  const { jack } = t.context as { jack: Jack }
+  const { jack } = context() as { jack: Jack }
   t.matchSnapshot(inspect(jack, { colors: false }), 'inspect')
   t.matchSnapshot(jack.toJSON())
   t.matchSnapshot(jack.usage())
@@ -196,7 +196,7 @@ t.test('inspection', t => {
 })
 
 t.test('validate object', t => {
-  const { jack } = t.context as { jack: Jack }
+  const { jack } = context() as { jack: Jack }
   t.matchSnapshot(jack.validate({ flag: true }), 'successful validate')
   t.throws(() => jack.validate({ debug: 12 }))
   t.throws(() => jack.validate({ flag: [true] }))
@@ -212,7 +212,7 @@ t.test('validate object', t => {
 })
 
 t.test('invalid config defs', t => {
-  const { jack } = t.context as { jack: Jack }
+  const { jack } = context() as { jack: Jack }
   t.throws(() => jack.num({ f: {} }))
   t.throws(() => jack.num({ flag: {} }))
   t.throws(() => jack.num({ fooooo: { short: 'f' } }))
@@ -275,7 +275,7 @@ t.test('defaults to process.env and process.argv', t => {
 })
 
 t.test('multiple is [] if env is empty', t => {
-  const { jack, env } = t.context as {
+  const { jack, env } = context() as {
     jack: Jack<{
       gtthree: { type: 'number'; multiple: true }
     }>
@@ -374,7 +374,7 @@ const cases: [a: string[], e?: { [k: string]: string }, inv?: boolean][] =
   ]
 for (const [args, e = {}, invalid] of cases) {
   t.test(args.join(' ') + ' ' + JSON.stringify(e), t => {
-    const { jack, env } = t.context as {
+    const { jack, env } = context() as {
       jack: Jack
       env: { [k: string]: string }
     }
@@ -398,7 +398,7 @@ t.test('validate against options', t => {
     // top level usage line, printed by -h
     // will be auto-generated if not specified
     usage: 'foo [options] <files>',
-    env: t.context.env,
+    env: {},
     envPrefix: 'TEST',
   })
     .addFields({
@@ -537,11 +537,7 @@ t.test('validate against options', t => {
 })
 
 t.test('valid options with defaults', async t => {
-  const j = jack({
-    usage: 'foo [options] <files>',
-    env: t.context.env,
-    envPrefix: 'TEST',
-  })
+  const j = jack()
     .addFields({
       'vo-opt': {
         type: 'string',
@@ -618,6 +614,107 @@ t.test('valid options with defaults', async t => {
   // these are ok because there are no valid options with the default
   values['no-vo-opt'] = undefined
   delete values['no-vo-opt']
+})
+
+t.test('valid options with incorrect defaults', async t => {
+  const addField = (
+    type: 'string' | 'number',
+    validOptions: readonly string[] | readonly number[],
+    def: string | number | string[] | number[],
+  ) =>
+    jack().addFields({
+      key: {
+        type,
+        multiple: Array.isArray(def),
+        validOptions,
+        default: def,
+      },
+    })
+  const opt = (validOptions: readonly string[], def: string) =>
+    jack().opt({
+      key: {
+        validOptions,
+        default: def,
+      },
+    })
+  const optList = (validOptions: readonly string[], def: string[]) =>
+    jack().optList({
+      key: {
+        validOptions,
+        default: def,
+      },
+    })
+  const num = (validOptions: readonly number[], def: number) =>
+    jack().num({
+      key: {
+        validOptions,
+        default: def,
+      },
+    })
+  const numList = (validOptions: readonly number[], def: number[]) =>
+    jack().numList({
+      key: {
+        validOptions,
+        default: def,
+      },
+    })
+
+  t.throws(() => addField('string', ['x', 'y'] as const, 'a'), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: 'a',
+      wanted: ['x', 'y'],
+    },
+  })
+  t.throws(() => addField('string', ['x', 'y'] as const, ['a']), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: ['a'],
+      wanted: ['x', 'y'],
+    },
+  })
+  t.throws(() => addField('number', [1, 2] as const, 3), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: 3,
+      wanted: [1, 2],
+    },
+  })
+  t.throws(() => addField('number', [1, 2] as const, [3]), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: [3],
+      wanted: [1, 2],
+    },
+  })
+  t.throws(() => opt(['x', 'y'] as const, 'a'), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: 'a',
+      wanted: ['x', 'y'],
+    },
+  })
+  t.throws(() => optList(['x', 'y'] as const, ['a']), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: ['a'],
+      wanted: ['x', 'y'],
+    },
+  })
+  t.throws(() => num([1, 2] as const, 3), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: 3,
+      wanted: [1, 2],
+    },
+  })
+  t.throws(() => numList([1, 2] as const, [3]), {
+    message: 'invalid default value not in validOptions',
+    cause: {
+      found: [3],
+      wanted: [1, 2],
+    },
+  })
 })
 
 t.test('parseRaw', t => {
