@@ -181,7 +181,7 @@ const context = ({ env = {} } = {}) => ({
 })
 
 t.test('inspection', t => {
-  const { jack } = context() as { jack: Jack }
+  const { jack } = context()
   t.matchSnapshot(inspect(jack, { colors: false }), 'inspect')
   t.matchSnapshot(jack.toJSON())
   t.matchSnapshot(jack.usage())
@@ -196,7 +196,7 @@ t.test('inspection', t => {
 })
 
 t.test('validate object', t => {
-  const { jack } = context() as { jack: Jack }
+  const { jack } = context()
   t.matchSnapshot(jack.validate({ flag: true }), 'successful validate')
   t.throws(() => jack.validate({ debug: 12 }))
   t.throws(() => jack.validate({ flag: [true] }))
@@ -212,7 +212,7 @@ t.test('validate object', t => {
 })
 
 t.test('invalid config defs', t => {
-  const { jack } = context() as { jack: Jack }
+  const { jack } = context()
   t.throws(() => jack.num({ f: {} }))
   t.throws(() => jack.num({ flag: {} }))
   t.throws(() => jack.num({ fooooo: { short: 'f' } }))
@@ -374,10 +374,7 @@ const cases: [a: string[], e?: { [k: string]: string }, inv?: boolean][] =
   ]
 for (const [args, e = {}, invalid] of cases) {
   t.test(args.join(' ') + ' ' + JSON.stringify(e), t => {
-    const { jack, env } = context() as {
-      jack: Jack
-      env: { [k: string]: string }
-    }
+    const { jack, env } = context()
     Object.assign(env, e)
     if (invalid) {
       t.matchSnapshot(
@@ -393,14 +390,7 @@ for (const [args, e = {}, invalid] of cases) {
 }
 
 t.test('validate against options', t => {
-  const j = jack({
-    // This will be auto-generated from the descriptions if not supplied
-    // top level usage line, printed by -h
-    // will be auto-generated if not specified
-    usage: 'foo [options] <files>',
-    env: {},
-    envPrefix: 'TEST',
-  })
+  const j = jack()
     .addFields({
       'vo-opt': {
         type: 'string',
@@ -469,17 +459,6 @@ t.test('validate against options', t => {
   t.throws(() => j.opt({ n: { validOptions: [1] } }))
   //@ts-expect-error
   t.throws(() => j.optList({ n: { validOptions: [1] } }))
-
-  // types
-  const { values } = j.parse()
-  const _voOpt: 'x' | 'y' = values['vo-opt']!
-  const _voOptList: ('x' | 'y')[] = values['vo-optlist']!
-  const _voNum: 1 | 2 = values['vo-num']!
-  const _voNumList: (1 | 2)[] = values['vo-numlist']!
-  const _opt: 'x' | 'y' = values['vo-by-opt']!
-  const _optList: ('x' | 'y')[] = values['vo-by-optlist']!
-  const _num: 1 | 2 = values['vo-by-num']!
-  const _numList: (1 | 2)[] = values['vo-by-numlist']!
 
   t.equal(
     isConfigOption(
@@ -612,7 +591,8 @@ t.test('valid options with defaults', async t => {
   //@ts-expect-error
   v['vo-opt'] = null
   // these are ok because there are no valid options with the default
-  values['no-vo-opt'] = undefined
+  values['no-vo-opt'] = ''
+  //@ts-expect-error
   delete values['no-vo-opt']
 })
 

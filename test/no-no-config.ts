@@ -1,5 +1,5 @@
 import t from 'tap'
-import { jack } from '../dist/esm/index.js'
+import { jack } from '../src/index.js'
 
 const j = jack({
   envPrefix: 'TEST',
@@ -10,7 +10,6 @@ const j = jack({
 }).flag({
   foo: {},
   'no-foo': {},
-
   'no-bar': {},
   'no-no-bar': {},
 })
