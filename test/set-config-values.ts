@@ -3,12 +3,12 @@ import { jack, JackOptions } from '../src/index.js'
 
 const newJack = (opts: JackOptions = {}) =>
   jack(opts)
-    .flag({ bool: {} })
-    .flagList({ bools: {} })
-    .opt({ str: {} })
-    .optList({ strs: {} })
-    .num({ num: {} })
-    .numList({ nums: {} })
+    .flag({ bool: {}, boolDef: { default: true } })
+    .flagList({ bools: {}, boolsDef: { default: [false] } })
+    .opt({ str: {}, strDef: { default: 'x' } })
+    .optList({ strs: {}, strsDef: { default: ['x'] } })
+    .num({ num: {}, numDef: { default: 1 } })
+    .numList({ nums: {}, numsDef: { default: [1, 2] } })
 
 t.test('set some config data', t => {
   const j = newJack()
@@ -27,6 +27,12 @@ t.test('set some config data', t => {
     strs: ['a', 'b'],
     num: 123,
     nums: [1, 2, 3],
+    boolDef: true,
+    boolsDef: [false],
+    strDef: 'x',
+    strsDef: ['x'],
+    numDef: 1,
+    numsDef: [1, 2],
   })
   t.end()
 })
@@ -53,6 +59,12 @@ t.test('env and cli override config data', t => {
     strs: ['a', 'b'],
     num: 123,
     nums: [1, 2, 3],
+    boolDef: true,
+    boolsDef: [false],
+    strDef: 'x',
+    strsDef: ['x'],
+    numDef: 1,
+    numsDef: [1, 2],
   })
   t.end()
 })

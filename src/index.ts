@@ -61,11 +61,22 @@ const isValidValue = <T extends ConfigType, M extends boolean>(
 
 export type ReadonlyArrays = readonly number[] | readonly string[]
 
+/**
+ * Defines the type of validOptions that are valid, given a config definition's
+ * {@link ConfigType}
+ */
 export type ValidOptions<T extends ConfigType> =
   T extends 'boolean' ? undefined
   : T extends 'string' ? readonly string[]
   : T extends 'number' ? readonly number[]
   : ReadonlyArrays
+
+const isValidOption = <T extends ConfigType>(
+  v: unknown,
+  vo: readonly unknown[],
+): vo is Exclude<ValidOptions<T>, undefined> =>
+  !!vo &&
+  (Array.isArray(v) ? v.every(x => isValidOption(x, vo)) : vo.includes(v))
 
 /**
  * A config field definition, in its full representation.
@@ -146,39 +157,28 @@ export type ConfigSetFromMetaSet<
   T extends ConfigType,
   M extends boolean,
   S extends ConfigMetaSet<T, M>,
-> = {
-  [longOption in keyof S]: ConfigOption<T, M> & S[longOption]
-}
-
-export type OptionsResultRequired<T extends ConfigOption, Yes, No> =
-  T['default'] extends ConfigValue ? Yes : No
-
-export type OptionsResult<T extends ConfigOption> =
-  T['validOptions'] extends ReadonlyArrays ?
-    T extends ConfigOption<'string' | 'number', false> ?
-      T['validOptions'][number]
-    : T extends ConfigOption<'string' | 'number', true> ?
-      T['validOptions'][number][]
-    : never
-  : T extends ConfigOption<'string', false> ? string
-  : T extends ConfigOption<'string', true> ? string[]
-  : T extends ConfigOption<'number', false> ? number
-  : T extends ConfigOption<'number', true> ? number[]
-  : T extends ConfigOption<'boolean', false> ? boolean
-  : T extends ConfigOption<'boolean', true> ? boolean[]
-  : never
+> = S & { [longOption in keyof S]: ConfigOption<T, M> }
 
 /**
- * The 'values' field returned by {@link Jack#parse}
+ * The 'values' field returned by {@link Jack#parse}. If a value has
+ * a default field it will be required on the object otherwise it is optional.
  */
 export type OptionsResults<T extends ConfigSet> = {
-  [K in keyof T as OptionsResultRequired<T[K], K, never>]: OptionsResult<
-    T[K]
-  >
-} & {
-  [K in keyof T as OptionsResultRequired<T[K], never, K>]?: OptionsResult<
-    T[K]
-  >
+  [K in keyof T]:
+    | (T[K]['validOptions'] extends ReadonlyArrays ?
+        T[K] extends ConfigOption<'string' | 'number', false> ?
+          T[K]['validOptions'][number]
+        : T[K] extends ConfigOption<'string' | 'number', true> ?
+          T[K]['validOptions'][number][]
+        : never
+      : T[K] extends ConfigOption<'string', false> ? string
+      : T[K] extends ConfigOption<'string', true> ? string[]
+      : T[K] extends ConfigOption<'number', false> ? number
+      : T[K] extends ConfigOption<'number', true> ? number[]
+      : T[K] extends ConfigOption<'boolean', false> ? boolean
+      : T[K] extends ConfigOption<'boolean', true> ? boolean[]
+      : never)
+    | (T[K]['default'] extends ConfigValue ? never : undefined)
 }
 
 /**
@@ -304,9 +304,6 @@ const undefOrType = (v: unknown, t: string): boolean =>
 const undefOrTypeArray = (v: unknown, t: string): boolean =>
   v === undefined || (Array.isArray(v) && v.every(x => typeof x === t))
 
-const isValidOption = (v: unknown, vo: readonly unknown[]): boolean =>
-  Array.isArray(v) ? v.every(x => isValidOption(x, vo)) : vo.includes(v)
-
 // print the value type, for error message reporting
 const valueType = (
   v: ConfigValue | { type: ConfigType; multiple?: boolean },
@@ -333,7 +330,7 @@ const validateField = <
   multiple?: M,
 ): ConfigOption<T, M> => {
   if (type !== undefined && o.type !== undefined && type !== o.type) {
-    throw new TypeError('mismatched type value', {
+    throw new TypeError('invalid type value', {
       cause: {
         found: o.type,
         wanted: [type, undefined],
@@ -357,7 +354,7 @@ const validateField = <
     o.multiple !== undefined &&
     multiple !== o.multiple
   ) {
-    throw new TypeError('mismatched multiple value', {
+    throw new TypeError('invalid multiple value', {
       cause: {
         found: o.multiple,
         wanted: [multiple, undefined],
@@ -568,7 +565,7 @@ export class Jack<C extends ConfigSet = {}> {
    * provided, will be included in error messages if a value is invalid or
    * unknown.
    */
-  setConfigValues(values: OptionsResults<C>, source = '') {
+  setConfigValues(values: Partial<OptionsResults<C>>, source = '') {
     try {
       this.validate(values)
     } catch (er) {
@@ -765,11 +762,7 @@ export class Jack<C extends ConfigSet = {}> {
       const validOptions = this.#configSet[field]?.validOptions
       let cause:
         | undefined
-        | {
-            name: string
-            found: unknown
-            validOptions?: readonly string[] | readonly number[]
-          }
+        | { name: string; found: unknown; validOptions?: ReadonlyArrays }
       if (validOptions && !isValidOption(value, validOptions)) {
         cause = { name: field, found: value, validOptions: validOptions }
       }
@@ -844,11 +837,7 @@ export class Jack<C extends ConfigSet = {}> {
       }
       let cause:
         | undefined
-        | {
-            name: string
-            found: any
-            validOptions?: readonly string[] | readonly number[]
-          }
+        | { name: string; found: unknown; validOptions?: ReadonlyArrays }
       if (
         config.validOptions &&
         !isValidOption(value, config.validOptions)
@@ -992,13 +981,13 @@ export class Jack<C extends ConfigSet = {}> {
       Object.fromEntries(
         Object.entries(fields).map(([name, field]) => {
           this.#validateName(name, field)
-          const option = validateField(field, type, multiple)
+          const value = validateField(field, type, multiple)
           next.#fields.push({
             type: 'config',
             name,
-            value: option,
+            value,
           })
-          return [name, option]
+          return [name, value]
         }),
       ),
     )
