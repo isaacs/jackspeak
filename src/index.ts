@@ -433,7 +433,7 @@ const toParseArgsOptionsConfig = (
     if (!config) {
       throw new Error('config must be an object: ' + longOption)
     }
-    /* c8 ignore start */
+    /* c8 ignore stop */
     if (isConfigOption(config, 'number', true)) {
       c[longOption] = {
         type: 'string',
@@ -569,15 +569,12 @@ export class Jack<C extends ConfigSet = {}> {
     try {
       this.validate(values)
     } catch (er) {
-      const e = er as Error
-      if (source && e && typeof e === 'object') {
-        if (e.cause && typeof e.cause === 'object') {
-          Object.assign(e.cause, { path: source })
-        } else {
-          e.cause = { path: source }
-        }
+      if (source && er instanceof Error) {
+        /* c8 ignore next */
+        const cause = typeof er.cause === 'object' ? er.cause : {}
+        er.cause = { ...cause, path: source }
       }
-      throw e
+      throw er
     }
     for (const [field, value] of Object.entries(values)) {
       const my = this.#configSet[field]
