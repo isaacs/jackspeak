@@ -385,7 +385,10 @@ Object {
 
 exports[`TAP > TAP > validate against options > must match snapshot 1`] = `
 Usage:
-  foo [options] <files>
+  basic.ts --vo-opt=<vo-opt> --vo-optlist=<vo-optlist> --vo-num=<vo-num>
+  --vo-numlist=<vo-numlist> --vo-by-opt=<vo-by-opt>
+  --vo-by-optlist=<vo-by-optlist> --vo-by-num=<vo-by-num>
+  --vo-by-numlist=<vo-by-numlist>
 
   --vo-opt=<vo-opt>    Valid options: "x", "y"
   --vo-optlist=<vo-optlist>
@@ -443,6 +446,11 @@ Jack {
     type: 'string',
     description: 'string that is not "foo"',
     validate: [Function: validate]
+  },
+  oneof: {
+    type: 'string',
+    description: 'one of the following',
+    validOptions: [ 'a', 'b', 'cant-not-be-see' ]
   },
   jobs: {
     type: 'number',
@@ -570,6 +578,15 @@ Object {
     "multiple": true,
     "type": "number",
   },
+  "oneof": Object {
+    "description": "one of the following",
+    "type": "string",
+    "validOptions": Array [
+      "a",
+      "b",
+      "cant-not-be-see",
+    ],
+  },
   "onlytrue": Object {
     "description": "only allowed to be true",
     "type": "boolean",
@@ -665,6 +682,9 @@ This is a list:
   -R<reporter> --reporter=<reporter>
                          the style of report to display
   --notfoo=<notfoo>      string that is not "foo"
+  --oneof=<oneof>        one of the following
+                         Valid options: "a", "b", "cant-not-be-see"
+
   -j<n> --jobs=<n>       how many jobs to run in parallel
   -5<n> --ltfive=<n>     must be less than 5
 
@@ -780,6 +800,10 @@ the style of report to display
 ### \`--notfoo=<notfoo>\`
 
 string that is not "foo"
+
+### \`--oneof=<oneof>\`
+
+one of the following Valid options: "a", "b", "cant-not-be-see"
 
 ### \`-j<n> --jobs=<n>\`
 

@@ -202,6 +202,15 @@ t.test('single string options', async t => {
       },
     }),
   )
+  doesNotParse(t, j =>
+    j.addFields({
+      addFieldWithConflictingDefault: {
+        type: TYPE,
+        default: DEF + 'a',
+        validOptions: VALID_OPTIONS,
+      },
+    }),
+  )
 })
 
 t.test('multiple string options', async t => {
@@ -363,6 +372,15 @@ t.test('multiple string options', async t => {
         type: TYPE,
         default: BAD,
         validOptions: [BAD],
+      },
+    }),
+  )
+  doesNotParse(t, j =>
+    j.addFields({
+      addFieldWithConflictingDefault: {
+        type: TYPE,
+        default: DEF[0] + 'a',
+        validOptions: VALID_OPTIONS,
       },
     }),
   )

@@ -329,12 +329,48 @@ const validateField = <
   O extends ConfigOptionMeta<T, M>,
 >(
   o: O,
-  type: T,
-  multiple: M,
+  type?: T,
+  multiple?: M,
 ): ConfigOption<T, M> => {
+  if (type !== undefined && o.type !== undefined && type !== o.type) {
+    throw new TypeError('mismatched type value', {
+      cause: {
+        found: o.type,
+        wanted: [type, undefined],
+      },
+    })
+  }
+
+  // Set type if was not explicitly passed in by a convenience method
+  type ??= o.type
+  if (!type) {
+    throw new TypeError('invalid type value', {
+      cause: {
+        found: type,
+        wanted: ['string', 'number', 'boolean'],
+      },
+    })
+  }
+
+  if (
+    multiple !== undefined &&
+    o.multiple !== undefined &&
+    multiple !== o.multiple
+  ) {
+    throw new TypeError('mismatched multiple value', {
+      cause: {
+        found: o.multiple,
+        wanted: [multiple, undefined],
+      },
+    })
+  }
+
+  // Set multiple if was not explicitly passed in by a convenience method
+  multiple ??= !!o.multiple as M
+
   if (
     o.default !== undefined &&
-    !isValidValue(o.default, type, multiple ?? false)
+    !isValidValue(o.default, type, multiple)
   ) {
     throw new TypeError('invalid default value', {
       cause: {
@@ -345,9 +381,11 @@ const validateField = <
   }
 
   if (type === 'boolean') {
-    delete o.validOptions
     if (o.hint !== undefined) {
       throw new TypeError('cannot provide hint for flag')
+    }
+    if (o.validOptions !== undefined) {
+      throw new TypeError('cannot provide validOptions for flag')
     }
   } else {
     if (!undefOrTypeArray(o.validOptions, type)) {
@@ -436,7 +474,7 @@ const toParseArgsOptionsConfig = (
     ) {
       c[`no-${longOption}`] = {
         type: 'boolean',
-        multiple: config.multiple,
+        multiple: !!config.multiple,
       }
     }
   }
@@ -872,7 +910,7 @@ export class Jack<C extends ConfigSet = {}> {
   num<F extends ConfigMetaSet<'number', false>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'number', false, F>> {
-    return this.#addFields(fields, 'number', false)
+    return this.#addFieldsWith(fields, 'number', false)
   }
 
   /**
@@ -881,7 +919,7 @@ export class Jack<C extends ConfigSet = {}> {
   numList<F extends ConfigMetaSet<'number', true>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'number', true, F>> {
-    return this.#addFields(fields, 'number', true)
+    return this.#addFieldsWith(fields, 'number', true)
   }
 
   /**
@@ -890,7 +928,7 @@ export class Jack<C extends ConfigSet = {}> {
   opt<F extends ConfigMetaSet<'string', false>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'string', false, F>> {
-    return this.#addFields(fields, 'string', false)
+    return this.#addFieldsWith(fields, 'string', false)
   }
 
   /**
@@ -899,7 +937,7 @@ export class Jack<C extends ConfigSet = {}> {
   optList<F extends ConfigMetaSet<'string', true>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'string', true, F>> {
-    return this.#addFields(fields, 'string', true)
+    return this.#addFieldsWith(fields, 'string', true)
   }
 
   /**
@@ -908,7 +946,7 @@ export class Jack<C extends ConfigSet = {}> {
   flag<F extends ConfigMetaSet<'boolean', false>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'boolean', false, F>> {
-    return this.#addFields(fields, 'boolean', false)
+    return this.#addFieldsWith(fields, 'boolean', false)
   }
 
   /**
@@ -917,7 +955,7 @@ export class Jack<C extends ConfigSet = {}> {
   flagList<F extends ConfigMetaSet<'boolean', true>>(
     fields: F,
   ): Jack<C & ConfigSetFromMetaSet<'boolean', true, F>> {
-    return this.#addFields(fields, 'boolean', true)
+    return this.#addFieldsWith(fields, 'boolean', true)
   }
 
   /**
@@ -926,67 +964,34 @@ export class Jack<C extends ConfigSet = {}> {
    * fields on each one, or Jack won't know how to define them.
    */
   addFields<F extends ConfigSet>(fields: F): Jack<C & F> {
-    const next = this as unknown as Jack<C & F>
-    for (const [name, field] of Object.entries(fields)) {
-      this.#validateName(name, field)
-      if (field.type === undefined) {
-        throw new TypeError('invalid type value', {
-          cause: {
-            found: field.type,
-            wanted: ['string', 'number', 'boolean'],
-          },
-        })
-      }
-      const option = validateField(
-        field,
-        field.type,
-        field.multiple ?? false,
-      )
-      next.#fields.push({
-        type: 'config',
-        name,
-        value: option,
-      })
-    }
-    Object.assign(next.#configSet, fields)
-    return next
+    return this.#addFields(this as unknown as Jack<C & F>, fields)
+  }
+
+  #addFieldsWith<
+    T extends ConfigType,
+    M extends boolean,
+    F extends ConfigMetaSet<T, M>,
+    O extends ConfigSetFromMetaSet<T, M, F>,
+  >(fields: F, type: ConfigType, multiple: boolean): Jack<C & O> {
+    return this.#addFields(
+      this as unknown as Jack<C & O>,
+      fields,
+      type,
+      multiple,
+    )
   }
 
   #addFields<
     T extends ConfigType,
     M extends boolean,
     F extends ConfigMetaSet<T, M>,
-  >(
-    fields: F,
-    type: ConfigType,
-    multiple: boolean,
-  ): Jack<C & ConfigSetFromMetaSet<T, M, F>> {
-    const next = this as unknown as Jack<C & ConfigSetFromMetaSet<T, M, F>>
+    O extends Jack,
+  >(next: O, fields: F, type?: ConfigType, multiple?: boolean): O {
     Object.assign(
       next.#configSet,
       Object.fromEntries(
         Object.entries(fields).map(([name, field]) => {
           this.#validateName(name, field)
-
-          if (field.type !== undefined && field.type !== type) {
-            throw new TypeError('mismatched type value', {
-              cause: {
-                found: field.type,
-                wanted: [field.type, undefined],
-              },
-            })
-          }
-          if (
-            field.multiple !== undefined &&
-            field.multiple !== multiple
-          ) {
-            throw new TypeError('mismatched multiple value', {
-              cause: {
-                found: field.multiple,
-                wanted: [field.multiple, undefined],
-              },
-            })
-          }
           const option = validateField(field, type, multiple)
           next.#fields.push({
             type: 'config',
