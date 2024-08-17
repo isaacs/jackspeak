@@ -55,13 +55,12 @@
     "endOfLine": "lf"
   },
   "devDependencies": {
-    "@types/node": "^20.7.0",
-    "@types/pkgjs__parseargs": "^0.10.1",
-    "prettier": "^3.2.5",
-    "tap": "^18.8.0",
-    "tshy": "^1.14.0",
-    "typedoc": "^0.25.1",
-    "typescript": "^5.2.2"
+    "@types/node": "^22.4.1",
+    "prettier": "^3.3.3",
+    "tap": "^21.0.1",
+    "tshy": "^3.0.2",
+    "typedoc": "^0.26.6",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@isaacs/cliui": "^8.0.2"
@@ -91,5 +90,6 @@
   "author": "Isaac Z. Schlueter <i@izs.me>",
   "tap": {
     "typecheck": true
-  }
+  },
+  "module": "./dist/esm/index.js"
 }
