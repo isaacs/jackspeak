@@ -10,9 +10,16 @@ import {
 import cliui from '@isaacs/cliui'
 import { basename } from 'node:path'
 
+export type ParseArgsOptions = Exclude<
+  ParseArgsConfig['options'],
+  undefined
+>
+export type ParseArgsOption = ParseArgsOptions[string]
+export type ParseArgsDefault = Exclude<ConfigValue, number | number[]>
+
 export type ConfigType = 'number' | 'string' | 'boolean'
 
-export const isConfigType = (t: string): t is ConfigType =>
+export const isConfigType = (t: unknown): t is ConfigType =>
   typeof t === 'string' &&
   (t === 'string' || t === 'number' || t === 'boolean')
 
@@ -105,7 +112,14 @@ export type ConfigOption<
   multiple?: M
 }
 
-export const isConfigOption = <T extends ConfigType, M extends boolean>(
+/**
+ * Determine whether an unknown object is a {@link ConfigOption} based only
+ * on its `type` and `multiple` property
+ */
+export const isConfigOptionOfType = <
+  T extends ConfigType,
+  M extends boolean,
+>(
   o: any,
   type: T,
   multi: M,
@@ -114,6 +128,18 @@ export const isConfigOption = <T extends ConfigType, M extends boolean>(
   typeof o === 'object' &&
   isConfigType(o.type) &&
   o.type === type &&
+  !!o.multiple === multi
+
+/**
+ * Determine whether an unknown object is a {@link ConfigOption} based on
+ * it having all valid properties
+ */
+export const isConfigOption = <T extends ConfigType, M extends boolean>(
+  o: any,
+  type: T,
+  multi: M,
+): o is ConfigOption<T, M> =>
+  isConfigOptionOfType(o, type, multi) &&
   undefOrType(o.short, 'string') &&
   undefOrType(o.description, 'string') &&
   undefOrType(o.hint, 'string') &&
@@ -121,8 +147,7 @@ export const isConfigOption = <T extends ConfigType, M extends boolean>(
   (o.type === 'boolean' ?
     o.validOptions === undefined
   : undefOrTypeArray(o.validOptions, o.type)) &&
-  (o.default === undefined || isValidValue(o.default, type, multi)) &&
-  !!o.multiple === multi
+  (o.default === undefined || isValidValue(o.default, type, multi))
 
 /**
  * The meta information for a config option definition, when the
@@ -254,7 +279,7 @@ export type UsageField =
       value: ConfigOption
     }
 
-const width = Math.min(process?.stdout?.columns || 80, 80)
+const width = Math.min(process?.stdout?.columns ?? 80, 80)
 
 // indentation spaces from heading level
 const indent = (n: number) => (n - 1) * 2
@@ -312,7 +337,7 @@ const valueType = (
   : typeof v === 'boolean' ? 'boolean'
   : typeof v === 'number' ? 'number'
   : Array.isArray(v) ?
-    joinTypes([...new Set(v.map(v => valueType(v)))]) + '[]'
+    `${joinTypes([...new Set(v.map(v => valueType(v)))])}[]`
   : `${v.type}${v.multiple ? '[]' : ''}`
 
 const joinTypes = (types: string[]): string =>
@@ -320,50 +345,83 @@ const joinTypes = (types: string[]): string =>
     types[0]
   : `(${types.join('|')})`
 
-const validateField = <
-  T extends ConfigType,
-  M extends boolean,
-  O extends ConfigOptionMeta<T, M>,
->(
-  o: O,
-  type?: T,
-  multiple?: M,
-): ConfigOption<T, M> => {
-  if (type !== undefined && o.type !== undefined && type !== o.type) {
-    throw new TypeError('invalid type value', {
-      cause: {
-        found: o.type,
-        wanted: [type, undefined],
-      },
-    })
+const validateFieldMeta = <T extends ConfigType, M extends boolean>(
+  field: ConfigOptionMeta<T, M>,
+  fieldMeta?: { type: T; multiple: M },
+): { type: ConfigType; multiple: boolean } => {
+  if (fieldMeta) {
+    if (field.type !== undefined && field.type !== fieldMeta.type) {
+      throw new TypeError(`invalid type`, {
+        cause: {
+          found: field.type,
+          wanted: [fieldMeta.type, undefined],
+        },
+      })
+    }
+    if (
+      field.multiple !== undefined &&
+      !!field.multiple !== fieldMeta.multiple
+    ) {
+      throw new TypeError(`invalid multiple`, {
+        cause: {
+          found: field.multiple,
+          wanted: [fieldMeta.multiple, undefined],
+        },
+      })
+    }
+    return fieldMeta
   }
 
-  // Set type if was not explicitly passed in by a convenience method
-  type ??= o.type
-  if (!type) {
-    throw new TypeError('invalid type value', {
+  if (!isConfigType(field.type)) {
+    throw new TypeError(`invalid type`, {
       cause: {
-        found: type,
+        found: field.type,
         wanted: ['string', 'number', 'boolean'],
       },
     })
   }
 
-  if (
-    multiple !== undefined &&
-    o.multiple !== undefined &&
-    multiple !== o.multiple
-  ) {
-    throw new TypeError('invalid multiple value', {
-      cause: {
-        found: o.multiple,
-        wanted: [multiple, undefined],
-      },
-    })
+  return {
+    type: field.type,
+    multiple: !!field.multiple,
   }
+}
 
-  // Set multiple if was not explicitly passed in by a convenience method
-  multiple ??= !!o.multiple as M
+const validateField = (
+  o: ConfigOption,
+  type: ConfigType,
+  multiple: boolean,
+): ConfigOption => {
+  const validateValidOptions = <
+    T extends ConfigValue | undefined,
+    V extends T extends Array<infer U> ? U : T,
+  >(
+    def: T | undefined,
+    validOptions: readonly V[] | undefined,
+  ) => {
+    if (!undefOrTypeArray(validOptions, type)) {
+      throw new TypeError('invalid validOptions', {
+        cause: {
+          found: validOptions,
+          wanted: valueType({ type, multiple: true }),
+        },
+      })
+    }
+    if (def !== undefined && validOptions !== undefined) {
+      const valid =
+        Array.isArray(def) ?
+          def.every(v => validOptions.includes(v as V))
+        : validOptions.includes(def as V)
+      if (!valid) {
+        throw new TypeError('invalid default value not in validOptions', {
+          cause: {
+            found: def,
+            wanted: validOptions,
+          },
+        })
+      }
+    }
+  }
 
   if (
     o.default !== undefined &&
@@ -372,110 +430,81 @@ const validateField = <
     throw new TypeError('invalid default value', {
       cause: {
         found: o.default,
-        wanted: multiple ? `${type}[]` : type,
+        wanted: valueType({ type, multiple }),
       },
     })
   }
 
-  if (type === 'boolean') {
+  if (
+    isConfigOptionOfType(o, 'number', false) ||
+    isConfigOptionOfType(o, 'number', true)
+  ) {
+    validateValidOptions(o.default, o.validOptions)
+  } else if (
+    isConfigOptionOfType(o, 'string', false) ||
+    isConfigOptionOfType(o, 'string', true)
+  ) {
+    validateValidOptions(o.default, o.validOptions)
+  } else if (
+    isConfigOptionOfType(o, 'boolean', false) ||
+    isConfigOptionOfType(o, 'boolean', true)
+  ) {
     if (o.hint !== undefined) {
       throw new TypeError('cannot provide hint for flag')
     }
     if (o.validOptions !== undefined) {
       throw new TypeError('cannot provide validOptions for flag')
     }
-  } else {
-    if (!undefOrTypeArray(o.validOptions, type)) {
-      throw new TypeError('invalid validOptions', {
-        cause: {
-          found: o.validOptions,
-          wanted: `${type}[]`,
-        },
-      })
-    }
-
-    if (o.default !== undefined && o.validOptions !== undefined) {
-      const validOptions =
-        o.validOptions as unknown as ConfigValuePrimitive[]
-      if (
-        multiple ?
-          !(o.default as unknown as ConfigValuePrimitive[]).every(v =>
-            validOptions.includes(v),
-          )
-        : !validOptions.includes(
-            o.default as unknown as ConfigValuePrimitive,
-          )
-      ) {
-        throw new TypeError('invalid default value not in validOptions', {
-          cause: {
-            found: o.default,
-            wanted: o.validOptions,
-          },
-        })
-      }
-    }
   }
 
-  return {
-    ...o,
-    multiple,
-    type,
-  }
+  return o
 }
 
 const toParseArgsOptionsConfig = (
   options: ConfigSet,
-): Exclude<ParseArgsConfig['options'], undefined> => {
-  const c: Exclude<ParseArgsConfig['options'], undefined> = {}
-  for (const longOption in options) {
-    const config = options[longOption]
-    /* c8 ignore start */
-    if (!config) {
-      throw new Error('config must be an object: ' + longOption)
+): ParseArgsOptions => {
+  return Object.entries(options).reduce((acc, [longOption, o]) => {
+    const p: ParseArgsOption = {
+      type: 'string',
+      multiple: !!o.multiple,
+      ...(typeof o.short === 'string' ? { short: o.short } : undefined),
     }
-    /* c8 ignore stop */
-    if (isConfigOption(config, 'number', true)) {
-      c[longOption] = {
-        type: 'string',
-        multiple: true,
-        default: config.default?.map(c => String(c)),
-      }
-    } else if (isConfigOption(config, 'number', false)) {
-      c[longOption] = {
-        type: 'string',
-        multiple: false,
-        default:
-          config.default === undefined ?
-            undefined
-          : String(config.default),
-      }
-    } else {
-      const conf = config as
-        | ConfigOption<'string'>
-        | ConfigOption<'boolean'>
-      c[longOption] = {
-        type: conf.type,
-        multiple: !!conf.multiple,
-        default: conf.default,
+    const setNoBool = () => {
+      if (!longOption.startsWith('no-') && !options[`no-${longOption}`]) {
+        acc[`no-${longOption}`] = {
+          type: 'boolean',
+          multiple: !!o.multiple,
+        }
       }
     }
-    const clo = c[longOption] as ConfigOption
-    if (typeof config.short === 'string') {
-      clo.short = config.short
+    const setDefault = <T>(
+      def: T | undefined,
+      fn: (d: T) => ParseArgsDefault,
+    ) => {
+      if (def !== undefined) {
+        p.default = fn(def)
+      }
     }
-
-    if (
-      config.type === 'boolean' &&
-      !longOption.startsWith('no-') &&
-      !options[`no-${longOption}`]
+    if (isConfigOption(o, 'number', false)) {
+      setDefault(o.default, String)
+    } else if (isConfigOption(o, 'number', true)) {
+      setDefault(o.default, d => d.map(v => String(v)))
+    } else if (
+      isConfigOption(o, 'string', false) ||
+      isConfigOption(o, 'string', true)
     ) {
-      c[`no-${longOption}`] = {
-        type: 'boolean',
-        multiple: !!config.multiple,
-      }
+      setDefault(o.default, v => v)
+    } else if (
+      isConfigOption(o, 'boolean', false) ||
+      isConfigOption(o, 'boolean', true)
+    ) {
+      p.type = 'boolean'
+      setDefault(o.default, v => v)
+      setNoBool()
     }
-  }
-  return c
+    acc[longOption] = p
+    return acc
+  }, {} as ParseArgsOptions)
 }
 
 /**
@@ -500,7 +529,7 @@ export interface JackOptions {
    * Environment object to read/write. Defaults `process.env`.
    * No effect if `envPrefix` is not set.
    */
-  env?: { [k: string]: string | undefined }
+  env?: Record<string, string | undefined>
 
   /**
    * A short usage string. If not provided, will be generated from the
@@ -537,10 +566,10 @@ export interface JackOptions {
  */
 export class Jack<C extends ConfigSet = {}> {
   #configSet: C
-  #shorts: { [k: string]: string }
+  #shorts: Record<string, string>
   #options: JackOptions
   #fields: UsageField[] = []
-  #env: { [k: string]: string | undefined }
+  #env: Record<string, string | undefined>
   #envPrefix?: string
   #allowPositionals: boolean
   #usage?: string
@@ -644,10 +673,9 @@ export class Jack<C extends ConfigSet = {}> {
       )
     }
 
-    const options = toParseArgsOptionsConfig(this.#configSet)
     const result = parseArgs({
       args,
-      options,
+      options: toParseArgsOptionsConfig(this.#configSet),
       // always strict, but using our own logic
       strict: false,
       allowPositionals: this.#allowPositionals,
@@ -741,14 +769,12 @@ export class Jack<C extends ConfigSet = {}> {
           }
         }
         if (my.multiple) {
-          const pv = p.values as {
-            [k: string]: ConfigValue[]
-          }
+          const pv = p.values as Record<string, ConfigValue[]>
           const tn = pv[token.name] ?? []
           pv[token.name] = tn
           tn.push(value)
         } else {
-          const pv = p.values as { [k: string]: ConfigValue }
+          const pv = p.values as Record<string, ConfigValue>
           pv[token.name] = value
         }
       }
@@ -757,20 +783,14 @@ export class Jack<C extends ConfigSet = {}> {
     for (const [field, value] of Object.entries(p.values)) {
       const valid = this.#configSet[field]?.validate
       const validOptions = this.#configSet[field]?.validOptions
-      let cause:
-        | undefined
-        | { name: string; found: unknown; validOptions?: ReadonlyArrays }
-      if (validOptions && !isValidOption(value, validOptions)) {
-        cause = { name: field, found: value, validOptions: validOptions }
-      }
-      if (valid && !valid(value)) {
-        cause ??= { name: field, found: value }
-      }
+      const cause =
+        validOptions && !isValidOption(value, validOptions) ?
+          { name: field, found: value, validOptions: validOptions }
+        : valid && !valid(value) ? { name: field, found: value }
+        : undefined
       if (cause) {
         throw new Error(
-          `Invalid value provided for --${field}: ${JSON.stringify(
-            value,
-          )}`,
+          `Invalid value provided for --${field}: ${JSON.stringify(value)}`,
           { cause },
         )
       }
@@ -820,9 +840,7 @@ export class Jack<C extends ConfigSet = {}> {
       }
       if (!isValidValue(value, config.type, !!config.multiple)) {
         throw new Error(
-          `Invalid value ${valueType(
-            value,
-          )} for ${field}, expected ${valueType(config)}`,
+          `Invalid value ${valueType(value)} for ${field}, expected ${valueType(config)}`,
           {
             cause: {
               name: field,
@@ -832,22 +850,12 @@ export class Jack<C extends ConfigSet = {}> {
           },
         )
       }
-      let cause:
-        | undefined
-        | { name: string; found: unknown; validOptions?: ReadonlyArrays }
-      if (
-        config.validOptions &&
-        !isValidOption(value, config.validOptions)
-      ) {
-        cause = {
-          name: field,
-          found: value,
-          validOptions: config.validOptions,
-        }
-      }
-      if (config.validate && !config.validate(value)) {
-        cause ??= { name: field, found: value }
-      }
+      const cause =
+        config.validOptions && !isValidOption(value, config.validOptions) ?
+          { name: field, found: value, validOptions: config.validOptions }
+        : config.validate && !config.validate(value) ?
+          { name: field, found: value }
+        : undefined
       if (cause) {
         throw new Error(`Invalid config value for ${field}: ${value}`, {
           cause,
@@ -959,12 +967,10 @@ export class Jack<C extends ConfigSet = {}> {
     F extends ConfigMetaSet<T, M>,
     O extends ConfigSetFromMetaSet<T, M, F>,
   >(fields: F, type: ConfigType, multiple: boolean): Jack<C & O> {
-    return this.#addFields(
-      this as unknown as Jack<C & O>,
-      fields,
+    return this.#addFields(this as unknown as Jack<C & O>, fields, {
       type,
       multiple,
-    )
+    })
   }
 
   #addFields<
@@ -972,18 +978,16 @@ export class Jack<C extends ConfigSet = {}> {
     M extends boolean,
     F extends ConfigMetaSet<T, M>,
     O extends Jack,
-  >(next: O, fields: F, type?: ConfigType, multiple?: boolean): O {
+  >(next: O, fields: F, opt?: { type: T; multiple: M }): O {
     Object.assign(
       next.#configSet,
       Object.fromEntries(
         Object.entries(fields).map(([name, field]) => {
           this.#validateName(name, field)
-          const value = validateField(field, type, multiple)
-          next.#fields.push({
-            type: 'config',
-            name,
-            value,
-          })
+          const { type, multiple } = validateFieldMeta(field, opt)
+          const value = { ...field, type, multiple }
+          validateField(value, type, multiple)
+          next.#fields.push({ type: 'config', name, value })
           return [name, value]
         }),
       ),
