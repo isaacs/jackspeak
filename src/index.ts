@@ -4,9 +4,6 @@ import {
   parseArgs,
   ParseArgsConfig,
 } from 'node:util'
-
-// it's a tiny API, just cast it inline, it's fine
-//@ts-ignore
 import cliui from '@isaacs/cliui'
 import { basename } from 'node:path'
 
@@ -120,22 +117,24 @@ export const isConfigOptionOfType = <
   T extends ConfigType,
   M extends boolean,
 >(
-  o: any,
+  o: unknown,
   type: T,
   multi: M,
 ): o is ConfigOption<T, M> =>
-  !!o &&
   typeof o === 'object' &&
+  o !== null &&
+  'type' in o &&
   isConfigType(o.type) &&
-  o.type === type &&
-  !!o.multiple === multi
+  o?.type === type &&
+  'multiple' in o &&
+  !!o?.multiple === multi
 
 /**
  * Determine whether an unknown object is a {@link ConfigOption} based on
  * it having all valid properties
  */
 export const isConfigOption = <T extends ConfigType, M extends boolean>(
-  o: any,
+  o: unknown,
   type: T,
   multi: M,
 ): o is ConfigOption<T, M> =>
@@ -565,6 +564,7 @@ export interface JackOptions {
  * Class returned by the {@link jack} function and all configuration
  * definition methods.  This is what gets chained together.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export class Jack<C extends ConfigSet = {}> {
   #configSet: C
   #shorts: Record<string, string>
@@ -586,7 +586,7 @@ export class Jack<C extends ConfigSet = {}> {
     // starts out as having an empty config set.  Then each method that adds
     // fields returns `this as Jack<C & { ...newConfigs }>`
     this.#configSet = Object.create(null) as C
-    this.#shorts = Object.create(null)
+    this.#shorts = Object.create(null) as Record<string, string>
   }
 
   /**
@@ -658,7 +658,8 @@ export class Jack<C extends ConfigSet = {}> {
   applyDefaults(p: Parsed<C>) {
     for (const [field, c] of Object.entries(this.#configSet)) {
       if (c.default !== undefined && !(field in p.values)) {
-        //@ts-ignore
+        //@ts-expect-error - configSet keys should already be valid so we can
+        // use them to write to a generic mapped type here
         p.values[field] = c.default
       }
     }
@@ -787,7 +788,8 @@ export class Jack<C extends ConfigSet = {}> {
       }
     }
 
-    for (const [field, value] of Object.entries(p.values)) {
+    for (const [field, value_] of Object.entries(p.values)) {
+      const value = value_ as unknown
       const valid = this.#configSet[field]?.validate
       const validOptions = this.#configSet[field]?.validOptions
       const cause =
@@ -865,9 +867,12 @@ export class Jack<C extends ConfigSet = {}> {
           { name: field, found: value }
         : undefined
       if (cause) {
-        throw new Error(`Invalid config value for ${field}: ${value}`, {
-          cause: { ...cause, code: 'JACKSPEAK' },
-        })
+        throw new Error(
+          `Invalid config value for ${field}: ${JSON.stringify(value)}`,
+          {
+            cause: { ...cause, code: 'JACKSPEAK' },
+          },
+        )
       }
     }
   }
@@ -1011,7 +1016,7 @@ export class Jack<C extends ConfigSet = {}> {
       )
     }
     if (this.#configSet[name]) {
-      throw new TypeError(`Cannot redefine option ${field}`)
+      throw new TypeError(`Cannot redefine option ${name}`)
     }
     if (this.#shorts[name]) {
       throw new TypeError(
@@ -1044,7 +1049,6 @@ export class Jack<C extends ConfigSet = {}> {
     if (this.#usage) return this.#usage
 
     let headingLevel = 1
-    //@ts-ignore
     const ui = cliui({ width })
     const first = this.#fields[0]
     let start = first?.type === 'heading' ? 1 : 0
@@ -1214,7 +1218,7 @@ export class Jack<C extends ConfigSet = {}> {
   #usageRows(start: number) {
     // turn each config type into a row, and figure out the width of the
     // left hand indentation for the option descriptions.
-    let maxMax = Math.max(12, Math.min(26, Math.floor(width / 3)))
+    const maxMax = Math.max(12, Math.min(26, Math.floor(width / 3)))
     let maxWidth = 8
     let prev: Row | TextRow | undefined = undefined
     const rows: (Row | TextRow)[] = []
@@ -1231,9 +1235,8 @@ export class Jack<C extends ConfigSet = {}> {
       const mult = value.multiple ? 'Can be set multiple times' : ''
       const opts =
         value.validOptions?.length ?
-          `Valid options:${value.validOptions.map(
-            v => ` ${JSON.stringify(v)}`,
-          )}`
+          `Valid options: ` +
+          value.validOptions.map(v => JSON.stringify(v)).join(', ')
         : ''
       const dmDelim = desc.includes('\n') ? '\n\n' : '\n'
       const extra = [opts, mult].join(dmDelim).trim()
@@ -1344,6 +1347,7 @@ const normalize = (s: string, pre = false) => {
         s
           // remove single line breaks, except for lists
           .replace(/([^\n])\n[ \t]*([^\n])/g, (_, $1, $2) =>
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             !/^[-*]/.test($2) ? `${$1} ${$2}` : `${$1}\n${$2}`,
           )
           // normalize mid-line whitespace
