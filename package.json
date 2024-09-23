@@ -55,12 +55,11 @@
     "endOfLine": "lf"
   },
   "devDependencies": {
-    "@types/node": "^22.4.1",
+    "@types/node": "^22.6.0",
     "prettier": "^3.3.3",
     "tap": "^21.0.1",
     "tshy": "^3.0.2",
-    "typedoc": "^0.26.6",
-    "typescript": "^5.5.4"
+    "typedoc": "^0.26.7"
   },
   "dependencies": {
     "@isaacs/cliui": "^8.0.2"
