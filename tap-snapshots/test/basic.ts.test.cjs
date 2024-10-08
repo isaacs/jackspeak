@@ -866,7 +866,3 @@ Can be set multiple times
 Send the raw output to the specified file.
 
 `
-
-exports[`test/basic.ts > TAP > validate object > successful validate 1`] = `
-undefined
-`

@@ -21,3 +21,4 @@
 !.gitignore
 !.gitattributes
 !map.js
+!eslint.config.mjs

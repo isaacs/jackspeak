@@ -1,6 +1,6 @@
 import { jack } from '../dist/commonjs/index.js'
-
 import * as os from 'node:os'
+
 const defaultParallel = Math.max(
   16,
   typeof os.availableParallelism === 'function' ?
