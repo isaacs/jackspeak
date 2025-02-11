@@ -792,7 +792,7 @@ export class Jack<C extends ConfigSet = {}> {
       const validOptions = this.#configSet[field]?.validOptions
       const cause =
         validOptions && !isValidOption(value, validOptions) ?
-          { name: field, found: value, validOptions: validOptions }
+          { name: field, found: value, validOptions }
         : valid && !valid(value) ? { name: field, found: value }
         : undefined
       if (cause) {
