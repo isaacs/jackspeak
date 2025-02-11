@@ -1,8 +1,8 @@
 import {
   inspect,
   InspectOptions,
-  ParseArgsConfig,
   parseArgs,
+  ParseArgsConfig,
 } from 'node:util'
 
 // it's a tiny API, just cast it inline, it's fine
@@ -304,6 +304,7 @@ const toEnvVal = (value: ConfigValue, delim: string = '\n'): string => {
   if (typeof str !== 'string') {
     throw new Error(
       `could not serialize value to environment: ${JSON.stringify(value)}`,
+      { cause: { code: 'JACKSPEAK' } },
     )
   }
   /* c8 ignore stop */
@@ -611,7 +612,10 @@ export class Jack<C extends ConfigSet = {}> {
       /* c8 ignore start */
       if (!my) {
         throw new Error('unexpected field in config set: ' + field, {
-          cause: { found: field },
+          cause: {
+            code: 'JACKSPEAK',
+            found: field,
+          },
         })
       }
       /* c8 ignore stop */
@@ -721,6 +725,7 @@ export class Jack<C extends ConfigSet = {}> {
               `'-- ${token.rawName}'`,
             {
               cause: {
+                code: 'JACKSPEAK',
                 found:
                   token.rawName + (token.value ? `=${token.value}` : ''),
               },
@@ -734,6 +739,7 @@ export class Jack<C extends ConfigSet = {}> {
                 `No value provided for ${token.rawName}, expected ${my.type}`,
                 {
                   cause: {
+                    code: 'JACKSPEAK',
                     name: token.rawName,
                     wanted: valueType(my),
                   },
@@ -745,7 +751,7 @@ export class Jack<C extends ConfigSet = {}> {
             if (my.type === 'boolean') {
               throw new Error(
                 `Flag ${token.rawName} does not take a value, received '${token.value}'`,
-                { cause: { found: token } },
+                { cause: { code: 'JACKSPEAK', found: token } },
               )
             }
             if (my.type === 'string') {
@@ -758,6 +764,7 @@ export class Jack<C extends ConfigSet = {}> {
                     `'${token.rawName}' option, expected number`,
                   {
                     cause: {
+                      code: 'JACKSPEAK',
                       name: token.rawName,
                       found: token.value,
                       wanted: 'number',
@@ -791,7 +798,7 @@ export class Jack<C extends ConfigSet = {}> {
       if (cause) {
         throw new Error(
           `Invalid value provided for --${field}: ${JSON.stringify(value)}`,
-          { cause },
+          { cause: { ...cause, code: 'JACKSPEAK' } },
         )
       }
     }
@@ -811,7 +818,7 @@ export class Jack<C extends ConfigSet = {}> {
     if (this.#configSet[yes]?.type === 'boolean') {
       throw new Error(
         `do not set '${s}', instead set '${yes}' as desired.`,
-        { cause: { found: s, wanted: yes } },
+        { cause: { code: 'JACKSPEAK', found: s, wanted: yes } },
       )
     }
   }
@@ -823,7 +830,7 @@ export class Jack<C extends ConfigSet = {}> {
   validate(o: unknown): asserts o is Parsed<C>['values'] {
     if (!o || typeof o !== 'object') {
       throw new Error('Invalid config: not an object', {
-        cause: { found: o },
+        cause: { code: 'JACKSPEAK', found: o },
       })
     }
     const opts = o as Record<string, ValidValue>
@@ -835,7 +842,7 @@ export class Jack<C extends ConfigSet = {}> {
       const config = this.#configSet[field]
       if (!config) {
         throw new Error(`Unknown config option: ${field}`, {
-          cause: { found: field },
+          cause: { code: 'JACKSPEAK', found: field },
         })
       }
       if (!isValidValue(value, config.type, !!config.multiple)) {
@@ -843,6 +850,7 @@ export class Jack<C extends ConfigSet = {}> {
           `Invalid value ${valueType(value)} for ${field}, expected ${valueType(config)}`,
           {
             cause: {
+              code: 'JACKSPEAK',
               name: field,
               found: value,
               wanted: valueType(config),
@@ -858,7 +866,7 @@ export class Jack<C extends ConfigSet = {}> {
         : undefined
       if (cause) {
         throw new Error(`Invalid config value for ${field}: ${value}`, {
-          cause,
+          cause: { ...cause, code: 'JACKSPEAK' },
         })
       }
     }

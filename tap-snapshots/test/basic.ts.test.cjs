@@ -14,6 +14,7 @@ Object {
 exports[`TAP > TAP > --flag=wave {} > throw 1`] = `
 Error: Flag --flag does not take a value, received 'wave' {
   "cause": Object {
+    "code": "JACKSPEAK",
     "found": Object {
       "index": 0,
       "inlineValue": true,
@@ -30,6 +31,7 @@ Error: Flag --flag does not take a value, received 'wave' {
 exports[`TAP > TAP > --jobs=workit {} > throw 1`] = `
 Error: Invalid value 'workit' provided for '--jobs' option, expected number {
   "cause": Object {
+    "code": "JACKSPEAK",
     "found": "workit",
     "name": "--jobs",
     "wanted": "number",
@@ -98,6 +100,7 @@ Object {
 exports[`TAP > TAP > --nums {} > throw 1`] = `
 Error: No value provided for --nums, expected number {
   "cause": Object {
+    "code": "JACKSPEAK",
     "name": "--nums",
     "wanted": "number[]",
   },
@@ -151,6 +154,7 @@ Object {
 exports[`TAP > TAP > --unknownthing {} > throw 1`] = `
 Error: Unknown option '--unknownthing'. To specify a positional argument starting with a '-', place it at the end of the command after '--', as in '-- --unknownthing' {
   "cause": Object {
+    "code": "JACKSPEAK",
     "found": "--unknownthing",
   },
   "name": "Error",
@@ -160,6 +164,7 @@ Error: Unknown option '--unknownthing'. To specify a positional argument startin
 exports[`TAP > TAP > --unknownthing=yolo {} > throw 1`] = `
 Error: Unknown option '--unknownthing'. To specify a positional argument starting with a '-', place it at the end of the command after '--', as in '-- --unknownthing' {
   "cause": Object {
+    "code": "JACKSPEAK",
     "found": "--unknownthing=yolo",
   },
   "name": "Error",
@@ -210,6 +215,7 @@ Object {
 exports[`TAP > TAP > -Oasdf -f -F --flag -ddd -j2 {} > throw 1`] = `
 Error: Invalid value provided for --opts-array: ["asdf"] {
   "cause": Object {
+    "code": "JACKSPEAK",
     "found": Array [
       "asdf",
     ],
