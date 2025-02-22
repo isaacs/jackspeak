@@ -1,6 +1,6 @@
 {
   "name": "jackspeak",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "description": "A very strict and proper argument parser.",
   "tshy": {
     "main": true,
