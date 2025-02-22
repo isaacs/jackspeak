@@ -255,6 +255,81 @@ Usage:
 
 `
 
+exports[`TAP > TAP > description with fenced code blocks > must match snapshot 2`] = `
+Object {
+  "definitions": Null Object {
+    "xyz": Object {
+      "description": String(
+        Sometimes, there's a number and you care about
+                              doing something special with that number, like
+        
+                              \`\`\`
+                              console.log(
+                                heloo, number
+        
+        
+                                such a fine day we're having,isn't it?
+        
+                              Ok, goodbye then.
+                              )
+                              \`\`\`
+        
+                              this is some stuff that happens later
+        
+                              \`\`\`
+                              just one line, no indentation
+                              \`\`\`
+        
+                              nothing in this one:
+                              \`\`\`
+                \`\`\`
+                              
+      ),
+      "multiple": false,
+      "type": "number",
+    },
+  },
+  "jackOptions": Object {},
+  "shorts": Null Object {},
+  "usageFields": Array [
+    Object {
+      "name": "xyz",
+      "type": "config",
+      "value": Object {
+        "description": String(
+          Sometimes, there's a number and you care about
+                                doing something special with that number, like
+          
+                                \`\`\`
+                                console.log(
+                                  heloo, number
+          
+          
+                                  such a fine day we're having,isn't it?
+          
+                                Ok, goodbye then.
+                                )
+                                \`\`\`
+          
+                                this is some stuff that happens later
+          
+                                \`\`\`
+                                just one line, no indentation
+                                \`\`\`
+          
+                                nothing in this one:
+                                \`\`\`
+                  \`\`\`
+                                
+        ),
+        "multiple": false,
+        "type": "number",
+      },
+    },
+  ],
+}
+`
+
 exports[`TAP > TAP > no env prefix, no writing env > must match snapshot 1`] = `
 Object {
   "positionals": Array [],

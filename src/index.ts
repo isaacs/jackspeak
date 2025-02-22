@@ -589,6 +589,22 @@ export class Jack<C extends ConfigSet = {}> {
     this.#shorts = Object.create(null)
   }
 
+  get definitions(): C {
+    return this.#configSet
+  }
+
+  get shorts() {
+    return this.#shorts
+  }
+
+  get jackOptions() {
+    return this.#options
+  }
+
+  get usageFields() {
+    return this.#fields
+  }
+
   /**
    * Set the default value (which will still be overridden by env or cli)
    * as if from a parsed config file. The optional `source` param, if

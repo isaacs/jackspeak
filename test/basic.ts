@@ -569,5 +569,7 @@ t.test('description with fenced code blocks', t => {
     },
   })
   t.matchSnapshot(j.usage())
+  const { usageFields, definitions, shorts, jackOptions } = j
+  t.matchSnapshot({ usageFields, definitions, shorts, jackOptions })
   t.end()
 })

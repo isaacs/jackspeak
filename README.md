@@ -209,6 +209,38 @@ Define one or more fields of any type. Note that `type` and
 `multiple` must be set explicitly on each definition when using
 this method.
 
+## Informative Getters
+
+Once you've defined several fields with the various methods
+described above, you can get at the definitions and such with
+these methods.
+
+This are primarily just informative, but can be useful in some
+advanced scenarios, such as providing "Did you mean?" type
+suggestions when someone misspells an option name.
+
+### `Jack.definitions`
+
+The set of config field definitions in no particular order. This
+is a data object suitable to passing to `util.parseArgs`, but
+with the addition of `short` and `description` fields, where
+appropriate.
+
+### `Jack.jackOptions`
+
+The options passed into the initial `jack()` function (or `new
+Jack()` constructor).
+
+### `Jack.shorts`
+
+The `{ <short>: <long> }` name record for all short options
+defined.
+
+### `Jack.usageFields`
+
+The array of fields that are used to generate `Jack.usage()` and
+`Jack.usageMarkdown()` content.
+
 ## Actions
 
 Use these methods on a Jack object that's already had its config
