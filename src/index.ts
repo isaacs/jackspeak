@@ -589,18 +589,30 @@ export class Jack<C extends ConfigSet = {}> {
     this.#shorts = Object.create(null)
   }
 
+  /**
+   * Resulting definitions, suitable to be passed to Node's `util.parseArgs`,
+   * but also including `description` and `short` fields, if set.
+   */
   get definitions(): C {
     return this.#configSet
   }
 
+  /** map of `{ <short>: <long> }` strings for each short name defined */
   get shorts() {
     return this.#shorts
   }
 
+  /**
+   * options passed to the {@link Jack} constructor
+   */
   get jackOptions() {
     return this.#options
   }
 
+  /**
+   * the data used to generate {@link Jack#usage} and
+   * {@link Jack#usageMarkdown} content.
+   */
   get usageFields() {
     return this.#fields
   }
