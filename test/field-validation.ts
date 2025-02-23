@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import t, { Test } from 'tap'
 import { Jack, jack } from '../src/index.js'
 
-const doesParse = (t: Test, fn: (j: Jack<{}>) => Jack<{}>) =>
+const doesParse = (t: Test, fn: (j: Jack) => Jack) =>
   t.doesNotThrow(() => fn(jack()).parse())
 
-const doesNotParse = (t: Test, fn: (j: Jack<{}>) => Jack<{}>) =>
+const doesNotParse = (t: Test, fn: (j: Jack) => Jack) =>
   t.throws(() => fn(jack()).parse())
 
 t.test('basic', async t => {

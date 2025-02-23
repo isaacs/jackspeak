@@ -13,6 +13,9 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2022"
+    "target": "es2022",
+    "paths": {
+      "@isaacs/cliui": ["./src/isaacs__cliui.d.ts"]
+    }
   }
 }
