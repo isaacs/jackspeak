@@ -631,6 +631,7 @@ export class Jack<C extends ConfigSet = {}> {
         /* c8 ignore next */
         const cause = typeof er.cause === 'object' ? er.cause : {}
         er.cause = { ...cause, path: source }
+        Error.captureStackTrace(er, this.setConfigValues)
       }
       throw er
     }
