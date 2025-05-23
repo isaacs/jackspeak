@@ -68,7 +68,7 @@ const context = ({ env = {} } = {}) => ({
         short: 'O',
         description: 'an array of opts',
         delim: ',',
-        validate: (o: any): o is string[] =>
+        validate: (o): o is string[] =>
           Array.isArray(o) &&
           !o.some(s => typeof s !== 'string') &&
           !o.includes('asdf'),
@@ -96,7 +96,7 @@ const context = ({ env = {} } = {}) => ({
       },
       onlytrue: {
         description: 'only allowed to be true',
-        validate: (x: any) => x === true,
+        validate: x => x === true,
       },
     })
 
@@ -108,7 +108,7 @@ const context = ({ env = {} } = {}) => ({
       },
       notfoo: {
         description: 'string that is not "foo"',
-        validate: (s: any) => s !== 'foo',
+        validate: s => s !== 'foo',
       },
       // force it to be set to a subset with validOptions
       oneof: {
@@ -127,7 +127,7 @@ const context = ({ env = {} } = {}) => ({
       ltfive: {
         short: '5',
         description: 'must be less than 5',
-        validate: (n: any) => typeof n === 'number' && n < 5,
+        validate: n => typeof n === 'number' && n < 5,
       },
     })
 
@@ -156,7 +156,7 @@ const context = ({ env = {} } = {}) => ({
           That long break is normalized to one line break. One is enough,
           really.
         `,
-        validate: (n: any) =>
+        validate: n =>
           Array.isArray(n) &&
           !n.some(n => typeof n !== 'number' || n <= 3),
       },
@@ -167,7 +167,7 @@ const context = ({ env = {} } = {}) => ({
     .flagList({
       debug: { short: 'd' },
       alltrue: {
-        validate: (a: any) => Array.isArray(a) && !a.some(v => v !== true),
+        validate: a => Array.isArray(a) && !a.some(v => v !== true),
       },
     })
 
@@ -202,10 +202,12 @@ t.test('inspection', t => {
 
 t.test('validate object', t => {
   const { jack } = context()
-  t.matchSnapshot(jack.validate({ flag: true }), 'successful validate')
+  t.doesNotThrow(() => jack.validate({ flag: true }))
   t.throws(() => jack.validate({ debug: 12 }))
   t.throws(() => jack.validate({ flag: [true] }))
-  t.throws(() => jack.validate({ 'opts-array': ['asdf'] }))
+  t.throws(() => jack.validate({ 'opts-array': ['asdf'] }), {
+    message: 'Invalid config value for opts-array: ["asdf"]',
+  })
   t.throws(() => jack.validate({ 'opts-array': ['foo'], unknown: false }))
   t.throws(() => jack.validate(12))
   t.throws(() => jack.validate({ ltfive: 6 }))
@@ -219,7 +221,9 @@ t.test('validate object', t => {
 t.test('invalid config defs', t => {
   const { jack } = context()
   t.throws(() => jack.num({ f: {} }))
-  t.throws(() => jack.num({ flag: {} }))
+  t.throws(() => jack.num({ flag: {} }), {
+    message: 'Cannot redefine option flag',
+  })
   t.throws(() => jack.num({ fooooo: { short: 'f' } }))
   t.throws(() => jack.num({ fooooo: { short: 'foo' } }))
   t.throws(() => jack.num({ 'foo bar baz': {} }))
@@ -444,16 +448,18 @@ t.test('validate against options', t => {
   t.throws(() => j.validate({ 'vo-by-optlist': ['a'] }))
   t.throws(() => j.validate({ 'vo-by-num': 9 }))
   t.throws(() => j.validate({ 'vo-by-numlist': [9] }))
-  j.validate({
-    'vo-opt': 'x',
-    'vo-optlist': ['y'],
-    'vo-num': 1,
-    'vo-numlist': [2],
-    'vo-by-opt': 'x',
-    'vo-by-optlist': ['y'],
-    'vo-by-num': 1,
-    'vo-by-numlist': [2],
-  }) as void
+  t.doesNotThrow(() =>
+    j.validate({
+      'vo-opt': 'x',
+      'vo-optlist': ['y'],
+      'vo-num': 1,
+      'vo-numlist': [2],
+      'vo-by-opt': 'x',
+      'vo-by-optlist': ['y'],
+      'vo-by-num': 1,
+      'vo-by-numlist': [2],
+    }),
+  )
 
   // invalid validOptions
   //@ts-expect-error

@@ -3,6 +3,40 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Use Nodejs 22.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Formatting
+        run: npm run format:check
+        id: format
+        continue-on-error: true
+
+      - name: Run Linting
+        run: npm run lint:check
+        id: lint
+        continue-on-error: true
+
+      - name: Check Results
+        run: |
+          FORMAT="${{ steps.format.outcome }}"
+          LINT="${{ steps.lint.outcome }}"
+          echo "Style: $FORMAT"
+          echo "Code: $LINT"
+          if [ "${FORMAT}_${LINT}" != "success_success" ]; then
+            exit 1
+          fi
   build:
     strategy:
       matrix:
