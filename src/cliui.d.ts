@@ -1,4 +1,4 @@
-declare module '@isaacs/cliui' {
+declare module 'cliui' {
   interface DivOpts {
     padding?: number[]
     text?: string

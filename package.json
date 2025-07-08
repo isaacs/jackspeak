@@ -62,7 +62,10 @@
     "typedoc": "^0.26.7"
   },
   "dependencies": {
-    "@isaacs/cliui": "^8.0.2"
+    "cliui": "^9.0.1"
+  },
+  "overrides": {
+    "string-width": "7.1.0"
   },
   "engines": {
     "node": "20 || >=22"

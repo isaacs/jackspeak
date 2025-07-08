@@ -7,7 +7,7 @@ import {
 
 // it's a tiny API, just cast it inline, it's fine
 //@ts-ignore
-import cliui from '@isaacs/cliui'
+import cliui from 'cliui'
 import { basename } from 'node:path'
 
 export type ParseArgsOptions = Exclude<
@@ -1073,7 +1073,6 @@ export class Jack<C extends ConfigSet = {}> {
     if (this.#usage) return this.#usage
 
     let headingLevel = 1
-    //@ts-ignore
     const ui = cliui({ width })
     const first = this.#fields[0]
     let start = first?.type === 'heading' ? 1 : 0
