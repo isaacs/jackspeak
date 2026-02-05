@@ -5,12 +5,6 @@
  * Make sure to inspect the output below.  Do not ignore changes!
  */
 'use strict'
-exports[`TAP --foo > TAP > defaults to process.env and process.argv > default parse, with _eval 1`] = `
-Object {
-  "foo": true,
-}
-`
-
 exports[`TAP > TAP > --flag=wave {} > throw 1`] = `
 Error: Flag --flag does not take a value, received 'wave' {
   "cause": Object {
@@ -222,6 +216,12 @@ Error: Invalid value provided for --opts-array: ["asdf"] {
     "name": "opts-array",
   },
   "name": "Error",
+}
+`
+
+exports[`TAP > TAP > defaults to process.env and process.argv > default parse, with _eval 1`] = `
+Object {
+  "foo": true,
 }
 `
 
@@ -489,7 +489,7 @@ Usage:
                        Can be set multiple times
 `
 
-exports[`test/basic.ts --foo > TAP > defaults to process.env and process.argv > default parse, no _eval 1`] = `
+exports[`test/basic.ts > TAP > defaults to process.env and process.argv > default parse, no _eval 1`] = `
 Object {
   "foo": true,
 }
