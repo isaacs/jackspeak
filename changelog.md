@@ -1,3 +1,12 @@
+# 4.2
+
+* ship a `jackspeak/min` package export path for faster loading
+
+# 4.1
+
+* capture stack trace nicely on file loading errors (2025-05-22)
+* expose definitions, usageFields, jackOptions, shorts (2025-02-22)
+
 # 4.0
 
 - Require modern node versions

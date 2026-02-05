@@ -29,9 +29,11 @@ Unless otherwise noted, all methods return the object itself.
 ## USAGE
 
 ```js
-import { jack } from 'jackspeak'
+// the minified version has no external deps, typically better
+// startup time for CLI tools that would use jackspeak.
+import { jack } from 'jackspeak/min'
 // this works too:
-// const { jack } = require('jackspeak')
+// const { jack } = require('jackspeak/min')
 
 const { positionals, values } = jack({ envPrefix: 'FOO' })
   .flag({
@@ -284,7 +286,10 @@ Also see [the examples
 folder](https://github.com/isaacs/jackspeak/tree/master/examples)
 
 ```js
-import { jack } from 'jackspeak'
+// the minified version has no external deps, typically better
+// startup time for CLI tools that would use jackspeak.
+// but `import { jack } from 'jackspeak'` also works fine.
+import { jack } from 'jackspeak/min'
 
 const j = jack({
   // Optional

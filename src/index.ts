@@ -5,7 +5,7 @@ import {
   ParseArgsConfig,
 } from 'node:util'
 
-import { cliui } from '@isaacs/cliui'
+import { cliui } from '@isaacs/cliui/min'
 import { basename } from 'node:path'
 
 export type ParseArgsOptions = Exclude<

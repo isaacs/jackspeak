@@ -7,6 +7,16 @@
     "exports": {
       "./package.json": "./package.json",
       ".": "./src/index.js"
+    },
+    "./min": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.min.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.min.js"
+      }
     }
   },
   "main": "./dist/commonjs/index.js",
@@ -33,7 +43,7 @@
     "preversion": "npm test",
     "postversion": "npm publish",
     "prepublishOnly": "git push origin --follow-tags",
-    "prepare": "tshy",
+    "prepare": "tshy && bash build.sh",
     "pretest": "npm run prepare",
     "presnap": "npm run prepare",
     "test": "tap",
@@ -56,6 +66,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.0",
+    "esbuild": "^0.27.2",
     "prettier": "^3.3.3",
     "tap": "^21.0.1",
     "tshy": "^3.0.2",
