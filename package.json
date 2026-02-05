@@ -62,7 +62,7 @@
     "typedoc": "^0.28.16"
   },
   "dependencies": {
-    "@isaacs/cliui": "^8.0.2"
+    "@isaacs/cliui": "^9.0.0"
   },
   "engines": {
     "node": "20 || >=22"

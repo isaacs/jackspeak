@@ -5,9 +5,7 @@ import {
   ParseArgsConfig,
 } from 'node:util'
 
-// it's a tiny API, just cast it inline, it's fine
-//@ts-ignore
-import cliui from '@isaacs/cliui'
+import { cliui } from '@isaacs/cliui'
 import { basename } from 'node:path'
 
 export type ParseArgsOptions = Exclude<
