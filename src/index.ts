@@ -127,8 +127,7 @@ export const isConfigOptionOfType = <
   'type' in o &&
   isConfigType(o.type) &&
   o.type === type &&
-  'multiple' in o &&
-  !!o.multiple === multi
+  !!(o as { multiple?: boolean }).multiple === multi
 
 /**
  * Determine whether an unknown object is a {@link ConfigOption} based on

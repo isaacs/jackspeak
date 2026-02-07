@@ -482,6 +482,18 @@ t.test('validate against options', t => {
     isConfigOption(
       {
         type: 'string',
+        validOptions: ['hello'],
+      },
+      'string',
+      false,
+    ),
+    true,
+  )
+
+  t.equal(
+    isConfigOption(
+      {
+        type: 'string',
         multiple: true,
         validOptions: [1],
       },
