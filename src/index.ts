@@ -118,14 +118,16 @@ export const isConfigOptionOfType = <
   T extends ConfigType,
   M extends boolean,
 >(
-  o: any,
+  o: unknown,
   type: T,
   multi: M,
 ): o is ConfigOption<T, M> =>
   !!o &&
   typeof o === 'object' &&
+  'type' in o &&
   isConfigType(o.type) &&
   o.type === type &&
+  'multiple' in o &&
   !!o.multiple === multi
 
 /**
@@ -133,7 +135,7 @@ export const isConfigOptionOfType = <
  * it having all valid properties
  */
 export const isConfigOption = <T extends ConfigType, M extends boolean>(
-  o: any,
+  o: unknown,
   type: T,
   multi: M,
 ): o is ConfigOption<T, M> =>
@@ -892,9 +894,12 @@ export class Jack<C extends ConfigSet = {}> {
           { name: field, found: value }
         : undefined
       if (cause) {
-        throw new Error(`Invalid config value for ${field}: ${value}`, {
-          cause: { ...cause, code: 'JACKSPEAK' },
-        })
+        throw new Error(
+          `Invalid config value for ${field}: ${JSON.stringify(value)}`,
+          {
+            cause: { ...cause, code: 'JACKSPEAK' },
+          },
+        )
       }
     }
   }
@@ -1038,7 +1043,7 @@ export class Jack<C extends ConfigSet = {}> {
       )
     }
     if (this.#configSet[name]) {
-      throw new TypeError(`Cannot redefine option ${field}`)
+      throw new TypeError(`Cannot redefine option ${name}`)
     }
     if (this.#shorts[name]) {
       throw new TypeError(
@@ -1241,7 +1246,7 @@ export class Jack<C extends ConfigSet = {}> {
   #usageRows(start: number) {
     // turn each config type into a row, and figure out the width of the
     // left hand indentation for the option descriptions.
-    let maxMax = Math.max(12, Math.min(26, Math.floor(width / 3)))
+    const maxMax = Math.max(12, Math.min(26, Math.floor(width / 3)))
     let maxWidth = 8
     let prev: Row | TextRow | undefined = undefined
     const rows: (Row | TextRow)[] = []
@@ -1258,9 +1263,8 @@ export class Jack<C extends ConfigSet = {}> {
       const mult = value.multiple ? 'Can be set multiple times' : ''
       const opts =
         value.validOptions?.length ?
-          `Valid options:${value.validOptions.map(
-            v => ` ${JSON.stringify(v)}`,
-          )}`
+          'Valid options: ' +
+          value.validOptions.map(v => JSON.stringify(v)).join(', ')
         : ''
       const dmDelim = desc.includes('\n') ? '\n\n' : '\n'
       const extra = [opts, mult].join(dmDelim).trim()

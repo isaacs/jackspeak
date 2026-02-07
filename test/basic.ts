@@ -68,7 +68,7 @@ const context = ({ env = {} } = {}) => ({
         short: 'O',
         description: 'an array of opts',
         delim: ',',
-        validate: (o: any): o is string[] =>
+        validate: (o): o is string[] =>
           Array.isArray(o) &&
           !o.some(s => typeof s !== 'string') &&
           !o.includes('asdf'),
@@ -96,7 +96,7 @@ const context = ({ env = {} } = {}) => ({
       },
       onlytrue: {
         description: 'only allowed to be true',
-        validate: (x: any) => x === true,
+        validate: x => x === true,
       },
     })
 
@@ -108,7 +108,7 @@ const context = ({ env = {} } = {}) => ({
       },
       notfoo: {
         description: 'string that is not "foo"',
-        validate: (s: any) => s !== 'foo',
+        validate: s => s !== 'foo',
       },
       // force it to be set to a subset with validOptions
       oneof: {
@@ -127,7 +127,7 @@ const context = ({ env = {} } = {}) => ({
       ltfive: {
         short: '5',
         description: 'must be less than 5',
-        validate: (n: any) => typeof n === 'number' && n < 5,
+        validate: n => typeof n === 'number' && n < 5,
       },
     })
 
@@ -156,7 +156,7 @@ const context = ({ env = {} } = {}) => ({
           That long break is normalized to one line break. One is enough,
           really.
         `,
-        validate: (n: any) =>
+        validate: n =>
           Array.isArray(n) &&
           !n.some(n => typeof n !== 'number' || n <= 3),
       },
@@ -167,7 +167,7 @@ const context = ({ env = {} } = {}) => ({
     .flagList({
       debug: { short: 'd' },
       alltrue: {
-        validate: (a: any) => Array.isArray(a) && !a.some(v => v !== true),
+        validate: a => Array.isArray(a) && !a.some(v => v !== true),
       },
     })
 
@@ -527,7 +527,7 @@ t.test('parseRaw', t => {
   }).num({
     xyz: {
       default: 345,
-      validate: (n: unknown) => Number(n) % 2 === 1,
+      validate: n => Number(n) % 2 === 1,
     },
   })
   const p = j.parseRaw(['--xyz=235'])

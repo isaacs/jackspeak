@@ -254,7 +254,7 @@ Parse the arguments list, write to the environment if `envPrefix`
 is set, and returned the parsed values and remaining positional
 arguments.
 
-### `Jack.validate(o: any): asserts o is OptionsResults`
+### `Jack.validate(o: unknown): asserts o is OptionsResults`
 
 Throws an error if the object provided is not a valid result set,
 for the configurations defined thusfar.
